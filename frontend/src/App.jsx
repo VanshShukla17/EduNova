@@ -25,6 +25,19 @@ import DiagramsExplorerPage from './pages/DiagramsExplorerPage';
 import VideoPlayerPage from './pages/VideoPlayerPage';
 import CommunityPage from './pages/CommunityPage';
 import PrivacyPage from './pages/PrivacyPage';
+import HumanHeartPage from './pages/HumanHeartPage';
+
+// Interactive STEM Learning Hub & Subject Modules
+import LearnPortalPage from './pages/learn/LearnPortalPage';
+import SubjectHubPage from './pages/learn/SubjectHubPage';
+import MuscularSystemPage from './pages/learn/biology/MuscularSystemPage';
+import RespirationPage from './pages/learn/biology/RespirationPage';
+import LightOpticsPage from './pages/learn/physics/LightOpticsPage';
+import WavesSoundPage from './pages/learn/physics/WavesSoundPage';
+import NewtonsLawsPage from './pages/learn/physics/NewtonsLawsPage';
+import MolecularExplorerPage from './pages/learn/chemistry/MolecularExplorerPage';
+import TrigonometryLabPage from './pages/learn/mathematics/TrigonometryLabPage';
+import ConicSectionsLabPage from './pages/learn/mathematics/ConicSectionsLabPage';
 
 // Admin Pages (Phase 10)
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
@@ -58,6 +71,27 @@ export default function App() {
         <Route path="/notes" element={<NotesPage />} />
         <Route path="/virtual-learning" element={<VirtualLearningPage />} />
         <Route path="/virtual-learning/:topicSlug" element={<TopicViewerPage />} />
+
+        {/* Master STEM Learning Portal & Subject Hubs */}
+        <Route path="/learn" element={<LearnPortalPage />} />
+        <Route path="/learn/:subjectId" element={<SubjectHubPage />} />
+
+        {/* Biology Modules */}
+        <Route path="/learn/biology/human-heart" element={<HumanHeartPage />} />
+        <Route path="/learn/biology/muscular-system" element={<MuscularSystemPage />} />
+        <Route path="/learn/biology/respiration" element={<RespirationPage />} />
+
+        {/* Physics Modules */}
+        <Route path="/learn/physics/light-and-optics" element={<LightOpticsPage />} />
+        <Route path="/learn/physics/waves-and-sound" element={<WavesSoundPage />} />
+        <Route path="/learn/physics/newtons-laws" element={<NewtonsLawsPage />} />
+
+        {/* Chemistry Modules */}
+        <Route path="/learn/chemistry/molecular-explorer" element={<MolecularExplorerPage />} />
+
+        {/* Mathematics Modules */}
+        <Route path="/learn/mathematics/trigonometry" element={<TrigonometryLabPage />} />
+        <Route path="/learn/mathematics/conic-sections" element={<ConicSectionsLabPage />} />
         <Route path="/diagrams" element={<DiagramsExplorerPage />} />
         <Route path="/videos" element={<VideoPlayerPage />} />
         <Route path="/community" element={<CommunityPage />} />

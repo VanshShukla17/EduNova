@@ -50,6 +50,9 @@ export default function Layout() {
 
           {user && (
             <>
+              <Link to="/learn" style={{ fontSize: '0.75rem', color: '#4338CA', textDecoration: 'none', padding: '4px 6px', fontWeight: '700' }}>
+                STEM Labs
+              </Link>
               <Link to="/diagrams" style={{ fontSize: '0.75rem', color: 'var(--color-text)', textDecoration: 'none', padding: '4px 6px', fontWeight: '600' }}>
                 Diagrams
               </Link>
@@ -155,7 +158,7 @@ export default function Layout() {
         </footer>
       </main>
 
-      {/* Mobile-First Bottom Navigation Bar (Updated for Phase 2 with Saarthi AI) */}
+      {/* Mobile-First Bottom Navigation Bar (Updated for Phase 2 with Saarthi AI & 3D Simulations) */}
       <nav className="bottom-nav" aria-label="Main Navigation">
         <NavLink
           to="/dashboard"
@@ -174,20 +177,20 @@ export default function Layout() {
         </NavLink>
 
         <NavLink
+          to="/virtual-learning"
+          className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
+        >
+          <Sparkles size={20} color="#4338CA" />
+          <span style={{ fontWeight: '700' }}>3D Labs</span>
+        </NavLink>
+
+        <NavLink
           to="/mentor"
           className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
           style={({ isActive }) => ({ color: isActive ? '#7C3AED' : undefined })}
         >
           <Bot size={20} />
           <span>{t('nav.mentor', 'Saarthi')}</span>
-        </NavLink>
-
-        <NavLink
-          to="/results"
-          className={({ isActive }) => `nav-tab ${isActive ? 'active' : ''}`}
-        >
-          <CheckCircle2 size={20} />
-          <span>Practice</span>
         </NavLink>
 
         <NavLink

@@ -107,6 +107,55 @@ export default function ChapterPage() {
         </Link>
       </div>
 
+      {/* Featured 3D Simulation for Biology / Life Processes */}
+      {(chapterInfo?.title?.toLowerCase().includes('life processes') || chapterInfo?.title?.toLowerCase().includes('प्रक्रम') || subjectId === 'biology' || subjectId === '65690f37-dfcf-4c93-b67c-b39631519544') && (
+        <div
+          className="card"
+          style={{
+            background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
+            color: '#FFFFFF',
+            border: '1px solid #334155',
+            padding: '16px 18px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            flexWrap: 'wrap',
+            margin: '16px 0'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ backgroundColor: '#EF4444', color: '#FFFFFF', padding: '10px', borderRadius: '10px' }}>
+              <Sparkles size={20} />
+            </div>
+            <div>
+              <div style={{ fontSize: '0.72rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#F87171' }}>
+                INTERACTIVE 3D LAB
+              </div>
+              <div style={{ fontWeight: '700', fontSize: '0.98rem', color: '#FFFFFF' }}>Human Heart & Circulatory System</div>
+              <div style={{ color: '#94A3B8', fontSize: '0.8rem' }}>Explore 3D heart anatomy, valve dynamics & double circulation</div>
+            </div>
+          </div>
+          <Link
+            to="/learn/biology/human-heart"
+            style={{
+              backgroundColor: '#2563EB',
+              color: '#FFFFFF',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              fontSize: '0.82rem',
+              fontWeight: '700',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
+          >
+            Launch 3D Lab <ArrowRight size={14} />
+          </Link>
+        </div>
+      )}
+
       <h2 style={{ fontSize: '1.05rem', fontWeight: '700', margin: '20px 0 12px 0' }}>
         Lessons in this Chapter
       </h2>

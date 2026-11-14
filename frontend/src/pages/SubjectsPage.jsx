@@ -70,6 +70,47 @@ export default function SubjectsPage() {
         </p>
       </div>
 
+      {/* Interactive STEM Labs Banner */}
+      <div
+        style={{
+          background: 'linear-gradient(135deg, #1E1B4B 0%, #312E81 100%)',
+          borderRadius: '14px',
+          padding: '16px 20px',
+          color: '#FFFFFF',
+          marginBottom: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}
+      >
+        <div>
+          <div style={{ fontSize: '0.72rem', fontWeight: '800', color: '#FDE047', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '2px' }}>
+            NEW: 3D SIMULATIONS & LABS
+          </div>
+          <div style={{ fontSize: '1rem', fontWeight: '800' }}>Interactive STEM Learning Platform</div>
+          <div style={{ fontSize: '0.82rem', color: '#E0E7FF' }}>Biology 3D organs, Physics ray optics & waves, Chemistry MolView, and Maths labs.</div>
+        </div>
+        <Link
+          to="/learn"
+          style={{
+            backgroundColor: '#4338CA',
+            color: '#FFFFFF',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            fontSize: '0.82rem',
+            fontWeight: '700',
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          Open STEM Labs <ArrowRight size={14} />
+        </Link>
+      </div>
+
       {error && <div className="alert alert-error">{error}</div>}
 
       {loading ? (

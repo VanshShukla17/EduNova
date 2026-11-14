@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, BookOpen, CheckCircle2, Bot, Sparkles, HelpCircle, Award, Check, X } from 'lucide-react';
+import { getVirtualTopic, submitVirtualTopicProgress } from '../../services/api';
+import ExternalSimulationFrame from '../../components/ExternalSimulationFrame';
 import RayOpticsSimulation from './RayOpticsSimulation';
 import MoleculeViewerSimulation from './MoleculeViewerSimulation';
 import ConicSectionsSimulation from './ConicSectionsSimulation';
@@ -19,6 +21,9 @@ export default function TopicViewerPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('simulation'); // 'simulation' | 'notes' | 'quiz'
 
+  // Newton Simulation View Mode ('3d' | '2d')
+  const [newtonViewMode, setNewtonViewMode] = useState('3d');
+
   // Quiz state
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
@@ -28,13 +33,23 @@ export default function TopicViewerPage() {
     const fetchTopic = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/virtual/${topicSlug}`);
-        const data = await res.json();
-        if (data.success) {
+        const data = await getVirtualTopic(topicSlug);
+        if (data && data.success) {
           setTopic(data.data);
+        } else if (data && data.slug) {
+          setTopic(data);
         }
       } catch (err) {
-        console.error('Fetch topic error:', err);
+        console.error('Fetch topic error via api, fallback to fetch:', err);
+        try {
+          const res = await fetch(`/api/virtual/${topicSlug}`);
+          const fallbackData = await res.json();
+          if (fallbackData.success) {
+            setTopic(fallbackData.data);
+          }
+        } catch (fErr) {
+          console.error('Fallback fetch error:', fErr);
+        }
       } finally {
         setLoading(false);
       }
@@ -98,13 +113,99 @@ export default function TopicViewerPage() {
       case 'conic-sections':
         return <ConicSectionsSimulation />;
       case 'heart-and-circulation':
-        return <HeartCirculationSimulation />;
+        return (
+          <div>
+            <ExternalSimulationFrame
+              src="https://iamtechartist.com/Apps/heart-and-circulatory-system/"
+              title="Human Heart & Circulatory System 3D Interactive Lab"
+              attributionText="Interactive simulation powered by iamtechartist.com"
+              attributionUrl="https://iamtechartist.com/Apps/heart-and-circulatory-system/"
+              minHeight="480px"
+              defaultHeight="620px"
+            />
+            <div style={{ marginTop: '14px', padding: '12px 14px', backgroundColor: '#F8FAFC', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '0.82rem', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+              <div>
+                <strong style={{ color: '#0F172A' }}>💡 Controls:</strong> Click/touch & drag to rotate 3D view. Scroll or pinch to zoom. Use Fullscreen for laboratory study.
+              </div>
+              <Link to="/learn/biology/human-heart" style={{ color: 'var(--color-primary, #2563EB)', fontWeight: '700', textDecoration: 'none' }}>
+                Full Lesson Guide →
+              </Link>
+            </div>
+          </div>
+        );
       case 'waves-and-sound':
         return <WavesSoundSimulation />;
       case 'trigonometry-unit-circle':
         return <TrigUnitCircleSimulation />;
       case 'newtons-laws':
-        return <NewtonLawsSimulation />;
+        return (
+          <div>
+            {/* View Mode Toggle: 3D Holographic Experience vs 2D Numerical Lab */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', backgroundColor: '#F1F5F9', borderRadius: '8px', padding: '3px' }}>
+                <button
+                  type="button"
+                  onClick={() => setNewtonViewMode('3d')}
+                  style={{
+                    padding: '5px 12px',
+                    fontSize: '0.78rem',
+                    fontWeight: '700',
+                    borderRadius: '6px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    backgroundColor: newtonViewMode === '3d' ? '#2563EB' : 'transparent',
+                    color: newtonViewMode === '3d' ? '#FFFFFF' : '#64748B'
+                  }}
+                >
+                  ✨ 3D Holographic Model
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNewtonViewMode('2d')}
+                  style={{
+                    padding: '5px 12px',
+                    fontSize: '0.78rem',
+                    fontWeight: '700',
+                    borderRadius: '6px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    backgroundColor: newtonViewMode === '2d' ? '#2563EB' : 'transparent',
+                    color: newtonViewMode === '2d' ? '#FFFFFF' : '#64748B'
+                  }}
+                >
+                  📐 2D Numerical Physics Lab
+                </button>
+              </div>
+
+              <span style={{ fontSize: '0.74rem', color: '#64748B' }}>
+                {newtonViewMode === '3d' ? 'Interactive 3D Hologram by iamtechartist' : 'Friction, F = ma & Recoil calculations'}
+              </span>
+            </div>
+
+            {newtonViewMode === '3d' ? (
+              <div>
+                <ExternalSimulationFrame
+                  src="https://iamtechartist.com/Apps/newtons-laws-of-motion/"
+                  title="Newton's Laws of Motion: 3D Holographic Lab"
+                  attributionText="3D interactive model powered by iamtechartist.com"
+                  attributionUrl="https://iamtechartist.com/Apps/newtons-laws-of-motion/"
+                  minHeight="480px"
+                  defaultHeight="620px"
+                />
+                <div style={{ marginTop: '14px', padding: '12px 14px', backgroundColor: '#F8FAFC', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '0.82rem', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <div>
+                    <strong style={{ color: '#0F172A' }}>💡 Controls:</strong> Click & drag to orbit in 3D. Use the chapter rail on the right side to inspect each law with Newton's bust.
+                  </div>
+                  <Link to="/learn/physics/newtons-laws" style={{ color: 'var(--color-primary, #2563EB)', fontWeight: '700', textDecoration: 'none' }}>
+                    Full Lesson Guide →
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <NewtonLawsSimulation />
+            )}
+          </div>
+        );
       case 'breathing-and-respiration':
         return <BreathingRespirationSimulation />;
       case 'skeleton-and-muscles':

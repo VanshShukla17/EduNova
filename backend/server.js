@@ -1,3 +1,8 @@
+// Polyfill globalThis.WebSocket for Node < 22 environments where @supabase/realtime-js expects it
+if (typeof globalThis.WebSocket === 'undefined') {
+  globalThis.WebSocket = class DummyWebSocket {};
+}
+
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');

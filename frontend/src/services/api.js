@@ -137,6 +137,11 @@ export const deleteQuestion = (id) => apiRequest(`/admin/questions/${id}`, { met
 
 // Admin Users
 export const getAdminUsers = () => apiRequest('/admin/users');
+// Virtual Learning 3D Topics
+export const getVirtualTopics = () => apiRequest('/virtual');
+export const getVirtualTopic = (slug) => apiRequest(`/virtual/${slug}`);
+export const submitVirtualTopicProgress = (slug, data) => apiRequest(`/virtual/${slug}/progress`, { method: 'POST', body: data });
+
 export const updateUserRole = (id, role) => apiRequest(`/admin/users/${id}/role`, { method: 'PUT', body: { role } });
 
 export default {
@@ -162,6 +167,9 @@ export default {
   getLab,
   submitLabQuiz,
   getMyLabResults,
+  getVirtualTopics,
+  getVirtualTopic,
+  submitVirtualTopicProgress,
   getAdminStats,
   createSubject,
   updateSubject,

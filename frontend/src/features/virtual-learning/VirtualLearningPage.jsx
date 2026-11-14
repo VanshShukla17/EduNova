@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, Box, Compass, CheckCircle2, ArrowRight, Search, Play } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { getVirtualTopics } from '../../services/api';
 
 export default function VirtualLearningPage() {
   const { user } = useAuth();
@@ -19,18 +20,26 @@ export default function VirtualLearningPage() {
     const fetchTopics = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem('token');
-        const res = await fetch('/api/virtual', {
-          headers: {
-            ...(token && { Authorization: `Bearer ${token}` })
-          }
-        });
-        const data = await res.json();
-        if (data.success) {
+        const data = await getVirtualTopics();
+        if (data && data.success) {
           setTopics(data.data || []);
+        } else if (Array.isArray(data)) {
+          setTopics(data);
         }
       } catch (err) {
-        console.error('Failed to fetch virtual topics:', err);
+        console.error('Failed to fetch virtual topics via api, trying fallback:', err);
+        try {
+          const token = localStorage.getItem('token');
+          const res = await fetch('/api/virtual', {
+            headers: { ...(token && { Authorization: `Bearer ${token}` }) }
+          });
+          const fallbackData = await res.json();
+          if (fallbackData.success) {
+            setTopics(fallbackData.data || []);
+          }
+        } catch (fallbackErr) {
+          console.error('Fallback fetch also failed:', fallbackErr);
+        }
       } finally {
         setLoading(false);
       }
@@ -65,7 +74,7 @@ export default function VirtualLearningPage() {
         </div>
         <h1 style={{ fontSize: '1.6rem', fontWeight: '800', margin: '0 0 8px 0' }}>Virtual Learning & 3D Simulations</h1>
         <p style={{ fontSize: '0.9rem', color: '#E0E7FF', margin: 0, maxWidth: '640px', lineHeight: 1.5 }}>
-          Manipulate ray optics, rotate 3D covalent molecules, slice conic sections, and follow double blood circulation in real-time.
+          Manipulate ray optics, rotate 3D covalent molecules, slice conic sections, and inspect the human heart and blood circulation in real-time.
         </p>
       </div>
 

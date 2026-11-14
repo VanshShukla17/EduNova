@@ -1,3 +1,4 @@
+
 # SUPABASE_SETUP.md: Switch from MongoDB to Supabase (database + login auth)
 
 Applies to: Phase 2 `Tasks.md` (STEM platform, CBSE Class 10 and 12).

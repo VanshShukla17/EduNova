@@ -8,11 +8,13 @@ router.use(requireAuth);
 
 // Direct single-endpoint chat (finds or creates active session)
 router.post('/chat', mentorController.directChat);
+router.post('/chat/stream', mentorController.streamChat);
 
 // Session management
 router.post('/sessions', mentorController.createSession);
 router.get('/sessions', mentorController.getSessions);
 router.get('/sessions/:id', mentorController.getSessionMessages);
+router.patch('/sessions/:id', mentorController.updateSession);
 router.delete('/sessions/:id', mentorController.deleteSession);
 
 // Messaging within session
