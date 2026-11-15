@@ -9,6 +9,7 @@ export { default as StickyNote } from './StickyNote';
 export { default as Stamp } from './Stamp';
 export { default as Tag } from './Tag';
 export { default as Button } from './Button';
+export { default as PixelButton } from './PixelButton';
 export { default as Field } from './Field';
 export { default as ProgressBar } from './ProgressBar';
 export { default as ProgressRing } from './ProgressRing';

@@ -12,9 +12,9 @@ export function resolveSubjectKey(subjectOrSlug) {
 }
 
 export const SUBJECT_PIN_COLORS = {
-  maths: 'blue',
+  maths: 'purple',
   physics: 'blue',
-  chemistry: 'amber',
+  chemistry: 'orange',
   biology: 'green',
 };
 

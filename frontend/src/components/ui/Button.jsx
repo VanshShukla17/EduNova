@@ -1,24 +1,15 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-
-const VARIANT_CLASSES = {
-  primary: 'btn--primary',
-  kraft: 'btn--kraft',
-  note: 'btn--note',
-  dark: 'btn--dark',
-  ghost: 'btn--ghost',
-  danger: 'btn--danger',
-  cream: 'btn--cream',
-  glass: 'btn--glass',
-};
+import PixelButton from './PixelButton';
 
 /**
- * Physical-press button primitive compliant with DESIGN.md Section 6.1.
+ * Physical-press pixel-art button primitive compliant with DESIGN.md Section 6.1.
+ * Routes all EduNova button variants through the unified 2D stepped PixelButton system.
  */
 export default function Button({
   variant = 'primary',
   size = 'md',
   fullWidth = false,
+  disabled = false,
   to,
   href,
   as,
@@ -27,36 +18,22 @@ export default function Button({
   children,
   ...props
 }) {
-  const classes = [
-    'btn',
-    VARIANT_CLASSES[variant] || 'btn--primary',
-    size === 'sm' ? 'btn--sm' : '',
-    fullWidth ? 'btn--full' : '',
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  const resolvedVariant = variant === 'pixel' ? 'primary' : variant;
 
-  if (to) {
-    return (
-      <Link to={to} className={classes} {...props}>
-        {children}
-      </Link>
-    );
-  }
-
-  if (href || as === 'a') {
-    return (
-      <a href={href} className={classes} {...props}>
-        {children}
-      </a>
-    );
-  }
-
-  const Component = as || 'button';
   return (
-    <Component type={Component === 'button' ? type : undefined} className={classes} {...props}>
+    <PixelButton
+      variant={resolvedVariant}
+      size={size}
+      fullWidth={fullWidth}
+      disabled={disabled}
+      to={to}
+      href={href}
+      as={as}
+      type={type}
+      className={className}
+      {...props}
+    >
       {children}
-    </Component>
+    </PixelButton>
   );
 }
