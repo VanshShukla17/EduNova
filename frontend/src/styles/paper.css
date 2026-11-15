@@ -3444,3 +3444,29 @@ textarea.field__control {
     transform: none;
   }
 }
+
+/* Print Media Styles: Clean output excluding navigation and desk shells */
+@media print {
+  @page {
+    size: auto;
+    margin: 8mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .nav-sky,
+  .desk,
+  .bottom-nav,
+  .chotu-fab,
+  .chotu-panel,
+  .toast-container,
+  .nav-pixel-dropdown,
+  header,
+  nav,
+  aside {
+    display: none !important;
+  }
+}

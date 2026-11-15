@@ -19,6 +19,8 @@ import ProfilePage from './pages/ProfilePage';
 import DiagramsExplorerPage from './pages/DiagramsExplorerPage';
 import VideoPlayerPage from './pages/VideoPlayerPage';
 import CommunityPage from './pages/CommunityPage';
+import ArenaPage from './pages/ArenaPage';
+import LeaderboardPage from './pages/LeaderboardPage';
 import PrivacyPage from './pages/PrivacyPage';
 import NotFoundPage from './pages/NotFoundPage';
 
@@ -98,6 +100,8 @@ export default function App() {
             <Route path="/diagrams" element={<DiagramsExplorerPage />} />
             <Route path="/videos" element={<VideoPlayerPage />} />
             <Route path="/community" element={<CommunityPage />} />
+            <Route path="/arena" element={<ArenaPage />} />
+            <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/labs" element={<VirtualLabPage />} />
             <Route path="/labs/:labId" element={<VirtualLabPage />} />
             <Route path="/profile" element={<ProfilePage />} />

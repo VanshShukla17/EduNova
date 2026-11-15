@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Layers } from 'lucide-react';
 import api from '../services/api';
 import InteractiveDiagram from '../components/InteractiveDiagram';
+import { STEM_DIAGRAMS, normalizeDiagramId } from '../components/diagrams/diagramsData';
 import {
   HeroCard,
   PaperCard,
@@ -14,8 +15,8 @@ import {
 } from '../components/ui';
 
 export default function DiagramsExplorerPage() {
-  const [diagrams, setDiagrams] = useState([]);
-  const [selectedDiagram, setSelectedDiagram] = useState(null);
+  const [diagrams, setDiagrams] = useState(STEM_DIAGRAMS);
+  const [selectedDiagram, setSelectedDiagram] = useState(STEM_DIAGRAMS[0]);
   const [selectedSubject, setSelectedSubject] = useState('all');
   const [loading, setLoading] = useState(true);
 
@@ -24,12 +25,47 @@ export default function DiagramsExplorerPage() {
       try {
         setLoading(true);
         const data = await api.getDiagrams();
-        setDiagrams(data || []);
         if (data && data.length > 0) {
-          setSelectedDiagram(data[0]);
+          // Map each canonical STEM diagram with any API attributes while preserving canonical parts & scene IDs
+          const merged = STEM_DIAGRAMS.map((canonical) => {
+            const apiMatch = data.find(
+              (apiDiag) =>
+                apiDiag.id === canonical.id ||
+                normalizeDiagramId(apiDiag) === canonical.id ||
+                apiDiag.title?.toLowerCase() === canonical.title?.toLowerCase()
+            );
+            if (apiMatch) {
+              return {
+                ...canonical,
+                dbId: apiMatch.id || apiMatch._id,
+                ...(apiMatch.titleHindi ? { titleHindi: apiMatch.titleHindi } : {}),
+              };
+            }
+            return canonical;
+          });
+
+          // Include any non-canonical custom diagrams from the backend
+          data.forEach((apiDiag) => {
+            const norm = normalizeDiagramId(apiDiag);
+            if (!STEM_DIAGRAMS.some((c) => c.id === norm || c.title.toLowerCase() === apiDiag.title?.toLowerCase())) {
+              merged.push(apiDiag);
+            }
+          });
+
+          setDiagrams(merged);
+          setSelectedDiagram((prev) => {
+            if (!prev) return merged[0];
+            const found = merged.find((m) => m.id === prev.id || m.title === prev.title);
+            return found || merged[0];
+          });
+        } else {
+          setDiagrams(STEM_DIAGRAMS);
+          setSelectedDiagram(STEM_DIAGRAMS[0]);
         }
       } catch (err) {
-        console.error('Failed to fetch diagrams list:', err);
+        console.warn('API fetch diagrams list note:', err.message);
+        setDiagrams(STEM_DIAGRAMS);
+        setSelectedDiagram(STEM_DIAGRAMS[0]);
       } finally {
         setLoading(false);
       }
@@ -41,10 +77,12 @@ export default function DiagramsExplorerPage() {
     selectedSubject === 'all'
       ? diagrams
       : diagrams.filter(
-          (d) => (d.subjectCode || '').toLowerCase() === selectedSubject.toLowerCase()
+          (d) =>
+            (d.subjectCode || d.subject || '').toLowerCase() ===
+            selectedSubject.toLowerCase()
         );
 
-  if (loading) {
+  if (loading && diagrams.length === 0) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
         <Skeleton lines={4} />
@@ -67,6 +105,7 @@ export default function DiagramsExplorerPage() {
               { id: 'physics', label: 'Physics' },
               { id: 'chemistry', label: 'Chemistry' },
               { id: 'biology', label: 'Biology' },
+              { id: 'mathematics', label: 'Mathematics' },
             ].map((sub) => (
               <Button
                 key={sub.id}
@@ -78,7 +117,9 @@ export default function DiagramsExplorerPage() {
                     sub.id === 'all'
                       ? diagrams[0]
                       : diagrams.find(
-                          (d) => (d.subjectCode || '').toLowerCase() === sub.id
+                          (d) =>
+                            (d.subjectCode || d.subject || '').toLowerCase() ===
+                            sub.id
                         );
                   if (next) setSelectedDiagram(next);
                 }}
@@ -102,7 +143,7 @@ export default function DiagramsExplorerPage() {
         <div
           className="paper-grid"
           style={{
-            gridTemplateColumns: 'minmax(240px, 310px) minmax(0, 1fr)',
+            gridTemplateColumns: 'minmax(240px, 320px) minmax(0, 1fr)',
             alignItems: 'start',
           }}
         >
@@ -114,8 +155,10 @@ export default function DiagramsExplorerPage() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
               {filteredDiagrams.map((d) => {
-                const isSelected = (selectedDiagram?.id || selectedDiagram?._id) === (d.id || d._id);
-                const subjectKey = resolveSubjectKey(d.subjectCode);
+                const isSelected =
+                  (selectedDiagram?.id || selectedDiagram?._id) ===
+                  (d.id || d._id);
+                const subjectKey = resolveSubjectKey(d.subjectCode || d.subject);
                 return (
                   <Button
                     key={d.id || d._id}
@@ -130,7 +173,7 @@ export default function DiagramsExplorerPage() {
                     }}
                   >
                     <span style={{ fontWeight: 700 }}>{d.title}</span>
-                    <Tag variant={subjectKey}>{d.subjectCode || 'STEM'}</Tag>
+                    <Tag variant={subjectKey}>{d.subjectCode || d.subject || 'STEM'}</Tag>
                   </Button>
                 );
               })}
@@ -140,7 +183,7 @@ export default function DiagramsExplorerPage() {
           {/* Active Interactive Diagram Sheet */}
           <div>
             {selectedDiagram ? (
-              <InteractiveDiagram diagramData={selectedDiagram} />
+              <InteractiveDiagram key={selectedDiagram.id || selectedDiagram._id} diagramData={selectedDiagram} />
             ) : (
               <EmptyState
                 title="Pick a Diagram"

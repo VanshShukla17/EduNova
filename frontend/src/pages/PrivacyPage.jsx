@@ -38,7 +38,7 @@ export default function PrivacyPage() {
               1. Minimal Student Information
             </h2>
             <p className="type-body" style={{ color: 'var(--ink-muted)' }}>
-              EduNova stores only your name, board, class level, preferred language, lesson completion progress, and test practice results so your notebook stays synced across sessions.
+              EVidya stores only your name, board, class level, preferred language, lesson completion progress, and test practice results so your notebook stays synced across sessions.
             </p>
           </section>
 

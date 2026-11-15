@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import { setupGlobalPixelSoundListener } from '../utils/pixelSound';
 import {
   Desk,
   NavBar,
@@ -63,6 +64,12 @@ export default function AppShell({ children }) {
       window.removeEventListener('online', goOnline);
       window.removeEventListener('offline', goOffline);
     };
+  }, []);
+
+  // Initialize global 16-bit physical press sound for pixelated buttons
+  useEffect(() => {
+    const cleanup = setupGlobalPixelSoundListener();
+    return cleanup;
   }, []);
 
   useEffect(() => {
@@ -137,7 +144,7 @@ export default function AppShell({ children }) {
 
           {!isLandingRoute ? (
             <footer className="app-footer">
-              <span>EduNova · Offline-First STEM Notebook</span>
+              <span>EVidya · Offline-First STEM Notebook</span>
               <span>·</span>
               <Link to="/privacy">Privacy & AI Controls</Link>
               {isAuthenticated ? (

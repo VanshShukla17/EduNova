@@ -229,7 +229,7 @@ export default function ExternalSimulationFrame({
               Visit source
             </a>
           </div>
-          <span>Curriculum aligned · EduNova STEM</span>
+          <span>Curriculum aligned · EVidya STEM</span>
         </div>
       </div>
     </PaperCard>

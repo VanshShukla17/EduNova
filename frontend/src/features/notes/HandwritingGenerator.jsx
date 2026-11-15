@@ -64,15 +64,17 @@ export default function HandwritingGenerator({ initialText = '', initialTitle = 
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  /**
+   * Renders a specific notebook page onto a target canvas (visible or offscreen)
+   */
+  const drawPageToCanvas = (targetCanvas, pageToDraw) => {
+    if (!targetCanvas) return 1;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = targetCanvas.getContext('2d');
     const PAGE_WIDTH = 794;
     const PAGE_HEIGHT = 1123;
-    canvas.width = PAGE_WIDTH;
-    canvas.height = PAGE_HEIGHT;
+    targetCanvas.width = PAGE_WIDTH;
+    targetCanvas.height = PAGE_HEIGHT;
 
     const paperFill =
       paperStyle === 'parchment'
@@ -158,10 +160,9 @@ export default function HandwritingGenerator({ initialText = '', initialTitle = 
       Math.floor((PAGE_HEIGHT - marginTop - marginBottom) / lineSpacing)
     );
     const calculatedPages = Math.max(1, Math.ceil(lines.length / linesPerPage));
-    setTotalPages(calculatedPages);
 
-    const safeCurrentPage = Math.min(currentPage, calculatedPages);
-    const startIndex = (safeCurrentPage - 1) * linesPerPage;
+    const safePage = Math.min(Math.max(1, pageToDraw), calculatedPages);
+    const startIndex = (safePage - 1) * linesPerPage;
     const pageLines = lines.slice(startIndex, startIndex + linesPerPage);
 
     let y = marginTop;
@@ -192,10 +193,19 @@ export default function HandwritingGenerator({ initialText = '', initialTitle = 
     ctx.font = `14px "${font}", cursive, sans-serif`;
     ctx.fillStyle = resolveCssVar('--ink-soft');
     ctx.fillText(
-      `Page ${safeCurrentPage} of ${calculatedPages}`,
+      `Page ${safePage} of ${calculatedPages}`,
       PAGE_WIDTH - 120,
       PAGE_HEIGHT - 30
     );
+
+    return calculatedPages;
+  };
+
+  useEffect(() => {
+    const calcPages = drawPageToCanvas(canvasRef.current, currentPage);
+    if (calcPages && calcPages !== totalPages) {
+      setTotalPages(calcPages);
+    }
   }, [text, font, fontSize, lineSpacing, paperStyle, inkChoice, humanJitter, currentPage]);
 
   const handleDownloadPNG = () => {
@@ -208,7 +218,133 @@ export default function HandwritingGenerator({ initialText = '', initialTitle = 
   };
 
   const handleDownloadPDF = () => {
-    window.print();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Collect high-resolution page images for all pages in this handwritten note
+    const pageDataUrls = [];
+    const offscreen = document.createElement('canvas');
+
+    for (let p = 1; p <= totalPages; p++) {
+      if (p === currentPage) {
+        pageDataUrls.push(canvas.toDataURL('image/png'));
+      } else {
+        drawPageToCanvas(offscreen, p);
+        pageDataUrls.push(offscreen.toDataURL('image/png'));
+      }
+    }
+
+    const cleanTitle = (title || 'Handwritten_Note').replace(/[^\w\s-]/g, '').trim();
+
+    // Create an isolated iframe to print ONLY the notebook page preview(s), never the website shell
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.style.visibility = 'hidden';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow.document;
+    doc.open();
+
+    const pagesHtml = pageDataUrls
+      .map(
+        (src, idx) => `
+        <div class="note-print-sheet">
+          <img src="${src}" alt="Page ${idx + 1}" />
+        </div>
+      `
+      )
+      .join('');
+
+    doc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${cleanTitle}</title>
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 0;
+            }
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            html, body {
+              width: 100%;
+              background: #ffffff;
+            }
+            .note-print-sheet {
+              width: 100vw;
+              height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              page-break-after: always;
+              break-after: page;
+            }
+            .note-print-sheet:last-child {
+              page-break-after: auto;
+              break-after: auto;
+            }
+            img {
+              max-width: 100%;
+              max-height: 100%;
+              width: auto;
+              height: auto;
+              display: block;
+              margin: 0 auto;
+              object-fit: contain;
+            }
+            @media print {
+              html, body {
+                width: 210mm;
+                height: 297mm;
+              }
+              .note-print-sheet {
+                width: 210mm;
+                height: 297mm;
+                margin: 0;
+                padding: 0;
+                page-break-inside: avoid;
+                break-inside: avoid;
+              }
+              img {
+                width: 210mm;
+                height: 297mm;
+                object-fit: contain;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          ${pagesHtml}
+        </body>
+      </html>
+    `);
+    doc.close();
+
+    const triggerPrint = () => {
+      try {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+      } catch (err) {
+        console.error('Print preview error:', err);
+      } finally {
+        setTimeout(() => {
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+          }
+        }, 1500);
+      }
+    };
+
+    setTimeout(triggerPrint, 200);
   };
 
   const handleFileUpload = async (e) => {

@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Chotu AI mentor mascot drawn strictly with EduNova CSS design tokens.
+ * Chotu AI mentor mascot drawn strictly with EVidya CSS design tokens.
  */
 export default function ChotuMascot({ size = 40, label = 'Chotu Mentor' }) {
   return (

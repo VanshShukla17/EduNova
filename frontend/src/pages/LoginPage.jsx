@@ -122,7 +122,7 @@ export default function LoginPage() {
             borderTop: '1px solid var(--paper-border-warm)',
           }}
         >
-          New to EduNova?{' '}
+          New to EVidya?{' '}
           <Link to="/signup" style={{ color: 'var(--emerald-700)', fontWeight: 700 }}>
             Create a free notebook
           </Link>

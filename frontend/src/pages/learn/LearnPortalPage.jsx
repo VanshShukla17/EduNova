@@ -50,7 +50,7 @@ export default function LearnPortalPage() {
       <HeroCard
         eyebrow="Class 10–12 Interactive STEM Environment"
         eyebrowVariant="ready"
-        title="EduNova Virtual STEM Hub"
+        title="EVidya Virtual STEM Hub"
         subtitle="Explore interactive 3D biological systems, physical ray optics, molecular structures, and graphing calculus labs."
         actions={
           <>

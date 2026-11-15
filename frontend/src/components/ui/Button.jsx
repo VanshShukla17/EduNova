@@ -3,7 +3,7 @@ import PixelButton from './PixelButton';
 
 /**
  * Physical-press pixel-art button primitive compliant with DESIGN.md Section 6.1.
- * Routes all EduNova button variants through the unified 2D stepped PixelButton system.
+ * Routes all EVidya button variants through the unified 2D stepped PixelButton system.
  */
 export default function Button({
   variant = 'primary',

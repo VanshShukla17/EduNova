@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { playPixelSound } from '../../utils/pixelSound';
 
 const VARIANT_CLASSES = {
   primary: 'pixel-btn--primary',
@@ -107,6 +108,7 @@ export default function PixelButton({
         e.preventDefault();
         return;
       }
+      playPixelSound(e);
       onClick?.(e);
     },
     [disabled, onClick]

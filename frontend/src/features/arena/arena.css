@@ -1,0 +1,360 @@
+/* STEM Arena Duel Styling matching EVidya visual language */
+
+.arena-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5, 20px);
+  width: 100%;
+}
+
+/* Desk Graph Board backdrop */
+.arena-board {
+  position: relative;
+  background-color: #0d2822;
+  background-image:
+    linear-gradient(rgba(20, 83, 67, 0.35) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 83, 67, 0.35) 1px, transparent 1px);
+  background-size: 24px 24px;
+  border: 1px solid rgba(45, 212, 191, 0.2);
+  border-radius: var(--r-xl, 20px);
+  padding: clamp(16px, 3vw, 32px);
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.25);
+  color: #f1f5f9;
+  min-height: 580px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Arena Header & Eyebrow */
+.arena-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(13, 148, 136, 0.2);
+  border: 1px solid rgba(45, 212, 191, 0.35);
+  color: #2dd4bf;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Lobby Cards Grid */
+.arena-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.arena-card {
+  background: var(--paper-warm, #faf7ec);
+  color: var(--ink, #101a3a);
+  border-radius: var(--r-xl, 24px);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 2px solid #e7decb;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.arena-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+}
+
+.arena-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.arena-card__avatar-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: #f1ebd8;
+  border-radius: 16px;
+  padding: 16px;
+  margin: 16px 0;
+}
+
+.arena-vs-mini {
+  background: #0f172a;
+  color: #f59e0b;
+  font-family: var(--font-mono, monospace);
+  font-weight: 900;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #f59e0b;
+}
+
+/* Match Intro Screen */
+.arena-intro-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 480px;
+  text-align: center;
+  position: relative;
+}
+
+.arena-intro-matchup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(20px, 6vw, 80px);
+  margin: 40px 0;
+  flex-wrap: wrap;
+}
+
+.arena-fighter-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.arena-fighter-box {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(45, 212, 191, 0.3);
+  padding: 8px 16px;
+  border-radius: 12px;
+  min-width: 150px;
+}
+
+.arena-fighter-name {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #fff;
+  letter-spacing: 0.02em;
+}
+
+.arena-fighter-sub {
+  font-size: 0.75rem;
+  font-family: var(--font-mono, monospace);
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+/* Hexagonal VS Centerpiece */
+.arena-vs-hexagon {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.6);
+  animation: pulse-vs 2.2s infinite ease-in-out;
+}
+
+.arena-vs-hexagon-inner {
+  width: 78px;
+  height: 78px;
+  background: #0f172a;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arena-vs-text {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.7rem;
+  font-weight: 900;
+  color: #f59e0b;
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.8);
+}
+
+@keyframes pulse-vs {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 16px rgba(245, 158, 11, 0.5));
+  }
+  50% {
+    transform: scale(1.06);
+    filter: drop-shadow(0 0 28px rgba(245, 158, 11, 0.85));
+  }
+}
+
+/* Live Battle Screen Layout */
+.arena-battle-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(45, 212, 191, 0.25);
+  border-radius: 14px;
+  padding: 10px 18px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.arena-battle-scores {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.arena-timer-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 170px;
+}
+
+.arena-timer-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.arena-timer-fill {
+  height: 100%;
+  background: #2dd4bf;
+  transition: width 1s linear, background-color 0.3s ease;
+}
+
+.arena-timer-fill.is-urgent {
+  background: #ef4444;
+}
+
+.arena-battle-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(260px, 320px);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .arena-battle-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Battle Question Card */
+.arena-q-card {
+  background: var(--paper-warm, #faf7ec);
+  color: var(--ink, #101a3a);
+  border: 2px solid #e7decb;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+}
+
+.arena-option-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink, #1e293b);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.arena-option-btn:hover:not(:disabled) {
+  border-color: #2563eb;
+  background: #eff6ff;
+  transform: translateY(-1px);
+}
+
+.arena-option-btn.is-selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 1px #2563eb;
+}
+
+.arena-option-btn.is-correct {
+  border-color: #16a34a;
+  background: #dcfce7;
+  color: #14532d;
+}
+
+.arena-option-btn.is-wrong {
+  border-color: #dc2626;
+  background: #fee2e2;
+  color: #7f1d1d;
+}
+
+.arena-opt-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #e2e8f0;
+  border-radius: 6px;
+  font-family: var(--font-mono, monospace);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+/* Battle Sidebar Widgets */
+.arena-side-widget {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(45, 212, 191, 0.22);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.arena-side-title {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.arena-thinking-pulse {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #f59e0b;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.arena-thinking-dot {
+  width: 8px;
+  height: 8px;
+  background: #f59e0b;
+  border-radius: 50%;
+  animation: pulse-dot 1.2s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}

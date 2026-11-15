@@ -170,6 +170,69 @@ function PixelNotebookIcon({ size = 16 }) {
   );
 }
 
+function PixelCommunityIcon({ size = 16 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      fill="none"
+      shapeRendering="crispEdges"
+      aria-hidden="true"
+      className="nav-pixel-icon"
+    >
+      {/* Left student avatar */}
+      <rect x="3" y="2" width="3" height="3" fill="var(--white)" />
+      <rect x="2" y="6" width="5" height="5" fill="var(--nav-pixel-mint-bright)" />
+      <rect x="3" y="7" width="3" height="4" fill="var(--nav-pixel-mint-core)" />
+
+      {/* Right student avatar */}
+      <rect x="10" y="2" width="3" height="3" fill="var(--white)" />
+      <rect x="9" y="6" width="5" height="5" fill="var(--nav-pixel-gold-bright)" />
+      <rect x="10" y="7" width="3" height="4" fill="var(--nav-pixel-gold-border)" />
+
+      {/* Chat connection node */}
+      <rect x="6" y="4" width="4" height="2" fill="var(--white)" />
+      <rect x="7" y="5" width="2" height="1" fill="var(--nav-pixel-mint-deep)" />
+      <rect x="6" y="11" width="4" height="2" fill="var(--nav-pixel-mint-bright)" />
+    </svg>
+  );
+}
+
+function PixelArenaIcon({ size = 16 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 16 16"
+      fill="none"
+      shapeRendering="crispEdges"
+      aria-hidden="true"
+      className="nav-pixel-icon"
+    >
+      {/* Crossed swords in pixel art */}
+      {/* Sword 1 */}
+      <rect x="2" y="2" width="2" height="2" fill="var(--nav-pixel-gold-bright)" />
+      <rect x="4" y="4" width="2" height="2" fill="var(--white)" />
+      <rect x="6" y="6" width="2" height="2" fill="var(--white)" />
+      <rect x="8" y="8" width="2" height="2" fill="var(--white)" />
+      <rect x="10" y="10" width="2" height="2" fill="var(--nav-pixel-gold-border)" />
+      <rect x="9" y="11" width="1" height="2" fill="var(--nav-pixel-gold-deep)" />
+      <rect x="12" y="12" width="2" height="2" fill="var(--nav-pixel-gold-mid)" />
+
+      {/* Sword 2 */}
+      <rect x="12" y="2" width="2" height="2" fill="var(--nav-pixel-gold-bright)" />
+      <rect x="10" y="4" width="2" height="2" fill="var(--white)" />
+      <rect x="4" y="10" width="2" height="2" fill="var(--nav-pixel-gold-border)" />
+      <rect x="6" y="11" width="1" height="2" fill="var(--nav-pixel-gold-deep)" />
+      <rect x="2" y="12" width="2" height="2" fill="var(--nav-pixel-gold-mid)" />
+
+      {/* Center clash sparkle */}
+      <rect x="7" y="7" width="2" height="2" fill="var(--nav-pixel-gold-bright)" />
+    </svg>
+  );
+}
+
 function PixelShieldIcon({ size = 16 }) {
   return (
     <svg
@@ -453,6 +516,18 @@ export default function NavBar({
         location.pathname.startsWith('/diagrams'),
     },
     {
+      to: '/arena',
+      label: 'Arena',
+      icon: PixelArenaIcon,
+      matchActive: (isActive) => isActive || location.pathname.startsWith('/arena'),
+    },
+    {
+      to: '/community',
+      label: 'Community',
+      icon: PixelCommunityIcon,
+      matchActive: (isActive) => isActive || location.pathname.startsWith('/community'),
+    },
+    {
       to: '/profile',
       label: 'Notebook',
       icon: PixelNotebookIcon,
@@ -497,12 +572,12 @@ export default function NavBar({
           <span className="nav-pixel-corner nav-pixel-corner--br" />
         </div>
 
-        {/* Left: EduNova Logo + Wordmark */}
+        {/* Left: EVidya Logo + Wordmark */}
         <Link to={isAuthenticated ? '/dashboard' : '/'} className="nav-sky__logo">
           <span className="nav-sky__logo-badge" aria-hidden="true">
             <PixelCapIcon size={20} />
           </span>
-          <span className="nav-sky__logo-text">EduNova</span>
+          <span className="nav-sky__logo-text">EVidya</span>
         </Link>
 
         {/* Center/Right: Main Navigation Links */}
@@ -655,7 +730,7 @@ export default function NavBar({
                   </span>
                   <div className="nav-pixel-profile-card__meta">
                     <div className="nav-pixel-profile-card__name">
-                      {isAuthenticated ? user?.name || 'Student' : 'EduNova Explorer'}
+                      {isAuthenticated ? user?.name || 'Student' : 'EVidya Explorer'}
                     </div>
                     <div className="nav-pixel-profile-card__sub">
                       {isAuthenticated
@@ -705,6 +780,30 @@ export default function NavBar({
                     >
                       Smart Notes
                     </Link>
+                    <Link
+                      to="/arena"
+                      role="menuitem"
+                      className="nav-pixel-dropdown__link"
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      Arena Battles
+                    </Link>
+                    <Link
+                      to="/leaderboard"
+                      role="menuitem"
+                      className="nav-pixel-dropdown__link"
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      Leaderboard
+                    </Link>
+                    <Link
+                      to="/community"
+                      role="menuitem"
+                      className="nav-pixel-dropdown__link"
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      Study Community
+                    </Link>
                     {isAdmin ? (
                       <Link
                         to="/admin"
@@ -750,6 +849,14 @@ export default function NavBar({
                       onClick={() => setProfileOpen(false)}
                     >
                       Chotu AI Mentor
+                    </Link>
+                    <Link
+                      to="/leaderboard"
+                      role="menuitem"
+                      className="nav-pixel-dropdown__link"
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      Leaderboard
                     </Link>
                   </>
                 )}
