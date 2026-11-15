@@ -64,8 +64,10 @@
   /* Pins */
   --pin-red: #dc2626;
   --pin-amber: #e89713;
+  --pin-orange: #f97316;
   --pin-green: #10b981;
   --pin-blue: #3b82f6;
+  --pin-purple: #8b5cf6;
   --pin-grey: #94a3b8;
 
   /* Subjects (section 7) */
@@ -131,6 +133,24 @@
   --dark-btn-edge: #0f172a;
   --danger-edge: #991b1b;
 
+  /* Interactive Pixel-Art Subject Notebook Cards */
+  --paper-grain: rgba(120, 96, 48, 0.045);
+  --paper-grain-light: rgba(255, 255, 255, 0.45);
+  --paper-deckle-edge: rgba(180, 154, 102, 0.35);
+  --notebook-shadow-rest: 0 2px 0 rgba(255,255,255,.75) inset, 0 -2px 0 rgba(217,208,176,.55) inset, 0 10px 24px rgba(0,0,0,.35);
+  --notebook-shadow-lift: 0 2px 0 rgba(255,255,255,.85) inset, 0 -2px 0 rgba(217,208,176,.7) inset, 0 18px 36px rgba(0,0,0,.44);
+  --notebook-shadow-press: 0 1px 0 rgba(255,255,255,.65) inset, 0 5px 12px rgba(0,0,0,.32);
+  --pin-pixel-outline: #181c26;
+  --pin-pixel-highlight: #ffffff;
+  --pin-pixel-shadow: rgba(0, 0, 0, 0.35);
+  --physics-ring: rgba(59, 130, 246, 0.28);
+  --chemistry-ring: rgba(249, 115, 22, 0.28);
+  --biology-ring: rgba(34, 197, 94, 0.28);
+  --maths-ring: rgba(139, 92, 246, 0.28);
+  --notebook-tooltip-bg: #181c26;
+  --notebook-tooltip-border: #334155;
+  --notebook-tooltip-ink: #faf7ed;
+
   /* Landing hero exception (section 8.1) */
   --sky-1: #1c97e8;
   --sky-2: #26a6f8;
@@ -169,4 +189,168 @@
   /* Motion */
   --t-fast: 120ms; --t-med: 200ms; --t-slow: 320ms;
   --ease: cubic-bezier(.2,.8,.2,1);
+
+  /* Pixel Glassmorphism Navbar (Global NavBar redesign) */
+  --nav-pixel-bg: linear-gradient(180deg, rgba(13, 58, 52, 0.88) 0%, rgba(7, 35, 33, 0.92) 55%, rgba(4, 24, 24, 0.95) 100%);
+  --nav-pixel-dropdown-bg: linear-gradient(180deg, rgba(10, 48, 44, 0.96) 0%, rgba(5, 26, 25, 0.98) 100%);
+  --nav-pixel-grid-line: rgba(110, 231, 183, 0.055);
+  --nav-pixel-grid-dot: rgba(167, 243, 208, 0.08);
+  --nav-pixel-sheen: linear-gradient(125deg, transparent 0%, transparent 18%, rgba(167, 243, 208, 0.13) 18.5%, rgba(209, 250, 229, 0.20) 21%, rgba(167, 243, 208, 0.10) 24%, transparent 24.5%, transparent 26.5%, rgba(209, 250, 229, 0.14) 27%, rgba(167, 243, 208, 0.06) 28.5%, transparent 29%, transparent 64%, rgba(167, 243, 208, 0.07) 64.5%, rgba(209, 250, 229, 0.11) 66.5%, transparent 67%, transparent 100%);
+  --nav-pixel-mint-bright: #a7f3d0;
+  --nav-pixel-mint-soft: #6ee7b7;
+  --nav-pixel-mint-core: #4ade80;
+  --nav-pixel-mint-teal: #2dd4bf;
+  --nav-pixel-mint-edge: #10b981;
+  --nav-pixel-mint-deep: #064e3b;
+  --nav-pixel-outline-dark: #031514;
+  --nav-pixel-inner-border: rgba(110, 231, 183, 0.36);
+  --nav-pixel-bevel-inset-light: rgba(167, 243, 208, 0.26);
+  --nav-pixel-bevel-inset-dark: rgba(2, 14, 14, 0.72);
+  --nav-pixel-top-highlight: linear-gradient(90deg, transparent 1%, rgba(110, 231, 183, 0.65) 6%, rgba(236, 253, 245, 0.95) 24%, rgba(110, 231, 183, 0.85) 50%, rgba(236, 253, 245, 0.95) 76%, rgba(110, 231, 183, 0.65) 94%, transparent 99%);
+  --nav-pixel-bottom-highlight: linear-gradient(90deg, transparent 2%, rgba(52, 211, 153, 0.55) 10%, rgba(167, 243, 208, 0.8) 50%, rgba(52, 211, 153, 0.55) 90%, transparent 98%);
+  --nav-pixel-shadow: 0 14px 30px rgba(0, 0, 0, 0.68), 0 4px 10px rgba(0, 0, 0, 0.52), 0 0 22px rgba(45, 212, 191, 0.18);
+  --nav-pixel-dropdown-shadow: 0 18px 36px rgba(0, 0, 0, 0.72), 0 6px 14px rgba(0, 0, 0, 0.56), 0 0 18px rgba(45, 212, 191, 0.2);
+  --nav-pixel-gold-bg: linear-gradient(180deg, rgba(96, 66, 14, 0.78) 0%, rgba(58, 38, 8, 0.88) 100%);
+  --nav-pixel-gold-border: #fbbf24;
+  --nav-pixel-gold-bright: #fde68a;
+  --nav-pixel-gold-mid: #d97706;
+  --nav-pixel-gold-deep: #92400e;
+  --nav-pixel-gold-text: #fcd34d;
+  --nav-pixel-gold-glow: rgba(251, 191, 36, 0.28);
+  --nav-pixel-gold-bevel-top: rgba(253, 230, 138, 0.42);
+  --nav-pixel-gold-bevel-bot: rgba(120, 53, 15, 0.78);
+  --nav-pixel-item-bg: rgba(7, 36, 33, 0.42);
+  --nav-pixel-item-border: rgba(110, 231, 183, 0.16);
+  --nav-pixel-item-hover-bg: linear-gradient(180deg, rgba(20, 83, 74, 0.62) 0%, rgba(11, 52, 47, 0.76) 100%);
+  --nav-pixel-item-hover-border: rgba(110, 231, 183, 0.55);
+  --nav-pixel-item-hover-glow: 0 0 12px rgba(52, 211, 153, 0.28);
+  --nav-pixel-badge-bg: linear-gradient(180deg, #10b981 0%, #059669 52%, #065f46 100%);
+  --nav-pixel-avatar-bg: linear-gradient(180deg, #113a35 0%, #072220 100%);
+  --nav-pixel-divider: linear-gradient(180deg, transparent 0%, rgba(110, 231, 183, 0.45) 20%, rgba(110, 231, 183, 0.45) 80%, transparent 100%);
+  --nav-pixel-danger-bg: rgba(153, 27, 27, 0.35);
+  --nav-pixel-danger-border: rgba(248, 113, 113, 0.45);
+  --nav-pixel-danger-text: #fecaca;
+  --nav-pixel-text-shadow: 0 2px 0 rgba(2, 16, 15, 0.86);
+  --nav-pixel-book-edge: #cbd5e1;
+  --nav-pixel-book-spine: #475569;
+  --nav-pixel-skin: #f5bfa0;
+  --nav-pixel-skin-shade: #d98d66;
+  --nav-pixel-hair: #182230;
+  --nav-pixel-avatar-eye: #0f172a;
+
+  /* Custom Pixel-Art Button System (PixelButton) */
+  --font-pixel: "Press Start 2P", "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --pixel-btn-border: #03221b;
+  --pixel-btn-border-inner: #04382c;
+  --pixel-btn-surface-top: #07a376;
+  --pixel-btn-surface: #058c65;
+  --pixel-btn-surface-bottom: #047453;
+  --pixel-btn-surface-hover-top: #10c995;
+  --pixel-btn-surface-hover: #09b382;
+  --pixel-btn-surface-hover-bottom: #059669;
+  --pixel-btn-highlight: #6ee7b7;
+  --pixel-btn-highlight-strong: #a7f3d0;
+  --pixel-btn-glint: rgba(209, 250, 229, 0.75);
+  --pixel-btn-top-glow: rgba(110, 231, 183, 0.42);
+  --pixel-btn-extrude: #04543e;
+  --pixel-btn-extrude-dark: #023024;
+  --pixel-btn-shadow: rgba(2, 18, 14, 0.55);
+  --pixel-btn-text-shadow: #022c22;
+
+  /* Optional PixelButton Variants */
+  --pixel-btn-kraft-border: #2c1c0b;
+  --pixel-btn-kraft-surface-top: #e6cb9f;
+  --pixel-btn-kraft-surface: #d8b98f;
+  --pixel-btn-kraft-surface-bottom: #c4a070;
+  --pixel-btn-kraft-hover-top: #f0d8b0;
+  --pixel-btn-kraft-hover: #e2c59b;
+  --pixel-btn-kraft-hover-bottom: #cfa978;
+  --pixel-btn-kraft-highlight: #fef3c7;
+  --pixel-btn-kraft-extrude: #9c7644;
+  --pixel-btn-kraft-extrude-dark: #5c401e;
+  --pixel-btn-kraft-ink: #3a250f;
+  --pixel-btn-kraft-text-shadow: rgba(255, 251, 235, 0.72);
+  --pixel-btn-kraft-glow: rgba(251, 191, 36, 0.34);
+
+  --pixel-btn-note-border: #332b10;
+  --pixel-btn-note-surface-top: #faf3ce;
+  --pixel-btn-note-surface: #f1e9bf;
+  --pixel-btn-note-surface-bottom: #dfd396;
+  --pixel-btn-note-hover-top: #fffbe0;
+  --pixel-btn-note-hover: #f7f0c8;
+  --pixel-btn-note-hover-bottom: #e8dc9f;
+  --pixel-btn-note-highlight: #fffef5;
+  --pixel-btn-note-extrude: #b5a34c;
+  --pixel-btn-note-extrude-dark: #786a28;
+  --pixel-btn-note-ink: #1e293b;
+  --pixel-btn-note-text-shadow: rgba(255, 255, 255, 0.78);
+  --pixel-btn-note-glow: rgba(250, 240, 137, 0.36);
+
+  --pixel-btn-dark-border: #050b14;
+  --pixel-btn-dark-surface-top: #334155;
+  --pixel-btn-dark-surface: #1e293b;
+  --pixel-btn-dark-surface-bottom: #131c2e;
+  --pixel-btn-dark-hover-top: #475569;
+  --pixel-btn-dark-hover: #29384d;
+  --pixel-btn-dark-hover-bottom: #1e293b;
+  --pixel-btn-dark-highlight: #94a3b8;
+  --pixel-btn-dark-extrude: #0f172a;
+  --pixel-btn-dark-extrude-dark: #050b14;
+  --pixel-btn-dark-glow: rgba(148, 163, 184, 0.32);
+
+  --pixel-btn-ghost-border: #1e293b;
+  --pixel-btn-ghost-surface-top: #faf7ed;
+  --pixel-btn-ghost-surface: #efe9d6;
+  --pixel-btn-ghost-surface-bottom: #dfd7be;
+  --pixel-btn-ghost-hover-top: #ffffff;
+  --pixel-btn-ghost-hover: #f7f3e6;
+  --pixel-btn-ghost-hover-bottom: #e8e0c8;
+  --pixel-btn-ghost-highlight: #ffffff;
+  --pixel-btn-ghost-extrude: #b0a68a;
+  --pixel-btn-ghost-extrude-dark: #736b54;
+  --pixel-btn-ghost-ink: #0f172a;
+  --pixel-btn-ghost-text-shadow: rgba(255, 255, 255, 0.8);
+
+  --pixel-btn-cream-border: #0f172a;
+  --pixel-btn-cream-surface-top: #ffffff;
+  --pixel-btn-cream-surface: #f5f5f2;
+  --pixel-btn-cream-surface-bottom: #e2e2da;
+  --pixel-btn-cream-extrude: #b5b5ab;
+  --pixel-btn-cream-extrude-dark: #717168;
+
+  --pixel-btn-glass-border: #041f2a;
+  --pixel-btn-glass-surface-top: rgba(20, 68, 82, 0.9);
+  --pixel-btn-glass-surface: rgba(10, 42, 54, 0.92);
+  --pixel-btn-glass-surface-bottom: rgba(6, 28, 38, 0.95);
+  --pixel-btn-glass-highlight: #6ee7b7;
+  --pixel-btn-glass-extrude: #062936;
+  --pixel-btn-glass-extrude-dark: #03151d;
+
+  --pixel-btn-amber-surface-top: #f59e0b;
+  --pixel-btn-amber-surface: #d97706;
+  --pixel-btn-amber-surface-bottom: #b45309;
+  --pixel-btn-amber-highlight: #fde68a;
+  --pixel-btn-amber-extrude: #92400e;
+  --pixel-btn-amber-extrude-dark: #451a03;
+
+  --pixel-btn-blue-surface-top: #3b82f6;
+  --pixel-btn-blue-surface: #2563eb;
+  --pixel-btn-blue-surface-bottom: #1d4ed8;
+  --pixel-btn-blue-highlight: #93c5fd;
+  --pixel-btn-blue-extrude: #1e40af;
+  --pixel-btn-blue-extrude-dark: #172554;
+
+  --pixel-btn-purple-surface-top: #8b5cf6;
+  --pixel-btn-purple-surface: #7c3aed;
+  --pixel-btn-purple-surface-bottom: #6d28d9;
+  --pixel-btn-purple-highlight: #c4b5fd;
+  --pixel-btn-purple-extrude: #5b21b6;
+  --pixel-btn-purple-extrude-dark: #2e1065;
+
+  --pixel-btn-danger-surface-top: #ef4444;
+  --pixel-btn-danger-surface: #dc2626;
+  --pixel-btn-danger-surface-bottom: #b91c1c;
+  --pixel-btn-danger-highlight: #fca5a5;
+  --pixel-btn-danger-extrude: #991b1b;
+  --pixel-btn-danger-extrude-dark: #450a0a;
 }

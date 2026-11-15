@@ -19,17 +19,17 @@ import {
   HeroCard,
   SectionHeader,
   PaperCard,
-  ChapterCard,
   StatChip,
   ProgressRing,
   Tag,
   Stamp,
   Button,
+  PixelButton,
   StickyNote,
   Skeleton,
   EmptyState,
-  resolveSubjectKey,
 } from '../components/ui';
+import { NotebookGrid } from '../components/notebooks';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -216,33 +216,7 @@ export default function DashboardPage() {
         />
 
         {subjects.length > 0 ? (
-          <div className="paper-grid paper-grid--2 tilt-cycle">
-            {subjects.map((sub, idx) => {
-              const firstChap = sub.chapters && sub.chapters[0];
-              const subId = sub._id || sub.id;
-              const chapId = firstChap ? firstChap._id || firstChap.id : null;
-              const targetTo = chapId ? `/subjects/${subId}/chapters/${chapId}` : '/subjects';
-              const displayName =
-                i18n.language === 'hi' && sub.nameHindi ? sub.nameHindi : sub.name;
-              const subjectKey = resolveSubjectKey(sub.name || sub.code);
-
-              return (
-                <ChapterCard
-                  key={subId || idx}
-                  code={`NOTEBOOK 0${idx + 1}`}
-                  subject={subjectKey}
-                  subjectLabel={sub.name}
-                  title={displayName}
-                  description={`${sub.chapters?.length || 0} chapters synced · Offline ready`}
-                  progress={sub.progressPercentage || 0}
-                  meta={`${sub.chapters?.length || 0} chapters`}
-                  mastered={(sub.progressPercentage || 0) >= 100}
-                  isNew={(sub.progressPercentage || 0) === 0}
-                  to={targetTo}
-                />
-              );
-            })}
-          </div>
+          <NotebookGrid subjects={subjects} language={i18n.language} />
         ) : (
           <EmptyState
             title="No Subjects Assigned Yet"
@@ -268,9 +242,9 @@ export default function DashboardPage() {
             <p className="type-small" style={{ color: 'var(--ink-muted)' }}>
               Heart, optics, trigonometry & molecular 3D explorers.
             </p>
-            <Button variant="primary" size="sm" to="/learn" style={{ marginTop: 'auto' }}>
+            <PixelButton variant="primary" size="sm" to="/learn" style={{ marginTop: 'auto' }}>
               Open Hub
-            </Button>
+            </PixelButton>
           </PaperCard>
 
           <PaperCard interactive style={{ padding: 'var(--sp-4)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>

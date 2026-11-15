@@ -156,8 +156,10 @@ Create `frontend/src/styles/tokens.css` with exactly these variables. Components
   /* Pins */
   --pin-red: #dc2626;
   --pin-amber: #e89713;
+  --pin-orange: #f97316;
   --pin-green: #10b981;
   --pin-blue: #3b82f6;
+  --pin-purple: #8b5cf6;
   --pin-grey: #94a3b8;
 
   /* Subjects (section 7) */
@@ -222,6 +224,24 @@ Create `frontend/src/styles/tokens.css` with exactly these variables. Components
   --dark-paper-border: rgba(233,217,166,.25);
   --dark-btn-edge: #0f172a;
   --danger-edge: #991b1b;
+
+  /* Interactive Pixel-Art Subject Notebook Cards */
+  --paper-grain: rgba(120, 96, 48, 0.045);
+  --paper-grain-light: rgba(255, 255, 255, 0.45);
+  --paper-deckle-edge: rgba(180, 154, 102, 0.35);
+  --notebook-shadow-rest: 0 2px 0 rgba(255,255,255,.75) inset, 0 -2px 0 rgba(217,208,176,.55) inset, 0 10px 24px rgba(0,0,0,.35);
+  --notebook-shadow-lift: 0 2px 0 rgba(255,255,255,.85) inset, 0 -2px 0 rgba(217,208,176,.7) inset, 0 18px 36px rgba(0,0,0,.44);
+  --notebook-shadow-press: 0 1px 0 rgba(255,255,255,.65) inset, 0 5px 12px rgba(0,0,0,.32);
+  --pin-pixel-outline: #181c26;
+  --pin-pixel-highlight: #ffffff;
+  --pin-pixel-shadow: rgba(0, 0, 0, 0.35);
+  --physics-ring: rgba(59, 130, 246, 0.28);
+  --chemistry-ring: rgba(249, 115, 22, 0.28);
+  --biology-ring: rgba(34, 197, 94, 0.28);
+  --maths-ring: rgba(139, 92, 246, 0.28);
+  --notebook-tooltip-bg: #181c26;
+  --notebook-tooltip-border: #334155;
+  --notebook-tooltip-ink: #faf7ed;
 
   /* Landing hero exception (section 8.1) */
   --sky-1: #1c97e8;
@@ -422,6 +442,12 @@ Minimum height 44px, radius `--r-md`, bold body font, a 3D bottom edge that pres
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 ```
 
+**Retro Pixel Button (`PixelButton`):**
+
+- `Button` (`frontend/src/components/ui/Button.jsx`) delegates all EduNova buttons across every route and variant to `PixelButton` (`frontend/src/components/ui/PixelButton.jsx`), rendering a unified 16-bit stepped arcade/notebook button using layered CSS spans (`.pixel-btn__shadow`, `.pixel-btn__extrude`, `.pixel-btn__surface`, `.pixel-btn__highlight`, `.pixel-btn__shimmer`, `.pixel-btn__pixels`, `.pixel-btn__label`) with two-step polygon pixel corners (`--px-step: 3px` for `sm`/`md`, `4px` for `lg`), `--font-pixel` centered label, mint/bright top highlight, dark extruded base, and deep bottom shadow (zero image/SVG assets).
+- Supported variants: `primary` / `emerald`, `kraft`, `note` / `secondary`, `dark`, `ghost`, `danger`, `cream`, `glass`, `amber`, `blue`, and `purple` (all backed by `--pixel-btn-*` tokens in `tokens.css`).
+- Supports `sm`/`md`/`lg` sizes, `fullWidth`, `disabled`, keyboard `:focus-visible`, tactile hover lift (`-2px`) + top glow, active press (`+4px`) compressing the 3D extrusion/shadow, and `@media (prefers-reduced-motion: reduce)`.
+
 ### 6.2 NavBar
 
 - Floating pill, fixed, `top: 12px`, centred, width `min(980px, 100% - 24px)`, height 56px, background `--nav-bg`, radius pill, no backdrop blur.
@@ -456,6 +482,12 @@ A `paper--hero` with tape. Left: tag, h1 title, one-sentence description, a meta
 3. Two-line description in `--ink-muted`.
 4. Inner box (white 60%, 1px `#e5e0cc`, radius 14): rows of icon + mono label on the left and mono value on the right (Lessons 3 parts, Quick check 3 questions, Virtual lab, Est. time 15 min). Subject colour is used on the lab row.
 5. Footer buttons: `note` "Review notes" and `primary` "Start" or "Replay".
+
+**Subject Notebook Cards (2×2 Dashboard Grid):**
+
+- Uses `NotebookGrid` (`Physics`, `Chemistry`, `Biology`, `Mathematics` in a 2-column desktop grid, stacking vertically below 768px) with `Pin` (`pixel` 3D variant in blue, orange, green, purple) and top-right `NEW` / `MASTERED` `Stamp`.
+- Two-zone upper layout: left zone (~56% width) shows notebook number (`NOTEBOOK 01`), subject badge (`Tag`), display heading, synced chapters count, and chapter count; right zone (~44% width) renders a deterministic, procedural HTML5 `<canvas>` pixel-art lab scene (`160 × 96` logical grid, `image-rendering: pixelated`, zero SVG/image assets) with independent idle animations, hover speed/particle boosts, and clickable apparatus hitboxes + formula tooltip.
+- Bottom footer spans full width with percentage readout and subject-coloured `ProgressBar`. Interactive tilt follows pointer softly (`max 1.5°`) and pauses all continuous animations offscreen or under `prefers-reduced-motion`.
 
 **Locked chapter card:** background `--locked`, text `--locked-ink`, grey pin, a `Prerequisite` tag with a lock icon top right, the sub-title and description dimmed, and a dashed divider with a lock icon and "Finish Chapter 3 to open this" at the bottom. The locked state is also announced in text for screen readers.
 
@@ -669,7 +701,7 @@ frontend/src/
     Desk.jsx  Ruler.jsx  Doodles.jsx
     NavBar.jsx  BottomTabs.jsx
     PaperCard.jsx  Tape.jsx  Pin.jsx  Paperclip.jsx  StickyNote.jsx  Stamp.jsx  Tag.jsx
-    Button.jsx  Field.jsx  ProgressBar.jsx  ProgressRing.jsx  StatChip.jsx
+    Button.jsx  PixelButton.jsx  Field.jsx  ProgressBar.jsx  ProgressRing.jsx  StatChip.jsx
     SectionHeader.jsx  HeroCard.jsx  ChapterCard.jsx  LockedChapterCard.jsx  IllustrationTile.jsx
     Modal.jsx  Toast.jsx  EmptyState.jsx  Skeleton.jsx
     ChotuFab.jsx  ChotuPanel.jsx
