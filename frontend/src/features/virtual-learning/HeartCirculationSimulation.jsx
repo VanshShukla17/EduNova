@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Heart, Activity, Play, Pause, ChevronRight, ChevronLeft, Info } from 'lucide-react';
+import { Heart, Activity, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Button, PaperCard, Tag } from '../../components/ui';
 
 const BLOOD_FLOW_STEPS = [
   {
@@ -180,37 +181,37 @@ export default function HeartCirculationSimulation() {
   }, [bpm]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
       {/* 3D Viewport */}
-      <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+      <div style={{ position: 'relative', borderRadius: 'var(--r-md)', overflow: 'hidden', border: '1px solid var(--dark-paper-border)', backgroundColor: 'var(--slate-950)' }}>
         <div ref={mountRef} style={{ width: '100%', height: '340px', cursor: 'grab' }} />
 
         {/* BPM Pulse Readout */}
-        <div style={{ position: 'absolute', top: '12px', left: '12px', backgroundColor: 'rgba(15, 23, 42, 0.85)', padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Activity size={18} color="#EF4444" className="animate-pulse" />
-          <span style={{ fontSize: '0.85rem', fontWeight: '800', color: '#FFFFFF' }}>{bpm} BPM</span>
+        <div style={{ position: 'absolute', top: '12px', left: '12px', backgroundColor: 'var(--slate-900)', padding: '6px 12px', borderRadius: 'var(--r-md)', border: '1px solid var(--dark-paper-border)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Activity size={18} color="var(--red-600)" />
+          <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--white)', fontFamily: 'var(--font-mono)' }}>{bpm} BPM</span>
         </div>
 
         {/* Oxygenation Legend */}
-        <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', flexDirection: 'column', gap: '6px', backgroundColor: 'rgba(15, 23, 42, 0.85)', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', fontSize: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
-            <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: '#DC2626' }} /> Oxygenated (Red)
+        <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', flexDirection: 'column', gap: '6px', backgroundColor: 'var(--slate-900)', padding: '8px 12px', borderRadius: 'var(--r-md)', border: '1px solid var(--dark-paper-border)', fontSize: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--on-desk)' }}>
+            <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: 'var(--red-600)' }} /> Oxygenated (Red)
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E2E8F0' }}>
-            <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: '#2563EB' }} /> Deoxygenated (Blue)
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--on-desk)' }}>
+            <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: 'var(--physics)' }} /> Deoxygenated (Blue)
           </div>
         </div>
 
-        <div style={{ position: 'absolute', bottom: '12px', right: '12px', backgroundColor: 'rgba(15, 23, 42, 0.8)', padding: '4px 10px', borderRadius: '6px', fontSize: '0.72rem', color: '#CBD5E1' }}>
+        <div style={{ position: 'absolute', bottom: '12px', right: '12px', backgroundColor: 'var(--slate-900)', border: '1px solid var(--dark-paper-border)', padding: '4px 10px', borderRadius: 'var(--r-sm)', fontSize: '0.72rem', color: 'var(--on-desk)' }}>
           Drag to rotate heart
         </div>
       </div>
 
       {/* Heartbeat Speed Slider */}
-      <div style={{ backgroundColor: '#FFFFFF', padding: '14px 16px', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: '700', marginBottom: '6px' }}>
+      <PaperCard flat style={{ padding: 'var(--sp-3)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>
           <span>Cardiac Heartbeat Rate (BPM)</span>
-          <span style={{ color: '#DC2626' }}>{bpm} Beats / min</span>
+          <Tag tone="red">{bpm} Beats / min</Tag>
         </div>
         <input
           type="range"
@@ -218,44 +219,49 @@ export default function HeartCirculationSimulation() {
           max={150}
           value={bpm}
           onChange={(e) => setBpm(Number(e.target.value))}
-          style={{ width: '100%', accentColor: '#DC2626' }}
+          aria-label="Cardiac Heartbeat Rate in BPM"
+          style={{ width: '100%', accentColor: 'var(--red-600)' }}
         />
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#94A3B8', marginTop: '2px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--ink-soft)', marginTop: '2px' }}>
           <span>Resting (50)</span>
           <span>Normal (72)</span>
           <span>Exercising (130+)</span>
         </div>
-      </div>
+      </PaperCard>
 
       {/* Step-by-Step Blood Circulation Walkthrough */}
-      <div style={{ backgroundColor: '#F8FAFC', padding: '16px', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', fontWeight: '700', color: step.type === 'ox' ? '#DC2626' : '#2563EB' }}>
-            <Heart size={16} /> DOUBLE CIRCULATION WALKTHROUGH
-          </div>
+      <PaperCard flat style={{ backgroundColor: 'var(--paper-warm)', padding: 'var(--sp-4)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+          <Tag tone={step.type === 'ox' ? 'red' : 'physics'}>
+            <Heart size={14} /> DOUBLE CIRCULATION WALKTHROUGH
+          </Tag>
           <div style={{ display: 'flex', gap: '6px' }}>
-            <button
+            <Button
               type="button"
+              size="sm"
+              variant="secondary"
               disabled={currentStepIdx === 0}
-              onClick={() => setCurrentStepIdx(prev => prev - 1)}
-              style={{ padding: '4px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', backgroundColor: '#FFFFFF', cursor: currentStepIdx === 0 ? 'not-allowed' : 'pointer' }}
+              onClick={() => setCurrentStepIdx((prev) => prev - 1)}
+              aria-label="Previous circulation step"
             >
               <ChevronLeft size={16} />
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              size="sm"
+              variant="secondary"
               disabled={currentStepIdx === BLOOD_FLOW_STEPS.length - 1}
-              onClick={() => setCurrentStepIdx(prev => prev + 1)}
-              style={{ padding: '4px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', backgroundColor: '#FFFFFF', cursor: currentStepIdx === BLOOD_FLOW_STEPS.length - 1 ? 'not-allowed' : 'pointer' }}
+              onClick={() => setCurrentStepIdx((prev) => prev + 1)}
+              aria-label="Next circulation step"
             >
               <ChevronRight size={16} />
-            </button>
+            </Button>
           </div>
         </div>
 
-        <h3 style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: '800', color: '#1E293B' }}>{step.title}</h3>
-        <p style={{ margin: 0, fontSize: '0.85rem', color: '#475569', lineHeight: 1.5 }}>{step.text}</p>
-      </div>
+        <h3 style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 800, color: 'var(--ink)' }}>{step.title}</h3>
+        <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--ink-muted)', lineHeight: 1.5 }}>{step.text}</p>
+      </PaperCard>
     </div>
   );
 }

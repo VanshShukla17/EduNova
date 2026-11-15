@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Layers, Search, RotateCcw, Info, CheckCircle2 } from 'lucide-react';
+import { Button, Field, PaperCard, Tag } from '../../components/ui';
+import { resolveCssVar } from '../../components/ui/subjectUtils';
 
 /**
  * Skeleton & Muscles Simulation (P2-8.2)
@@ -64,11 +65,21 @@ export default function SkeletonMusclesSimulation() {
     const handX = elbowX + forearmLen * Math.sin(rad);
     const handY = elbowY - forearmLen * Math.cos(rad);
 
+    const cBone = resolveCssVar('--paper-edge');
+    const cBoneOutline = resolveCssVar('--ink-soft');
+    const cJoint = resolveCssVar('--paper-aged');
+    const cMuted = resolveCssVar('--ink-muted');
+    const cBicepsActive = resolveCssVar('--red-600');
+    const cBicepsRest = resolveCssVar('--red-border');
+    const cTricepsActive = resolveCssVar('--physics');
+    const cTricepsRest = resolveCssVar('--physics-soft');
+    const cInk = resolveCssVar('--ink');
+
     // 1. Draw Skeleton Layer (Bones)
     if (layer === 'skeleton' || layer === 'both') {
       ctx.lineWidth = 14;
       ctx.lineCap = 'round';
-      ctx.strokeStyle = '#E2E8F0';
+      ctx.strokeStyle = cBone;
 
       // Humerus
       ctx.beginPath();
@@ -84,17 +95,17 @@ export default function SkeletonMusclesSimulation() {
 
       // Bone highlights / outlines
       ctx.lineWidth = 2;
-      ctx.strokeStyle = '#94A3B8';
+      ctx.strokeStyle = cBoneOutline;
       ctx.strokeRect(shoulderX - 8, shoulderY - 8, 16, 16); // Shoulder joint
 
       // Elbow Hinge Joint (condyle)
       ctx.beginPath();
       ctx.arc(elbowX, elbowY, 10, 0, Math.PI * 2);
-      ctx.fillStyle = '#CBD5E1';
+      ctx.fillStyle = cJoint;
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = '#475569';
+      ctx.fillStyle = cMuted;
       ctx.font = 'bold 11px sans-serif';
       ctx.fillText('Humerus (Upper arm)', shoulderX - 110, (shoulderY + elbowY) / 2);
       ctx.fillText('Elbow Hinge Joint', elbowX + 16, elbowY + 4);
@@ -107,16 +118,12 @@ export default function SkeletonMusclesSimulation() {
       const bicepsBellyWidth = 14 + (180 - elbowAngle) * 0.12; // bulges during flexion
       const tricepsBellyWidth = 12 + (elbowAngle) * 0.08; // stretches during extension
 
-      // Biceps Brachii (Anterior / Front)
-      const bMidX = (shoulderX + handX) / 2 - 15;
-      const bMidY = (shoulderY + handY) / 2 - 10;
-
       ctx.beginPath();
       ctx.moveTo(shoulderX - 4, shoulderY + 15);
       ctx.quadraticCurveTo(shoulderX + 25 + bicepsBellyWidth, (shoulderY + elbowY) / 2, elbowX + 15, elbowY - 10);
       ctx.lineWidth = bicepsBellyWidth;
       ctx.lineCap = 'round';
-      ctx.strokeStyle = isFlexed ? '#EF4444' : '#F87171';
+      ctx.strokeStyle = isFlexed ? cBicepsActive : cBicepsRest;
       ctx.stroke();
 
       // Triceps Brachii (Posterior / Back)
@@ -124,19 +131,19 @@ export default function SkeletonMusclesSimulation() {
       ctx.moveTo(shoulderX - 12, shoulderY + 20);
       ctx.quadraticCurveTo(shoulderX - 25 - tricepsBellyWidth, (shoulderY + elbowY) / 2, elbowX - 8, elbowY + 8);
       ctx.lineWidth = tricepsBellyWidth;
-      ctx.strokeStyle = !isFlexed ? '#3B82F6' : '#93C5FD';
+      ctx.strokeStyle = !isFlexed ? cTricepsActive : cTricepsRest;
       ctx.stroke();
 
       // Muscle Status Callouts
       ctx.font = 'bold 12px sans-serif';
-      ctx.fillStyle = '#DC2626';
+      ctx.fillStyle = cBicepsActive;
       ctx.fillText(
         `Biceps: ${isFlexed ? 'CONTRACTED (Shortened & Bulging)' : 'RELAXED (Stretched)'}`,
         shoulderX + 50,
         shoulderY + 50
       );
 
-      ctx.fillStyle = '#2563EB';
+      ctx.fillStyle = cTricepsActive;
       ctx.fillText(
         `Triceps: ${!isFlexed ? 'CONTRACTED (Pulling Arm Straight)' : 'RELAXED (Elongated)'}`,
         shoulderX - 180,
@@ -145,56 +152,47 @@ export default function SkeletonMusclesSimulation() {
     }
 
     // Angle indicator
-    ctx.fillStyle = '#1E293B';
+    ctx.fillStyle = cInk;
     ctx.font = 'bold 12px sans-serif';
     ctx.fillText(`Joint Angle: ${elbowAngle}° (${elbowAngle < 90 ? 'Flexion' : 'Extension'})`, 20, 25);
   }, [layer, elbowAngle]);
 
   return (
-    <div style={{ backgroundColor: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+    <PaperCard flat style={{ padding: 'var(--sp-4)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
       {/* Layer Toggles & Search */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-        <div style={{ display: 'flex', backgroundColor: '#F1F5F9', borderRadius: '8px', padding: '3px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
           {[
             { id: 'both', label: 'Composite (Both)' },
             { id: 'muscles', label: 'Muscles Only' },
             { id: 'skeleton', label: 'Skeleton Only' }
-          ].map(t => (
-            <button
+          ].map((t) => (
+            <Button
               key={t.id}
               type="button"
+              size="sm"
+              variant={layer === t.id ? 'primary' : 'secondary'}
               onClick={() => setLayer(t.id)}
-              style={{
-                padding: '6px 12px',
-                fontSize: '0.78rem',
-                fontWeight: '700',
-                borderRadius: '6px',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: layer === t.id ? '#4F46E5' : 'transparent',
-                color: layer === t.id ? '#FFFFFF' : '#64748B'
-              }}
             >
               {t.label}
-            </button>
+            </Button>
           ))}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#F8FAFC', padding: '4px 10px', borderRadius: '8px', border: '1px solid #CBD5E1' }}>
-          <Search size={14} color="#64748B" />
-          <input
+        <div style={{ minWidth: '200px', flex: '0 1 240px' }}>
+          <Field
             type="text"
+            aria-label="Search bone or muscle"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search bone or muscle..."
-            style={{ border: 'none', outline: 'none', backgroundColor: 'transparent', fontSize: '0.78rem', width: '150px' }}
           />
         </div>
       </div>
 
       {/* Main Viewport & Anatomical List */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 260px', gap: '14px' }}>
-        <div style={{ backgroundColor: '#F8FAFC', borderRadius: '10px', border: '1px solid #E2E8F0', height: '300px', overflow: 'hidden' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 'var(--sp-3)' }}>
+        <div style={{ backgroundColor: 'var(--paper-warm)', borderRadius: 'var(--r-md)', border: '1px solid var(--paper-edge)', height: '300px', overflow: 'hidden' }}>
           <canvas
             ref={canvasRef}
             width={480}
@@ -205,40 +203,37 @@ export default function SkeletonMusclesSimulation() {
 
         {/* 13 Landmark Explorer List */}
         <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '6px', paddingRight: '4px' }}>
-          <div style={{ fontSize: '0.72rem', fontWeight: '800', color: '#64748B', textTransform: 'uppercase' }}>
+          <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--ink-soft)', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>
             CBSE Anatomy Landmarks ({filteredParts.length})
           </div>
-          {filteredParts.map(part => (
+          {filteredParts.map((part) => (
             <button
               key={part.id}
               type="button"
               onClick={() => setSelectedPart(part)}
+              className={`option-card${selectedPart?.id === part.id ? ' option-card--selected' : ''}`}
               style={{
-                textAlign: 'left',
-                padding: '8px 10px',
-                borderRadius: '8px',
-                border: selectedPart?.id === part.id ? '1px solid #4F46E5' : '1px solid #E2E8F0',
-                backgroundColor: selectedPart?.id === part.id ? '#EEF2FF' : '#FFFFFF',
-                cursor: 'pointer'
+                flexDirection: 'column',
+                alignItems: 'stretch',
+                gap: '4px',
+                padding: 'var(--sp-2) var(--sp-3)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#1E293B' }}>{part.name}</span>
-                <span style={{ fontSize: '0.62rem', fontWeight: '700', padding: '1px 5px', borderRadius: '4px', backgroundColor: part.type === 'muscle' ? '#FEE2E2' : '#F1F5F9', color: part.type === 'muscle' ? '#991B1B' : '#475569' }}>
-                  {part.type}
-                </span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--ink)' }}>{part.name}</span>
+                <Tag tone={part.type === 'muscle' ? 'red' : 'neutral'}>{part.type}</Tag>
               </div>
-              <div style={{ fontSize: '0.68rem', color: '#64748B', marginTop: '2px' }}>{part.role}</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--ink-soft)' }}>{part.role}</div>
             </button>
           ))}
         </div>
       </div>
 
       {/* Elbow Joint Angle Slider */}
-      <div style={{ padding: '12px 16px', backgroundColor: '#F8FAFC', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', fontWeight: '700', marginBottom: '6px' }}>
+      <PaperCard flat style={{ padding: 'var(--sp-3)', backgroundColor: 'var(--paper-warm)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>
           <span>Elbow Joint Movement (Flexion vs Extension):</span>
-          <span style={{ color: '#4F46E5' }}>{elbowAngle}° ({elbowAngle < 90 ? 'Flexion (Arm bent)' : 'Extension (Arm straight)'})</span>
+          <Tag tone="maths">{elbowAngle}° ({elbowAngle < 90 ? 'Flexion (Arm bent)' : 'Extension (Arm straight)'})</Tag>
         </div>
         <input
           type="range"
@@ -246,15 +241,16 @@ export default function SkeletonMusclesSimulation() {
           max="160"
           step="2"
           value={elbowAngle}
-          onChange={(e) => setElbowAngle(parseInt(e.target.value))}
-          style={{ width: '100%', cursor: 'pointer' }}
+          onChange={(e) => setElbowAngle(parseInt(e.target.value, 10))}
+          aria-label="Elbow Joint Movement angle in degrees"
+          style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--maths)' }}
         />
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: '#64748B', marginTop: '4px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--ink-soft)', marginTop: '4px' }}>
           <span>← Full Flexion (Biceps shorten)</span>
           <span>Full Extension (Triceps shorten) →</span>
         </div>
-      </div>
-    </div>
+      </PaperCard>
+    </PaperCard>
   );
 }
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
+import { resolveCssVar } from './ui/subjectUtils';
 
 /**
  * PendulumSimulation
@@ -349,14 +350,23 @@ export default function PendulumSimulation({
       const bobY = pivotY + visualPxLength * Math.cos(theta);
       const bobRadius = 14 * Math.pow(mass / 0.2, 1 / 3);
 
+      const standColor = resolveCssVar('--slate-700') || 'SlateGray';
+      const lineMuted = resolveCssVar('--ink-muted') || 'Gray';
+      const stringColor = resolveCssVar('--paper-edge') || 'LightGray';
+      const bobLight = resolveCssVar('--physics-soft') || 'LightSkyBlue';
+      const bobMain = resolveCssVar('--physics') || 'DodgerBlue';
+      const bobDark = resolveCssVar('--physics-ink') || 'MidnightBlue';
+      const pinColor = resolveCssVar('--amber-400') || 'Gold';
+      const shadowTint = resolveCssVar('--desk-950') || 'Black';
+
       // 1. Draw Stand & Pivot
-      ctx.fillStyle = '#334155';
+      ctx.fillStyle = standColor;
       ctx.fillRect(pivotX - 60, pivotY - 14, 120, 14);
 
       // 2. Draw Reference Plumb Line
       ctx.beginPath();
       ctx.setLineDash([4, 4]);
-      ctx.strokeStyle = '#475569';
+      ctx.strokeStyle = lineMuted;
       ctx.moveTo(pivotX, pivotY);
       ctx.lineTo(pivotX, pivotY + 230);
       ctx.stroke();
@@ -365,21 +375,21 @@ export default function PendulumSimulation({
       // 3. Draw String
       ctx.beginPath();
       ctx.lineWidth = 2.5;
-      ctx.strokeStyle = '#E2E8F0';
+      ctx.strokeStyle = stringColor;
       ctx.moveTo(pivotX, pivotY);
       ctx.lineTo(bobX, bobY);
       ctx.stroke();
 
       // 4. Draw Bob with Gradient Specular Shading
       const grad = ctx.createRadialGradient(bobX - 4, bobY - 4, 2, bobX, bobY, bobRadius);
-      grad.addColorStop(0, '#BAE6FD');
-      grad.addColorStop(0.4, '#38BDF8');
-      grad.addColorStop(1, '#0284C7');
+      grad.addColorStop(0, bobLight);
+      grad.addColorStop(0.4, bobMain);
+      grad.addColorStop(1, bobDark);
 
       ctx.beginPath();
       ctx.arc(bobX, bobY, bobRadius, 0, Math.PI * 2);
       ctx.fillStyle = grad;
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+      ctx.shadowColor = shadowTint;
       ctx.shadowBlur = 8;
       ctx.shadowOffsetY = 4;
       ctx.fill();
@@ -388,7 +398,7 @@ export default function PendulumSimulation({
       // Pivot Pin Circle
       ctx.beginPath();
       ctx.arc(pivotX, pivotY, 5, 0, Math.PI * 2);
-      ctx.fillStyle = '#F59E0B';
+      ctx.fillStyle = pinColor;
       ctx.fill();
 
       animId = requestAnimationFrame(render2D);
@@ -436,13 +446,13 @@ export default function PendulumSimulation({
         position: 'relative',
         width: '100%',
         height: '320px',
-        backgroundColor: '#0F172A',
-        borderRadius: 'var(--radius-md, 8px)',
+        background: 'var(--slate-950)',
+        border: '1px solid var(--dark-paper-border)',
+        borderRadius: 'var(--r-md)',
         overflow: 'hidden',
-        boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.5)',
         cursor: isDragging ? 'grabbing' : 'grab',
         touchAction: 'none',
-        userSelect: 'none'
+        userSelect: 'none',
       }}
       onMouseDown={handlePointerDown}
       onMouseMove={handlePointerMove}
@@ -471,16 +481,16 @@ export default function PendulumSimulation({
           top: '10px',
           right: '10px',
           padding: '4px 8px',
-          borderRadius: '4px',
-          fontSize: '0.7rem',
-          fontWeight: '600',
-          backgroundColor: hasWebGL ? 'rgba(30, 41, 59, 0.85)' : 'rgba(234, 88, 12, 0.9)',
-          color: '#F8FAFC',
-          backdropFilter: 'blur(4px)',
-          pointerEvents: 'none'
+          borderRadius: 'var(--r-sm)',
+          fontSize: '0.72rem',
+          fontWeight: 600,
+          background: hasWebGL ? 'var(--slate-800)' : 'var(--chemistry)',
+          border: '1px solid var(--dark-paper-border)',
+          color: 'var(--white)',
+          pointerEvents: 'none',
         }}
       >
-        {hasWebGL ? '⚡ Three.js 3D WebGL' : '⚠️ 2D Canvas Fallback'}
+        {hasWebGL ? 'Three.js 3D WebGL' : '2D Canvas Fallback'}
       </div>
 
       {/* Touch Interaction Hint */}
@@ -490,14 +500,15 @@ export default function PendulumSimulation({
           bottom: '10px',
           left: '12px',
           fontSize: '0.72rem',
-          color: '#94A3B8',
+          color: 'var(--on-desk-muted)',
           pointerEvents: 'none',
-          backgroundColor: 'rgba(15, 23, 42, 0.75)',
+          background: 'var(--slate-900)',
+          border: '1px solid var(--dark-paper-border)',
           padding: '3px 8px',
-          borderRadius: '4px'
+          borderRadius: 'var(--r-sm)',
         }}
       >
-        👆 Drag bob to release • Small angle SHM
+        Drag bob to release • Small angle SHM
       </div>
     </div>
   );

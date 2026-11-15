@@ -1,0 +1,148 @@
+/* Section 2: Global Desk Background, Ruler Strips, and Chalk Doodles */
+
+.desk {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-desk);
+  pointer-events: none;
+  overflow: hidden;
+  background-color: var(--desk-800);
+  background-image:
+    radial-gradient(120% 90% at 50% 15%, var(--desk-vignette-top), transparent 60%),
+    linear-gradient(to bottom, transparent 55%, var(--desk-vignette-bottom)),
+    linear-gradient(var(--grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(var(--grid-minor) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px);
+  background-size: auto, auto, 240px 240px, 240px 240px, 48px 48px, 48px 48px;
+}
+
+@media (max-width: 640px) {
+  .desk {
+    background-size: auto, auto, 160px 160px, 160px 160px, 32px 32px, 32px 32px;
+  }
+}
+
+/* Ruler strips (28px thick, flush to viewport edges) */
+.ruler {
+  position: fixed;
+  pointer-events: none;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  color: var(--ruler-ink);
+  user-select: none;
+}
+
+.ruler--left {
+  top: 0;
+  left: 0;
+  bottom: 28px;
+  width: 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ruler--bottom {
+  left: 28px;
+  right: 0;
+  bottom: 0;
+  height: 28px;
+  display: flex;
+  flex-direction: row;
+}
+
+.ruler__cell--v {
+  height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 3px;
+  padding-top: 2px;
+}
+
+.ruler__cell--h {
+  width: 48px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 2px;
+  padding-left: 2px;
+}
+
+.ruler__tick--v {
+  width: 6px;
+  height: 1px;
+  background: var(--ruler-ink);
+  margin-top: 5px;
+}
+
+.ruler__tick--h {
+  width: 1px;
+  height: 6px;
+  background: var(--ruler-ink);
+  margin-left: 5px;
+}
+
+.ruler__label {
+  font-size: 10px;
+  line-height: 1;
+  color: var(--ruler-ink);
+}
+
+.ruler__protractor {
+  position: fixed;
+  left: 4px;
+  bottom: 4px;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  color: var(--ruler-ink);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .ruler__cell--v {
+    height: 32px;
+  }
+
+  .ruler__cell--h {
+    width: 32px;
+  }
+
+  .ruler__label {
+    display: none;
+  }
+
+  .ruler__protractor {
+    display: none;
+  }
+}
+
+/* Chalk doodles: 1280px+ outer margins only */
+.doodles {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  .doodles {
+    display: block;
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+  }
+}
+
+.doodle {
+  position: absolute;
+  color: var(--chalk);
+  font-family: var(--font-hand);
+  font-size: 1.25rem;
+  line-height: 1.1;
+  user-select: none;
+}

@@ -2,19 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
-  Users,
-  Shield,
-  UserCheck,
   CheckCircle2,
   AlertTriangle,
   X
 } from 'lucide-react';
 import { getAdminUsers, updateUserRole } from '../../services/api';
+import { Button, EmptyState, Modal, PaperCard, SectionHeader, Skeleton, Tag } from '../../components/ui';
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [alertMsg, setAlertMsg] = useState(null);
+  const [roleTarget, setRoleTarget] = useState(null);
+  const [updatingRole, setUpdatingRole] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -32,52 +32,46 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleToggleRole = async (user) => {
-    const newRole = user.role === 'admin' ? 'student' : 'admin';
-    if (!window.confirm(`Change ${user.name}'s role to ${newRole.toUpperCase()}?`)) return;
-
+  const handleConfirmToggleRole = async () => {
+    if (!roleTarget) return;
+    const { user, newRole } = roleTarget;
     try {
+      setUpdatingRole(true);
       await updateUserRole(user._id, newRole);
       setAlertMsg({ type: 'success', text: `Updated ${user.name}'s role to ${newRole}.` });
+      setRoleTarget(null);
       loadUsers();
     } catch (err) {
       setAlertMsg({ type: 'error', text: 'Failed to update user role: ' + err.message });
+      setRoleTarget(null);
+    } finally {
+      setUpdatingRole(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', paddingBottom: '32px' }}>
+    <div style={{ maxWidth: '960px', margin: '0 auto', paddingBottom: 'var(--sp-8)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
       {/* Top Navigation */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-        <Link
-          to="/admin"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            color: 'var(--color-primary)',
-            textDecoration: 'none',
-            fontSize: '0.9rem',
-            fontWeight: '600'
-          }}
-        >
+      <div>
+        <Button as={Link} to="/admin" variant="ghost" size="sm">
           <ArrowLeft size={16} /> Back to Admin Dashboard
-        </Link>
+        </Button>
       </div>
 
       {/* Banner Alert */}
       {alertMsg && (
-        <div
+        <PaperCard
+          flat
+          role="status"
           style={{
-            padding: '12px 16px',
-            borderRadius: 'var(--radius-sm, 6px)',
-            marginBottom: '14px',
-            backgroundColor: alertMsg.type === 'success' ? '#DCFCE7' : '#FEF2F2',
-            color: alertMsg.type === 'success' ? '#15803D' : '#991B1B',
-            border: `1px solid ${alertMsg.type === 'success' ? '#86EFAC' : '#FECACA'}`,
+            padding: 'var(--sp-3) var(--sp-4)',
+            backgroundColor: alertMsg.type === 'success' ? 'var(--emerald-soft)' : 'var(--red-soft)',
+            color: alertMsg.type === 'success' ? 'var(--emerald-800)' : 'var(--red-ink)',
+            borderColor: alertMsg.type === 'success' ? 'var(--emerald-600)' : 'var(--red-border)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            gap: 'var(--sp-2)',
             fontSize: '0.88rem'
           }}
         >
@@ -85,101 +79,114 @@ export default function AdminUsersPage() {
             {alertMsg.type === 'success' ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
             <span>{alertMsg.text}</span>
           </div>
-          <button
-            onClick={() => setAlertMsg(null)}
-            style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}
-          >
+          <Button type="button" variant="ghost" size="sm" onClick={() => setAlertMsg(null)} aria-label="Dismiss alert">
             <X size={16} />
-          </button>
-        </div>
+          </Button>
+        </PaperCard>
       )}
 
       {/* Header */}
-      <div className="card" style={{ padding: '16px', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', backgroundColor: '#F0FDF4', color: '#16A34A', padding: '2px 8px', borderRadius: '4px' }}>
-            User Directory
-          </span>
-          <span style={{ fontSize: '0.75rem', color: '#64748B' }}>
+      <PaperCard flat style={{ padding: 'var(--sp-4)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)', flexWrap: 'wrap', marginBottom: 'var(--sp-2)' }}>
+          <Tag tone="emerald">User Directory</Tag>
+          <span style={{ fontSize: '0.78rem', color: 'var(--ink-soft)', fontFamily: 'var(--font-mono)' }}>
             {users.length} Registered Accounts
           </span>
         </div>
-        <h1 style={{ fontSize: '1.25rem', fontWeight: '800', margin: '2px 0 0 0', color: '#0F172A' }}>
-          Registered Students & Administrators
-        </h1>
-      </div>
+        <SectionHeader title="Registered Students & Administrators" />
+      </PaperCard>
 
       {/* Users Table */}
-      <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
+      <PaperCard flat style={{ padding: 0, overflow: 'hidden' }}>
         {loading ? (
-          <div style={{ padding: '24px', textAlign: 'center', color: '#64748B' }}>
-            Loading users...
+          <div style={{ padding: 'var(--sp-5)' }}>
+            <Skeleton lines={5} />
+          </div>
+        ) : users.length === 0 ? (
+          <div style={{ padding: 'var(--sp-5)' }}>
+            <EmptyState
+              title="No registered accounts"
+              description="Student and administrator accounts will appear here once registered."
+            />
           </div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: '0.75rem', color: '#64748B', textTransform: 'uppercase' }}>
-                <th style={{ padding: '12px 16px' }}>Name</th>
-                <th style={{ padding: '12px 16px' }}>Email / Identifier</th>
-                <th style={{ padding: '12px 16px' }}>Role</th>
-                <th style={{ padding: '12px 16px' }}>Class / Board</th>
-                <th style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => {
-                const isAdmin = u.role === 'admin';
-                return (
-                  <tr key={u._id} style={{ borderBottom: '1px solid #F1F5F9', fontSize: '0.88rem' }}>
-                    <td style={{ padding: '12px 16px', fontWeight: '600', color: '#0F172A' }}>
-                      {u.name}
-                    </td>
-                    <td style={{ padding: '12px 16px', color: '#475569' }}>
-                      {u.email || u.phone || '-'}
-                    </td>
-                    <td style={{ padding: '12px 16px' }}>
-                      <span
-                        style={{
-                          fontSize: '0.75rem',
-                          fontWeight: '700',
-                          padding: '3px 8px',
-                          borderRadius: '4px',
-                          backgroundColor: isAdmin ? '#FEF2F2' : '#EFF6FF',
-                          color: isAdmin ? '#DC2626' : '#2563EB',
-                          textTransform: 'uppercase'
-                        }}
-                      >
-                        {u.role}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px 16px', color: '#64748B' }}>
-                      Class {u.classLevel || 10} • {u.board || 'CBSE'}
-                    </td>
-                    <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                      <button
-                        onClick={() => handleToggleRole(u)}
-                        style={{
-                          padding: '4px 10px',
-                          borderRadius: '4px',
-                          fontSize: '0.78rem',
-                          fontWeight: '600',
-                          border: '1px solid #CBD5E1',
-                          backgroundColor: '#FFFFFF',
-                          color: isAdmin ? '#2563EB' : '#DC2626',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        {isAdmin ? 'Make Student' : 'Make Admin'}
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="paper-table-wrap">
+            <table className="paper-table paper-table--stack">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email / Identifier</th>
+                  <th>Role</th>
+                  <th>Class / Board</th>
+                  <th style={{ textAlign: 'right' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((u) => {
+                  const isAdmin = u.role === 'admin';
+                  const nextRole = isAdmin ? 'student' : 'admin';
+                  return (
+                    <tr key={u._id}>
+                      <td data-label="Name" style={{ fontWeight: 700, color: 'var(--ink)' }}>
+                        {u.name}
+                      </td>
+                      <td data-label="Email / Identifier" style={{ color: 'var(--ink-muted)' }}>
+                        {u.email || u.phone || '-'}
+                      </td>
+                      <td data-label="Role">
+                        <Tag tone={isAdmin ? 'red' : 'physics'}>
+                          {u.role}
+                        </Tag>
+                      </td>
+                      <td data-label="Class / Board" style={{ color: 'var(--ink-soft)' }}>
+                        Class {u.classLevel || 10} • {u.board || 'CBSE'}
+                      </td>
+                      <td data-label="Actions" style={{ textAlign: 'right' }}>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant={isAdmin ? 'secondary' : 'danger'}
+                          onClick={() => setRoleTarget({ user: u, newRole: nextRole })}
+                        >
+                          {isAdmin ? 'Make Student' : 'Make Admin'}
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
-      </div>
+      </PaperCard>
+
+      <Modal
+        open={Boolean(roleTarget)}
+        onClose={() => !updatingRole && setRoleTarget(null)}
+        title="Confirm Role Change"
+        tapeTone="yellow"
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--sp-2)' }}>
+            <Button type="button" variant="secondary" size="sm" onClick={() => setRoleTarget(null)} disabled={updatingRole}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant={roleTarget?.newRole === 'admin' ? 'danger' : 'primary'}
+              size="sm"
+              onClick={handleConfirmToggleRole}
+              disabled={updatingRole}
+            >
+              {updatingRole ? 'Updating...' : `Confirm ${roleTarget?.newRole?.toUpperCase()}`}
+            </Button>
+          </div>
+        }
+      >
+        <p style={{ margin: 0, fontSize: '0.92rem', color: 'var(--ink-muted)', lineHeight: 1.55 }}>
+          Change <strong>{roleTarget?.user?.name}</strong>&apos;s role to{' '}
+          <strong>{roleTarget?.newRole?.toUpperCase()}</strong>?
+        </p>
+      </Modal>
     </div>
   );
 }
-

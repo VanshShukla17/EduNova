@@ -4,16 +4,23 @@ import {
   Info,
   X,
   Sparkles,
-  Loader2,
   CheckCircle2,
   HelpCircle,
   RotateCcw,
   ZoomIn,
   ZoomOut,
-  Maximize2
 } from 'lucide-react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import {
+  PaperCard,
+  Pin,
+  Tag,
+  StickyNote,
+  Button,
+  Skeleton,
+  EmptyState,
+} from './ui';
 
 export default function InteractiveDiagram({ diagramData, diagramId, subjectCode }) {
   const { user } = useAuth();
@@ -24,13 +31,10 @@ export default function InteractiveDiagram({ diagramData, diagramId, subjectCode
   const [loading, setLoading] = useState(!diagramData && !!(diagramId || subjectCode));
   const [error, setError] = useState('');
 
-  // Mode: 'explore' | 'quiz' (P2-7.1, P2-7.6)
   const [mode, setMode] = useState('explore');
   const [quizScore, setQuizScore] = useState(0);
-  const [quizAnswered, setQuizAnswered] = useState({}); // { [elemId]: guessedCorrectly }
+  const [quizAnswered, setQuizAnswered] = useState({});
   const [activeQuizQuestion, setActiveQuizQuestion] = useState(null);
-
-  // Zoom scale
   const [zoom, setZoom] = useState(1);
 
   const isHindi = user?.language === 'hi';
@@ -63,11 +67,9 @@ export default function InteractiveDiagram({ diagramData, diagramId, subjectCode
 
   const handleElementTap = (element) => {
     if (mode === 'quiz') {
-      // In quiz mode, prompt student to identify the part
       setActiveQuizQuestion(element);
       return;
     }
-
     if (selectedElement && selectedElement.id === element.id) {
       setSelectedElement(null);
     } else {
@@ -77,12 +79,12 @@ export default function InteractiveDiagram({ diagramData, diagramId, subjectCode
 
   const handleQuizAnswer = (targetElement, guessedLabel) => {
     const isCorrect = targetElement.label === guessedLabel;
-    setQuizAnswered(prev => ({
+    setQuizAnswered((prev) => ({
       ...prev,
-      [targetElement.id]: isCorrect
+      [targetElement.id]: isCorrect,
     }));
     if (isCorrect) {
-      setQuizScore(s => s + 1);
+      setQuizScore((s) => s + 1);
     }
   };
 
@@ -94,182 +96,163 @@ export default function InteractiveDiagram({ diagramData, diagramId, subjectCode
 
   const handleAskSaarthi = (element) => {
     const prompt = `I am studying the "${diagram.title}" diagram in ${diagram.subjectCode || 'Science'}. Specifically, can you explain the function of the "${element.label}" and how it interacts with the rest of the system?`;
-    navigate('/mentor', { state: { prefill: prompt, subject: diagram.subjectCode || 'Science' } });
+    navigate('/mentor', {
+      state: { prefill: prompt, subject: diagram.subjectCode || 'Science' },
+    });
   };
 
-  if (loading) {
+  if (loading) return <Skeleton lines={4} />;
+
+  if (error || !diagram) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '30px', color: 'var(--color-primary)' }}>
-        <Loader2 className="animate-spin" size={24} />
-      </div>
+      <EmptyState
+        title="Diagram Not Available"
+        description={error || 'Could not load diagram elements.'}
+      />
     );
   }
 
-  if (error || !diagram) {
-    return null;
-  }
-
-  const title = isHindi && diagram.titleHindi ? diagram.titleHindi : diagram.title;
   const elements = diagram.elements || [];
 
   return (
-    <div
-      className="card"
-      style={{
-        margin: '16px 0',
-        padding: '16px',
-        border: '1px solid var(--color-border)',
-        borderRadius: 'var(--radius-md)',
-        backgroundColor: 'var(--color-surface)',
-        overflow: 'hidden'
-      }}
-    >
-      {/* Diagram Header & Mode Toggle */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ backgroundColor: 'var(--color-primary-light)', color: 'var(--color-primary)', padding: '6px', borderRadius: '8px' }}>
-            <Sparkles size={16} />
-          </div>
-          <div>
-            <h3 style={{ fontSize: '1rem', fontWeight: '700', margin: 0 }}>{title}</h3>
-            <span style={{ fontSize: '0.75rem', color: 'var(--color-muted)' }}>
-              {mode === 'quiz'
-                ? `Quiz Mode: Score ${quizScore} / ${elements.length}`
-                : (isHindi ? 'किसी भी भाग पर टैप करके सीखें' : 'Tap any labelled part to explore')}
-            </span>
-          </div>
+    <PaperCard flat style={{ padding: 'var(--sp-5)' }}>
+      <Pin color="blue" position="right" />
+
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 'var(--sp-3)',
+          marginBottom: 'var(--sp-4)',
+        }}
+      >
+        <div>
+          <h2 className="type-h2" style={{ color: 'var(--ink)' }}>
+            {isHindi && diagram.titleHindi ? diagram.titleHindi : diagram.title}
+          </h2>
+          {diagram.description ? (
+            <p className="type-small" style={{ color: 'var(--ink-muted)' }}>
+              {diagram.description}
+            </p>
+          ) : null}
         </div>
 
-        {/* Action Buttons: Zoom & Mode Toggle */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Zoom controls */}
-          <button
-            onClick={() => setZoom(z => Math.max(0.8, Number((z - 0.2).toFixed(1))))}
-            className="btn btn-secondary"
-            style={{ width: '28px', height: '28px', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-            title="Zoom Out"
-          >
-            <ZoomOut size={14} />
-          </button>
-          <button
-            onClick={() => setZoom(1)}
-            className="btn btn-secondary"
-            style={{ padding: '4px 8px', fontSize: '0.75rem', height: '28px' }}
-            title="Reset Zoom"
-          >
-            {Math.round(zoom * 100)}%
-          </button>
-          <button
-            onClick={() => setZoom(z => Math.min(2.0, Number((z + 0.2).toFixed(1))))}
-            className="btn btn-secondary"
-            style={{ width: '28px', height: '28px', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-            title="Zoom In"
-          >
-            <ZoomIn size={14} />
-          </button>
-
-          {/* Mode Switch (Explore vs Quiz) */}
-          <button
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-2)', alignItems: 'center' }}>
+          <Button
+            variant={mode === 'explore' ? 'primary' : 'note'}
+            size="sm"
             onClick={() => {
-              if (mode === 'explore') {
-                setMode('quiz');
-                handleResetQuiz();
-              } else {
-                setMode('explore');
-                setActiveQuizQuestion(null);
-              }
+              setMode('explore');
+              setActiveQuizQuestion(null);
             }}
-            className={`btn ${mode === 'quiz' ? 'btn-primary' : 'btn-secondary'}`}
-            style={{ width: 'auto', padding: '4px 10px', fontSize: '0.78rem' }}
           >
-            {mode === 'quiz' ? '✓ Quiz Mode' : '🎮 Test Knowledge (Quiz)'}
-          </button>
+            <Info size={14} strokeWidth={2} aria-hidden="true" />
+            Explore
+          </Button>
 
-          {selectedElement && mode === 'explore' && (
-            <button
-              onClick={() => setSelectedElement(null)}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--color-muted)',
-                padding: '4px',
-                display: 'flex',
-                alignItems: 'center'
-              }}
-            >
-              <X size={18} />
-            </button>
-          )}
+          <Button
+            variant={mode === 'quiz' ? 'primary' : 'note'}
+            size="sm"
+            onClick={() => {
+              setMode('quiz');
+              setSelectedElement(null);
+            }}
+          >
+            <HelpCircle size={14} strokeWidth={2} aria-hidden="true" />
+            Identify Quiz
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setZoom((z) => Math.max(0.7, Number((z - 0.15).toFixed(2))))}
+            aria-label="Zoom out"
+          >
+            <ZoomOut size={14} strokeWidth={2} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setZoom((z) => Math.min(1.6, Number((z + 0.15).toFixed(2))))}
+            aria-label="Zoom in"
+          >
+            <ZoomIn size={14} strokeWidth={2} />
+          </Button>
         </div>
       </div>
 
-      {/* SVG Canvas Area */}
+      {mode === 'quiz' ? (
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 'var(--sp-2)',
+            marginBottom: 'var(--sp-3)',
+          }}
+        >
+          <Tag variant="verified">
+            <CheckCircle2 size={13} strokeWidth={2} aria-hidden="true" />
+            Score: {quizScore} / {elements.length}
+          </Tag>
+          <Button variant="note" size="sm" onClick={handleResetQuiz}>
+            <RotateCcw size={13} strokeWidth={2} aria-hidden="true" />
+            Reset Quiz
+          </Button>
+        </div>
+      ) : null}
+
+      {/* Interactive SVG Canvas */}
       <div
         style={{
-          width: '100%',
-          backgroundColor: '#F8FAFC',
-          borderRadius: 'var(--radius-sm)',
-          border: '1px solid var(--color-border)',
-          overflow: 'auto',
+          overflowX: 'auto',
+          background: 'var(--paper-warm)',
+          border: '1px solid var(--paper-border-warm)',
+          borderRadius: 'var(--r-md)',
+          padding: 'var(--sp-4)',
           display: 'flex',
           justifyContent: 'center',
-          alignItems: 'center',
-          touchAction: 'manipulation',
-          position: 'relative'
         }}
       >
-        <div style={{ transform: `scale(${zoom})`, transformOrigin: 'center center', transition: 'transform 0.2s ease', width: '100%' }}>
+        <div style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}>
           <svg
             viewBox={diagram.svgViewBox || '0 0 600 400'}
-            style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '360px' }}
+            style={{ width: '100%', maxWidth: '580px', height: 'auto', display: 'block' }}
+            role="img"
+            aria-label={diagram.title}
           >
-            {/* Physics circuit guide wire if physics circuit */}
-            {diagram.title.toLowerCase().includes('circuit') && (
-              <path
-                d="M 100 190 L 100 60 L 500 60 L 500 190 M 500 190 L 500 330 L 100 330 L 100 190"
-                fill="none"
-                stroke="#334155"
-                strokeWidth="4"
-                strokeDasharray="8 4"
-              />
-            )}
-
-            {elements.map((elem, idx) => {
-              const isSelected = selectedElement && selectedElement.id === elem.id;
-              const isQuizTarget = activeQuizQuestion && activeQuizQuestion.id === elem.id;
-              const isAnswered = quizAnswered[elem.id] !== undefined;
-              const answeredCorrect = quizAnswered[elem.id] === true;
-
+            {elements.map((elem) => {
+              const isSelected =
+                (mode === 'explore' && selectedElement?.id === elem.id) ||
+                (mode === 'quiz' && activeQuizQuestion?.id === elem.id);
+              const answered = quizAnswered[elem.id];
               const attrs = elem.attributes || {};
 
+              let strokeColor = isSelected ? 'var(--physics)' : 'var(--ink-muted)';
+              let fillColor = isSelected ? 'var(--physics-soft)' : 'var(--paper-field)';
+              const strokeWidth = isSelected ? Number(attrs.strokeWidth || 2.5) + 2 : attrs.strokeWidth || 2.5;
+
+              if (mode === 'quiz' && answered !== undefined) {
+                strokeColor = answered ? 'var(--emerald-700)' : 'var(--red-600)';
+                fillColor = answered ? 'var(--emerald-soft)' : 'var(--red-soft)';
+              }
+
+              const displayText =
+                mode === 'quiz' && answered === undefined
+                  ? '?'
+                  : isHindi && elem.labelHindi
+                  ? elem.labelHindi
+                  : elem.label;
+
               const shapeProps = {
-                key: elem.id,
                 onClick: () => handleElementTap(elem),
-                onTouchStart: () => handleElementTap(elem),
-                style: {
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  filter: isSelected || isQuizTarget ? 'drop-shadow(0 0 8px rgba(37,99,235,0.6))' : 'none'
-                }
+                style: { cursor: 'pointer' },
               };
 
-              let strokeColor = isSelected ? '#2563EB' : (attrs.stroke || '#475569');
-              let fillColor = isSelected ? '#DBEAFE' : (attrs.fill || '#EFF6FF');
-              let strokeWidth = isSelected ? (Number(attrs.strokeWidth || 3) + 3) : (attrs.strokeWidth || 3);
-
-              if (mode === 'quiz' && isAnswered) {
-                strokeColor = answeredCorrect ? '#16A34A' : '#DC2626';
-                fillColor = answeredCorrect ? '#DCFCE7' : '#FEE2E2';
-              }
-
-              // Display label or Quiz Mask (Part 1, Part 2...)
-              let displayText = isHindi && elem.labelHindi ? elem.labelHindi : elem.label;
-              if (mode === 'quiz' && !isAnswered) {
-                displayText = `? Part ${idx + 1}`;
-              }
-
-              if (elem.shape === 'rect') {
+              if (elem.type === 'rect') {
                 return (
                   <g key={elem.id} {...shapeProps}>
                     <rect
@@ -286,33 +269,7 @@ export default function InteractiveDiagram({ diagramData, diagramId, subjectCode
                       x={Number(attrs.x || 0) + Number(attrs.width || 80) / 2}
                       y={Number(attrs.y || 0) + Number(attrs.height || 40) / 2 + 5}
                       textAnchor="middle"
-                      fill="#0F172A"
-                      fontSize="11"
-                      fontWeight="600"
-                      pointerEvents="none"
-                    >
-                      {displayText}
-                    </text>
-                  </g>
-                );
-              }
-
-              if (elem.shape === 'circle') {
-                return (
-                  <g key={elem.id} {...shapeProps}>
-                    <circle
-                      cx={attrs.cx || 50}
-                      cy={attrs.cy || 50}
-                      r={attrs.r || 30}
-                      fill={fillColor}
-                      stroke={strokeColor}
-                      strokeWidth={strokeWidth}
-                    />
-                    <text
-                      x={attrs.cx || 50}
-                      y={Number(attrs.cy || 50) + 4}
-                      textAnchor="middle"
-                      fill="#0F172A"
+                      fill="var(--ink)"
                       fontSize="11"
                       fontWeight="700"
                       pointerEvents="none"
@@ -323,116 +280,101 @@ export default function InteractiveDiagram({ diagramData, diagramId, subjectCode
                 );
               }
 
-              return null;
+              return (
+                <g key={elem.id} {...shapeProps}>
+                  <circle
+                    cx={attrs.cx || 50}
+                    cy={attrs.cy || 50}
+                    r={attrs.r || 30}
+                    fill={fillColor}
+                    stroke={strokeColor}
+                    strokeWidth={strokeWidth}
+                  />
+                  <text
+                    x={attrs.cx || 50}
+                    y={Number(attrs.cy || 50) + 4}
+                    textAnchor="middle"
+                    fill="var(--ink)"
+                    fontSize="11"
+                    fontWeight="700"
+                    pointerEvents="none"
+                  >
+                    {displayText}
+                  </text>
+                </g>
+              );
             })}
           </svg>
         </div>
       </div>
 
-      {/* Quiz Modal / Question Prompt (P2-7.6) */}
-      {mode === 'quiz' && activeQuizQuestion && (
-        <div
-          style={{
-            marginTop: '12px',
-            padding: '14px',
-            borderRadius: 'var(--radius-sm)',
-            backgroundColor: '#EFF6FF',
-            border: '2px solid #3B82F6'
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ fontWeight: '700', fontSize: '0.9rem', color: '#1E40AF' }}>
+      {/* Quiz Choice Prompt */}
+      {mode === 'quiz' && activeQuizQuestion ? (
+        <StickyNote tone="blue" body rotation="-0.3deg" style={{ maxWidth: '100%', marginTop: 'var(--sp-4)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--sp-2)' }}>
+            <span className="type-h3" style={{ fontSize: '1rem' }}>
               Identify This Highlighted Component:
             </span>
-            <button onClick={() => setActiveQuizQuestion(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+            <Button variant="ghost" size="sm" onClick={() => setActiveQuizQuestion(null)} aria-label="Close prompt">
               <X size={16} />
-            </button>
+            </Button>
           </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
-            {elements.map((optionElem) => {
-              const isAlreadyCorrect = quizAnswered[activeQuizQuestion.id] === true;
-              return (
-                <button
-                  key={optionElem.id}
-                  onClick={() => handleQuizAnswer(activeQuizQuestion, optionElem.label)}
-                  disabled={isAlreadyCorrect}
-                  className="btn btn-secondary"
-                  style={{
-                    padding: '8px',
-                    fontSize: '0.8rem',
-                    textAlign: 'center',
-                    backgroundColor: 'white'
-                  }}
-                >
-                  {optionElem.label}
-                </button>
-              );
-            })}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--sp-2)' }}>
+            {elements.map((optionElem) => (
+              <Button
+                key={optionElem.id}
+                variant="note"
+                size="sm"
+                disabled={quizAnswered[activeQuizQuestion.id] === true}
+                onClick={() => handleQuizAnswer(activeQuizQuestion, optionElem.label)}
+              >
+                {optionElem.label}
+              </Button>
+            ))}
           </div>
-
-          {quizAnswered[activeQuizQuestion.id] !== undefined && (
-            <div style={{ marginTop: '8px', fontWeight: '700', fontSize: '0.85rem', color: quizAnswered[activeQuizQuestion.id] ? '#15803D' : '#DC2626' }}>
-              {quizAnswered[activeQuizQuestion.id] ? '✓ Correct! Well done.' : `✗ Incorrect. This is the "${activeQuizQuestion.label}".`}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Explanation Drawer Panel (Explore Mode) */}
-      {mode === 'explore' && selectedElement ? (
-        <div
-          style={{
-            marginTop: '14px',
-            padding: '14px 16px',
-            backgroundColor: 'var(--color-primary-light)',
-            borderRadius: 'var(--radius-sm)',
-            borderLeft: '4px solid var(--color-primary)',
-            animation: 'fadeIn 0.2s ease-in-out'
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-            <h4 style={{ fontSize: '0.98rem', fontWeight: '700', color: 'var(--color-primary)' }}>
-              {isHindi && selectedElement.labelHindi ? selectedElement.labelHindi : selectedElement.label}
-            </h4>
-            <button
-              onClick={() => handleAskSaarthi(selectedElement)}
-              className="btn btn-secondary"
+          {quizAnswered[activeQuizQuestion.id] !== undefined ? (
+            <p
+              className="type-small"
               style={{
-                width: 'auto',
-                padding: '4px 10px',
-                fontSize: '0.75rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                backgroundColor: 'white'
+                marginTop: 'var(--sp-2)',
+                fontWeight: 700,
+                color: quizAnswered[activeQuizQuestion.id] ? 'var(--emerald-800)' : 'var(--red-600)',
               }}
             >
-              <Sparkles size={13} color="var(--color-primary)" /> Ask Saarthi
-            </button>
-          </div>
-          <p style={{ fontSize: '0.9rem', lineHeight: '1.5', color: 'var(--color-text)', margin: 0 }}>
-            {isHindi && selectedElement.explanationHindi ? selectedElement.explanationHindi : selectedElement.explanation}
-          </p>
-        </div>
-      ) : mode === 'explore' ? (
-        <div
-          style={{
-            marginTop: '12px',
-            padding: '10px 14px',
-            backgroundColor: 'var(--color-background)',
-            borderRadius: 'var(--radius-sm)',
-            fontSize: '0.82rem',
-            color: 'var(--color-muted)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
-          }}
-        >
-          <Info size={16} />
-          <span>{isHindi ? 'जानकारी देखने के लिए ऊपर दिए गए किसी भी घटक पर क्लिक करें।' : 'Tap any component in the diagram above to read its function and explanation.'}</span>
-        </div>
+              {quizAnswered[activeQuizQuestion.id]
+                ? 'Correct! Well done.'
+                : `Incorrect. This component is "${activeQuizQuestion.label}".`}
+            </p>
+          ) : null}
+        </StickyNote>
       ) : null}
-    </div>
+
+      {/* Explanation Panel */}
+      {mode === 'explore' && selectedElement ? (
+        <StickyNote tone="yellow" body rotation="-0.4deg" style={{ maxWidth: '100%', marginTop: 'var(--sp-4)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--sp-2)', flexWrap: 'wrap', marginBottom: 'var(--sp-2)' }}>
+            <h3 className="type-h3" style={{ color: 'var(--ink)' }}>
+              {isHindi && selectedElement.labelHindi ? selectedElement.labelHindi : selectedElement.label}
+            </h3>
+            <Button variant="primary" size="sm" onClick={() => handleAskSaarthi(selectedElement)}>
+              <Sparkles size={14} strokeWidth={2} aria-hidden="true" />
+              Ask Saarthi
+            </Button>
+          </div>
+          <p className="type-body" style={{ color: 'var(--ink)' }}>
+            {isHindi && selectedElement.explanationHindi
+              ? selectedElement.explanationHindi
+              : selectedElement.explanation}
+          </p>
+        </StickyNote>
+      ) : mode === 'explore' ? (
+        <p className="type-small" style={{ color: 'var(--ink-muted)', marginTop: 'var(--sp-3)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Info size={15} strokeWidth={2} aria-hidden="true" />
+          {isHindi
+            ? 'जानकारी देखने के लिए ऊपर दिए गए किसी भी घटक पर क्लिक करें।'
+            : 'Tap any component in the diagram above to read its function and explanation.'}
+        </p>
+      ) : null}
+    </PaperCard>
   );
 }

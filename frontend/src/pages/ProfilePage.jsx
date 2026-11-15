@@ -1,24 +1,44 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { User, LogOut, Globe, BookOpen, Check, Shield, Brain } from 'lucide-react';
+import {
+  User,
+  Shield,
+  BookOpen,
+  Globe,
+  LogOut,
+  Check,
+  Sparkles,
+  FileText,
+  BarChart3,
+  Lock,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext';
+import {
+  PaperCard,
+  Tape,
+  Pin,
+  Tag,
+  Field,
+  Button,
+  SectionHeader,
+  useToast,
+} from '../components/ui';
 
 export default function ProfilePage() {
   const { user, logout, updateProfile } = useAuth();
   const { t, i18n } = useTranslation();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   const [board, setBoard] = useState(user?.board || 'CBSE');
-  const [classLevel, setClassLevel] = useState(user?.classLevel || 10);
-  const [language, setLanguage] = useState(user?.preferredLanguage || user?.language || 'en');
+  const [classLevel, setClassLevel] = useState(user?.classLevel || user?.class || 10);
+  const [language, setLanguage] = useState(user?.preferredLanguage || user?.language || i18n.language || 'en');
   const [saarthiMemory, setSaarthiMemory] = useState(user?.saarthiMemoryEnabled !== false);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState('');
 
   const handleSave = async () => {
     setSaving(true);
-    setMessage('');
     try {
       await updateProfile({
         board,
@@ -26,17 +46,14 @@ export default function ProfilePage() {
         classLevel: Number(classLevel),
         language,
         preferredLanguage: language,
-        saarthiMemoryEnabled: saarthiMemory
+        saarthiMemoryEnabled: saarthiMemory,
       });
 
-      // Switch UI language if changed
-      i18n.changeLanguage(language);
+      await i18n.changeLanguage(language);
       localStorage.setItem('i18nextLng', language);
-
-      setMessage('Preferences updated successfully!');
-      setTimeout(() => setMessage(''), 3000);
+      showToast(t('settings.savedSuccess', 'Settings saved cleanly!'), 'success');
     } catch (err) {
-      setMessage('Failed to update preferences: ' + err.message);
+      showToast(err.message || 'Failed to save preferences', 'error');
     } finally {
       setSaving(false);
     }
@@ -47,162 +64,206 @@ export default function ProfilePage() {
     navigate('/login');
   };
 
+  const initials = (user?.name || 'S')
+    .split(' ')
+    .map((p) => p[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
-    <div style={{ maxWidth: '640px', margin: '0 auto', paddingBottom: '32px' }}>
-      <h1 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '16px' }}>
-        {t('settings.title', 'Learning Preferences & Settings')}
-      </h1>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-6)' }}>
+      {/* Hero Student ID Card */}
+      <PaperCard
+        as="section"
+        hero
+        variant="ruled-margin"
+        style={{ padding: 'var(--sp-6) var(--sp-5) var(--sp-6) 64px' }}
+      >
+        <Tape tone="kraft" rotation="-1.5deg" />
+        <Pin color="green" position="right" />
 
-      {message && <div className="alert alert-success">{message}</div>}
-
-      <div className="card">
-        {/* User Badge */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid var(--color-border)' }}>
-          <div style={{ backgroundColor: 'var(--color-primary-light)', color: 'var(--color-primary)', padding: '14px', borderRadius: '50%' }}>
-            <User size={28} />
-          </div>
-          <div>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: '700' }}>{user?.name || 'Student'}</h2>
-            <p style={{ color: 'var(--color-muted)', fontSize: '0.88rem' }}>{user?.email || 'No email registered'}</p>
-            <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', backgroundColor: user?.role === 'admin' ? '#FEE2E2' : '#E0E7FF', color: user?.role === 'admin' ? '#DC2626' : '#4338CA', padding: '2px 8px', borderRadius: '4px', marginTop: '4px', display: 'inline-block' }}>
-              {user?.role || 'student'}
-            </span>
-          </div>
-        </div>
-
-        {/* 1. Educational Board (Task P2-1.3) */}
-        <div className="form-group" style={{ marginBottom: '20px' }}>
-          <label className="form-label" style={{ fontWeight: '600', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Shield size={16} /> {t('settings.boardLabel', 'Educational Board')}
-          </label>
-          <div className="pill-group" style={{ display: 'flex', gap: '8px' }}>
-            {['CBSE', 'ICSE', 'State Board'].map((b) => (
-              <button
-                key={b}
-                type="button"
-                className={`pill-btn ${board === b ? 'active' : ''}`}
-                onClick={() => setBoard(b)}
-              >
-                {b}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 2. Class Level (Task P2-1.2, P2-1.3) */}
-        <div className="form-group" style={{ marginBottom: '20px' }}>
-          <label className="form-label" style={{ fontWeight: '600', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <BookOpen size={16} /> {t('settings.classLabel', 'Class Level')}
-          </label>
-          <div className="pill-group" style={{ display: 'flex', gap: '8px' }}>
-            {[10, 12].map((cls) => (
-              <button
-                key={cls}
-                type="button"
-                className={`pill-btn ${Number(classLevel) === cls ? 'active' : ''}`}
-                onClick={() => setClassLevel(cls)}
-                style={{ padding: '8px 18px', fontWeight: '700' }}
-              >
-                Class {cls} {cls === 10 ? '(Board Exam)' : '(Senior Secondary)'}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 3. Preferred Content & UI Language (Task P2-1.4) */}
-        <div className="form-group" style={{ marginBottom: '20px' }}>
-          <label className="form-label" style={{ fontWeight: '600', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Globe size={16} /> {t('settings.languageLabel', 'Preferred Language')}
-          </label>
-          <div className="pill-group" style={{ display: 'flex', gap: '8px' }}>
-            <button
-              type="button"
-              className={`pill-btn ${language === 'en' ? 'active' : ''}`}
-              onClick={() => setLanguage('en')}
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 'var(--sp-4)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-4)' }}>
+            <div
+              style={{
+                width: '68px',
+                height: '68px',
+                borderRadius: 'var(--r-pill)',
+                background: 'var(--avatar-bg)',
+                border: '2px solid var(--emerald-700)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'var(--font-display)',
+                fontWeight: 800,
+                fontSize: '1.5rem',
+                color: 'var(--emerald-800)',
+                flexShrink: 0,
+              }}
+              aria-hidden="true"
             >
-              English
-            </button>
-            <button
-              type="button"
-              className={`pill-btn ${language === 'hi' ? 'active' : ''}`}
-              onClick={() => setLanguage('hi')}
-            >
-              हिंदी (Hindi)
-            </button>
-            <button
-              type="button"
-              className={`pill-btn ${language === 'mr' ? 'active' : ''}`}
-              onClick={() => setLanguage('mr')}
-            >
-              मराठी (Marathi)
-            </button>
-          </div>
-        </div>
-
-        {/* 4. Saarthi Memory Toggle (P2-3.1, P2-3.2) */}
-        <div className="form-group" style={{ marginBottom: '24px', padding: '12px', backgroundColor: '#F8FAFC', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', fontWeight: '600' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Brain size={18} color="#7C3AED" />
-              {t('settings.memoryToggle', 'Enable Saarthi Long-term Memory')}
-            </span>
-            <input
-              type="checkbox"
-              checked={saarthiMemory}
-              onChange={(e) => setSaarthiMemory(e.target.checked)}
-              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-            />
-          </label>
-          <p style={{ margin: '6px 0 0 26px', fontSize: '0.8rem', color: '#64748B' }}>
-            {t('settings.memoryDesc', 'Allows Saarthi AI to remember your weak topics, study goals, and strengths across sessions for personalized guidance.')}
-          </p>
-        </div>
-
-        {/* 5. Personal Knowledge Base Link (P2-2.7) */}
-        <div style={{ marginBottom: '24px', padding: '12px', backgroundColor: '#FAF5FF', borderRadius: '8px', border: '1px solid #E9D5FF', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontWeight: '700', fontSize: '0.9rem', color: '#6B21A8', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <BookOpen size={16} /> My Private Knowledge Base
+              {initials || <User size={28} />}
             </div>
-            <div style={{ fontSize: '0.78rem', color: '#7E22CE', marginTop: '2px' }}>
-              Upload and manage your personal study notes and formula sheets.
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-1)' }}>
+              <span className="type-label" style={{ color: 'var(--hand-rust)' }}>
+                {t('settings.title', 'My Notebook & Settings')}
+              </span>
+              <h1 className="type-h1" style={{ color: 'var(--ink)' }}>
+                {user?.name || 'Student'}
+              </h1>
+              <p className="type-small" style={{ color: 'var(--ink-muted)' }}>
+                {user?.email || user?.phone || 'Offline Student Account'}
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-2)', marginTop: 'var(--sp-1)' }}>
+                <Tag variant="verified">{board}</Tag>
+                <Tag variant="paper">Class {classLevel}</Tag>
+                {user?.role === 'admin' ? <Tag variant="physics">Admin</Tag> : null}
+              </div>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => navigate('/notes')}
-            style={{
-              padding: '6px 12px',
-              fontSize: '0.75rem',
-              fontWeight: '700',
-              backgroundColor: '#7C3AED',
-              color: '#FFFFFF',
-              borderRadius: '6px',
-              border: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            Manage Notes
-          </button>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
+            <Button variant="note" size="sm" to="/notes">
+              <FileText size={16} strokeWidth={2} aria-hidden="true" />
+              My Notes
+            </Button>
+            <Button variant="note" size="sm" to="/results">
+              <BarChart3 size={16} strokeWidth={2} aria-hidden="true" />
+              Test History
+            </Button>
+            <Button variant="note" size="sm" to="/privacy">
+              <Lock size={16} strokeWidth={2} aria-hidden="true" />
+              Privacy
+            </Button>
+          </div>
         </div>
+      </PaperCard>
 
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="btn btn-primary"
-          style={{ width: '100%', marginBottom: '12px' }}
-        >
-          <Check size={16} /> {saving ? 'Saving...' : t('settings.save', 'Save Preferences')}
-        </button>
+      {/* Notebook Preferences Card (Flat paper so inputs stay un-tilted) */}
+      <section>
+        <SectionHeader
+          tag="Study Preferences"
+          title="Curriculum & Language"
+          note="Changes update your syllabus and Chotu tutor context immediately"
+        />
 
-        <button
-          onClick={handleLogout}
-          className="btn btn-outline"
-          style={{ width: '100%', color: '#DC2626', borderColor: '#FCA5A5' }}
-        >
-          <LogOut size={16} /> {t('nav.logout', 'Log Out')}
-        </button>
-      </div>
+        <PaperCard flat style={{ padding: 'var(--sp-6)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-5)' }}>
+            {/* Educational Board */}
+            <div>
+              <div className="field__label" style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: 'var(--sp-2)' }}>
+                <Shield size={16} strokeWidth={2} aria-hidden="true" />
+                <span>{t('settings.boardLabel', 'Educational Board')}</span>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
+                {['CBSE', 'ICSE', 'State Board'].map((b) => (
+                  <Button
+                    key={b}
+                    type="button"
+                    variant={board === b ? 'primary' : 'note'}
+                    size="sm"
+                    onClick={() => setBoard(b)}
+                    aria-pressed={board === b ? 'true' : 'false'}
+                  >
+                    {b}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Class & Language */}
+            <div className="paper-grid paper-grid--2" style={{ gap: 'var(--sp-4)' }}>
+              <Field
+                as="select"
+                label={
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <BookOpen size={15} strokeWidth={2} aria-hidden="true" />
+                    {t('settings.classLabel', 'Class / Standard')}
+                  </span>
+                }
+                value={String(classLevel)}
+                onChange={(e) => setClassLevel(Number(e.target.value))}
+              >
+                <option value="9">Class 9</option>
+                <option value="10">Class 10 (SSC)</option>
+                <option value="11">Class 11</option>
+                <option value="12">Class 12 (HSC)</option>
+              </Field>
+
+              <Field
+                as="select"
+                label={
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <Globe size={15} strokeWidth={2} aria-hidden="true" />
+                    {t('settings.languageLabel', 'App & Content Language')}
+                  </span>
+                }
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+              >
+                <option value="en">English (EN)</option>
+                <option value="hi">Hindi (हिंदी)</option>
+                <option value="mr">Marathi (मराठी)</option>
+              </Field>
+            </div>
+
+            {/* Chotu AI Memory Setting */}
+            <div
+              style={{
+                padding: 'var(--sp-4)',
+                background: 'var(--paper-warm)',
+                borderRadius: 'var(--r-md)',
+                border: '1px solid var(--paper-border-warm)',
+              }}
+            >
+              <Field
+                as="checkbox"
+                checked={saarthiMemory}
+                onChange={(e) => setSaarthiMemory(e.target.checked)}
+                label={
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <Sparkles size={15} strokeWidth={2} aria-hidden="true" />
+                    Enable Chotu (AI Saarthi) Learning Memory
+                  </span>
+                }
+                helper="Allows Chotu to remember weak topics and guide personalized revision."
+              />
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 'var(--sp-3)',
+                paddingTop: 'var(--sp-3)',
+                borderTop: '1px solid var(--paper-border-warm)',
+              }}
+            >
+              <Button variant="primary" onClick={handleSave} disabled={saving}>
+                <Check size={17} strokeWidth={2} aria-hidden="true" />
+                {saving ? 'Saving...' : t('settings.saveBtn', 'Save Preferences')}
+              </Button>
+
+              <Button variant="danger" onClick={handleLogout}>
+                <LogOut size={17} strokeWidth={2} aria-hidden="true" />
+                {t('settings.logoutBtn', 'Log out')}
+              </Button>
+            </div>
+          </div>
+        </PaperCard>
+      </section>
     </div>
   );
 }

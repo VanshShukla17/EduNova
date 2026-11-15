@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Eye, RotateCcw, HelpCircle, CheckCircle } from 'lucide-react';
+import { Button, PaperCard, Tag } from '../../components/ui';
+import { resolveCssVar } from '../../components/ui/subjectUtils';
 
 export default function RayOpticsSimulation() {
   const canvasRef = useRef(null);
@@ -65,11 +66,19 @@ export default function RayOpticsSimulation() {
 
     ctx.clearRect(0, 0, width, height);
 
+    const cAxis = resolveCssVar('--ink-soft');
+    const cFocus = resolveCssVar('--physics');
+    const cDevice = resolveCssVar('--ink');
+    const cObj = resolveCssVar('--red-600');
+    const cImg = resolveCssVar('--biology');
+    const cRay1 = resolveCssVar('--chemistry');
+    const cRay2 = resolveCssVar('--maths');
+
     const originX = width / 2;
     const originY = height / 2;
 
     // 1. Draw Principal Axis
-    ctx.strokeStyle = '#94A3B8';
+    ctx.strokeStyle = cAxis;
     ctx.lineWidth = 1.5;
     ctx.setLineDash([]);
     ctx.beginPath();
@@ -78,7 +87,7 @@ export default function RayOpticsSimulation() {
     ctx.stroke();
 
     // 2. Optical Center / Pole
-    ctx.fillStyle = '#64748B';
+    ctx.fillStyle = cAxis;
     ctx.beginPath();
     ctx.arc(originX, originY, 4, 0, 2 * Math.PI);
     ctx.fill();
@@ -88,14 +97,14 @@ export default function RayOpticsSimulation() {
     // 3. Mark Focus (F) and 2F / C
     const fPixel = focalLength * 2.2;
     // Left points
-    drawPoint(ctx, originX - fPixel, originY, 'F₁', '#3B82F6');
-    drawPoint(ctx, originX - (2 * fPixel), originY, isMirror ? 'C' : '2F₁', '#2563EB');
+    drawPoint(ctx, originX - fPixel, originY, 'F₁', cFocus);
+    drawPoint(ctx, originX - (2 * fPixel), originY, isMirror ? 'C' : '2F₁', cFocus);
     // Right points
-    drawPoint(ctx, originX + fPixel, originY, 'F₂', '#3B82F6');
-    drawPoint(ctx, originX + (2 * fPixel), originY, isMirror ? 'C₂' : '2F₂', '#2563EB');
+    drawPoint(ctx, originX + fPixel, originY, 'F₂', cFocus);
+    drawPoint(ctx, originX + (2 * fPixel), originY, isMirror ? 'C₂' : '2F₂', cFocus);
 
     // 4. Draw Optical Device (Mirror / Lens)
-    ctx.strokeStyle = '#1E293B';
+    ctx.strokeStyle = cDevice;
     ctx.lineWidth = 3;
     ctx.beginPath();
     if (deviceType === 'concave_mirror') {
@@ -116,7 +125,7 @@ export default function RayOpticsSimulation() {
     const objX = originX - objPixelDist;
     const objY = originY - (objectHeight * 1.5);
 
-    drawArrow(ctx, objX, originY, objX, objY, '#DC2626', 'Object (AB)');
+    drawArrow(ctx, objX, originY, objX, objY, cObj, 'Object (AB)');
 
     // 6. Draw Image Arrow (if not at infinity)
     if (!isInfinity && Math.abs(imageDistance) < 500) {
@@ -129,13 +138,13 @@ export default function RayOpticsSimulation() {
       } else {
         ctx.setLineDash([]);
       }
-      drawArrow(ctx, imgX, originY, imgX, imgY, '#16A34A', `Image (A'B')`);
+      drawArrow(ctx, imgX, originY, imgX, imgY, cImg, `Image (A'B')`);
       ctx.setLineDash([]);
     }
 
     // 7. Ray Tracing Lines
     ctx.lineWidth = 1.5;
-    ctx.strokeStyle = '#EA580C';
+    ctx.strokeStyle = cRay1;
 
     // Ray 1: Parallel to principal axis -> to device
     ctx.beginPath();
@@ -155,7 +164,7 @@ export default function RayOpticsSimulation() {
       ctx.stroke();
 
       // Ray 2: Ray through Focus -> reflects parallel
-      ctx.strokeStyle = '#9333EA';
+      ctx.strokeStyle = cRay2;
       ctx.beginPath();
       ctx.moveTo(objX, objY);
       ctx.lineTo(focusX, originY);
@@ -172,7 +181,7 @@ export default function RayOpticsSimulation() {
       ctx.stroke();
 
       // Ray 2: Ray through optical center (continues straight)
-      ctx.strokeStyle = '#9333EA';
+      ctx.strokeStyle = cRay2;
       ctx.beginPath();
       ctx.moveTo(objX, objY);
       const centerSlope = (originY - objY) / (originX - objX);
@@ -214,46 +223,38 @@ export default function RayOpticsSimulation() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
       {/* Device Mode Switcher */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
         {[
           { id: 'concave_mirror', label: 'Concave Mirror (अवतल दर्पण)' },
           { id: 'convex_mirror', label: 'Convex Mirror (उत्तल दर्पण)' },
           { id: 'convex_lens', label: 'Convex Lens (उत्तल लेंस)' },
           { id: 'concave_lens', label: 'Concave Lens (अवतल लेंस)' }
         ].map((d) => (
-          <button
+          <Button
             key={d.id}
             type="button"
+            size="sm"
+            variant={deviceType === d.id ? 'primary' : 'secondary'}
             onClick={() => setDeviceType(d.id)}
-            style={{
-              padding: '6px 14px',
-              fontSize: '0.8rem',
-              fontWeight: '700',
-              borderRadius: '8px',
-              border: deviceType === d.id ? '2px solid #2563EB' : '1px solid #CBD5E1',
-              backgroundColor: deviceType === d.id ? '#EFF6FF' : '#FFFFFF',
-              color: deviceType === d.id ? '#1D4ED8' : '#475569',
-              cursor: 'pointer'
-            }}
           >
             {d.label}
-          </button>
+          </Button>
         ))}
       </div>
 
       {/* Interactive Ray Diagram Canvas */}
-      <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #CBD5E1', borderRadius: '12px', overflow: 'hidden', display: 'flex', justifyContent: 'center', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)' }}>
+      <PaperCard flat style={{ backgroundColor: 'var(--paper-warm)', overflow: 'hidden', display: 'flex', justifyContent: 'center', padding: 'var(--sp-2)' }}>
         <canvas ref={canvasRef} width={680} height={280} style={{ width: '100%', maxWidth: '680px', height: 'auto' }} />
-      </div>
+      </PaperCard>
 
       {/* Parameter Sliders */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
+      <PaperCard flat style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--sp-3)', padding: 'var(--sp-4)' }}>
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: '700', marginBottom: '4px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', fontWeight: 700, marginBottom: '4px' }}>
             <span>Object Distance (u)</span>
-            <span style={{ color: '#DC2626' }}>{objectDistance} cm</span>
+            <Tag tone="red">{objectDistance} cm</Tag>
           </div>
           <input
             type="range"
@@ -261,14 +262,15 @@ export default function RayOpticsSimulation() {
             max={180}
             value={objectDistance}
             onChange={(e) => setObjectDistance(Number(e.target.value))}
-            style={{ width: '100%', accentColor: '#DC2626' }}
+            aria-label="Object Distance u in cm"
+            style={{ width: '100%', accentColor: 'var(--red-600)' }}
           />
         </div>
 
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: '700', marginBottom: '4px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', fontWeight: 700, marginBottom: '4px' }}>
             <span>Focal Length (f)</span>
-            <span style={{ color: '#2563EB' }}>{focalLength} cm</span>
+            <Tag tone="physics">{focalLength} cm</Tag>
           </div>
           <input
             type="range"
@@ -276,14 +278,15 @@ export default function RayOpticsSimulation() {
             max={90}
             value={focalLength}
             onChange={(e) => setFocalLength(Number(e.target.value))}
-            style={{ width: '100%', accentColor: '#2563EB' }}
+            aria-label="Focal Length f in cm"
+            style={{ width: '100%', accentColor: 'var(--physics)' }}
           />
         </div>
 
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: '700', marginBottom: '4px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', fontWeight: 700, marginBottom: '4px' }}>
             <span>Object Height (h)</span>
-            <span style={{ color: '#475569' }}>{objectHeight} mm</span>
+            <Tag tone="neutral">{objectHeight} mm</Tag>
           </div>
           <input
             type="range"
@@ -291,33 +294,34 @@ export default function RayOpticsSimulation() {
             max={60}
             value={objectHeight}
             onChange={(e) => setObjectHeight(Number(e.target.value))}
-            style={{ width: '100%', accentColor: '#475569' }}
+            aria-label="Object Height h in mm"
+            style={{ width: '100%', accentColor: 'var(--ink-muted)' }}
           />
         </div>
-      </div>
+      </PaperCard>
 
       {/* Real-time CBSE Optics Diagnostic Readouts */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
-        <div style={{ backgroundColor: '#F1F5F9', padding: '10px 14px', borderRadius: '8px', borderLeft: '4px solid #2563EB' }}>
-          <div style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: '600' }}>Image Distance (v)</div>
-          <div style={{ fontSize: '1rem', fontWeight: '800', color: '#1E293B' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--sp-2)' }}>
+        <PaperCard flat style={{ backgroundColor: 'var(--paper-warm)', padding: 'var(--sp-3)', borderLeft: '4px solid var(--physics)' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--ink-soft)', fontWeight: 700 }}>Image Distance (v)</div>
+          <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-mono)' }}>
             {isInfinity ? 'Infinity (∞)' : `${Math.abs(Math.round(imageDistance * 10) / 10)} cm`}
           </div>
-        </div>
+        </PaperCard>
 
-        <div style={{ backgroundColor: '#F1F5F9', padding: '10px 14px', borderRadius: '8px', borderLeft: '4px solid #16A34A' }}>
-          <div style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: '600' }}>Magnification (m)</div>
-          <div style={{ fontSize: '1rem', fontWeight: '800', color: '#1E293B' }}>
+        <PaperCard flat style={{ backgroundColor: 'var(--paper-warm)', padding: 'var(--sp-3)', borderLeft: '4px solid var(--biology)' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--ink-soft)', fontWeight: 700 }}>Magnification (m)</div>
+          <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-mono)' }}>
             {isInfinity ? 'Undefined' : `${Math.round(m * 100) / 100}x`}
           </div>
-        </div>
+        </PaperCard>
 
-        <div style={{ backgroundColor: '#F1F5F9', padding: '10px 14px', borderRadius: '8px', borderLeft: '4px solid #EA580C' }}>
-          <div style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: '600' }}>Image Nature</div>
-          <div style={{ fontSize: '0.88rem', fontWeight: '800', color: '#1E293B' }}>
+        <PaperCard flat style={{ backgroundColor: 'var(--paper-warm)', padding: 'var(--sp-3)', borderLeft: '4px solid var(--chemistry)' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--ink-soft)', fontWeight: 700 }}>Image Nature</div>
+          <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--ink)' }}>
             {nature}
           </div>
-        </div>
+        </PaperCard>
       </div>
     </div>
   );

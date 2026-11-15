@@ -1,66 +1,143 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Sparkles, BookOpen, CheckCircle, Cpu, ArrowRight } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { Button } from '../components/ui';
+import PixelHeroCanvas from '../components/hero/PixelHeroCanvas';
+
+const HERO_CARDS = [
+  {
+    id: 'quick-check',
+    label: 'Quick check passed',
+    title: 'Force and motion',
+    delay: '0.5s',
+    celebratory: false,
+    third: false,
+  },
+  {
+    id: 'chotu-answered',
+    label: 'Chotu answered',
+    title: 'Why is the sky blue?',
+    delay: '1.7s',
+    celebratory: false,
+    third: false,
+  },
+  {
+    id: 'badge-earned',
+    label: 'Badge earned',
+    title: '3-day streak',
+    delay: '2.9s',
+    celebratory: true,
+    third: true,
+  },
+];
 
 export default function LandingPage() {
+  const { isAuthenticated } = useAuth();
+  const startHref = isAuthenticated ? '/dashboard' : '/signup';
+  const [disableMotion, setDisableMotion] = useState(false);
+  const [chotuAnchor, setChotuAnchor] = useState(null);
+
+  useEffect(() => {
+    const saveData = Boolean(
+      typeof navigator !== 'undefined' &&
+        navigator.connection &&
+        navigator.connection.saveData
+    );
+    const mq =
+      typeof window !== 'undefined' && window.matchMedia
+        ? window.matchMedia('(prefers-reduced-motion: reduce)')
+        : null;
+
+    const updateMotionPref = () => {
+      setDisableMotion(saveData || Boolean(mq && mq.matches));
+    };
+
+    updateMotionPref();
+    if (mq && mq.addEventListener) {
+      mq.addEventListener('change', updateMotionPref);
+      return () => mq.removeEventListener('change', updateMotionPref);
+    }
+    return undefined;
+  }, []);
+
   return (
-    <div style={{ maxWidth: '640px', margin: '0 auto', padding: '32px 16px' }}>
-      {/* Hero */}
-      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'var(--color-primary-light)', color: 'var(--color-primary)', padding: '6px 14px', borderRadius: '999px', fontSize: '0.85rem', fontWeight: '600', marginBottom: '16px' }}>
-          <Sparkles size={16} /> Free STEM Education for Every Student
-        </div>
-        <h1 style={{ fontSize: '2rem', fontWeight: '800', lineHeight: '1.25', marginBottom: '12px' }}>
-          Master STEM in Your Board & Language
-        </h1>
-        <p style={{ color: 'var(--color-muted)', fontSize: '1.05rem', marginBottom: '24px' }}>
-          Bilingual CBSE lessons, interactive diagrams, 3D virtual experiments, and instant practice tests right on your phone.
-        </p>
+      <section
+        id="landing-hero"
+        className={`landing-hero${disableMotion ? ' landing-hero--static' : ''}`}
+        aria-labelledby="landing-hero-heading"
+      >
+        <PixelHeroCanvas
+          reducedMotion={disableMotion}
+          onChotuAnchor={setChotuAnchor}
+        />
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <Link to="/signup" className="btn btn-primary" style={{ padding: '14px' }}>
-            <span>Start Learning Free</span>
-            <ArrowRight size={18} />
-          </Link>
-          <Link to="/login" className="btn btn-secondary">
-            Already have an account? Log In
-          </Link>
-        </div>
-      </div>
+        <div className="landing-hero__scrim" aria-hidden="true" />
 
-      {/* Feature Pillars */}
-      <div style={{ display: 'grid', gap: '16px', marginBottom: '32px' }}>
-        <div className="card" style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-          <div style={{ backgroundColor: 'var(--color-primary-light)', padding: '10px', borderRadius: '10px', color: 'var(--color-primary)' }}>
-            <BookOpen size={24} />
-          </div>
-          <div>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: '600', marginBottom: '4px' }}>Board-Aligned Notes</h3>
-            <p style={{ color: 'var(--color-muted)', fontSize: '0.9rem' }}>Read chapter lessons in English or Hindi with easy formulas and real-world examples.</p>
-          </div>
-        </div>
+        <div className="landing-hero__inner">
+          <div className="landing-hero__copy">
+            <h1 id="landing-hero-heading" className="landing-hero__title">
+              <span className="landing-hero__title-line">Maths and Science</span>
+              <span className="landing-hero__title-line">that make sense</span>
+              <span className="landing-hero__title-line">in your own language.</span>
+            </h1>
 
-        <div className="card" style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-          <div style={{ backgroundColor: 'var(--color-success-light)', padding: '10px', borderRadius: '10px', color: 'var(--color-success)' }}>
-            <CheckCircle size={24} />
-          </div>
-          <div>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: '600', marginBottom: '4px' }}>Instant MCQ Practice</h3>
-            <p style={{ color: 'var(--color-muted)', fontSize: '0.9rem' }}>Test your understanding with instant server-scored quizzes and step-by-step explanations.</p>
+            <p className="landing-hero__subtitle">
+              Lessons for your board, a mentor called Chotu who answers doubts from your own
+              notes, and labs you can run on your phone.
+            </p>
+
+            <div className="landing-hero__actions">
+              <Button variant="cream" to={startHref}>
+                Start learning
+              </Button>
+              <Button variant="glass" to="/subjects">
+                See how it works
+              </Button>
+            </div>
           </div>
         </div>
 
-        <div className="card" style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-          <div style={{ backgroundColor: '#F3E8FF', padding: '10px', borderRadius: '10px', color: 'var(--color-secondary)' }}>
-            <Cpu size={24} />
-          </div>
-          <div>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: '600', marginBottom: '4px' }}>3D Virtual Labs</h3>
-            <p style={{ color: 'var(--color-muted)', fontSize: '0.9rem' }}>Experience hands-on science experiments like the Simple Pendulum right in your browser.</p>
-          </div>
+        <div
+          className="landing-hero__cards"
+          aria-label="Live student activity"
+          style={
+            chotuAnchor
+              ? {
+                  '--chotu-x': `${chotuAnchor.x}px`,
+                  '--chotu-y': `${chotuAnchor.y}px`,
+                }
+              : undefined
+          }
+        >
+          {HERO_CARDS.map((card, idx) => (
+            <div
+              key={card.id}
+              className={`landing-hero__card-wrap${
+                card.celebratory ? ' landing-hero__card-wrap--badge' : ''
+              }`}
+              style={{
+                '--card-index': idx,
+                '--card-delay': card.delay,
+              }}
+            >
+              <div className="landing-hero__card">
+                <span className="landing-hero__dot" aria-hidden="true" />
+                <span className="landing-hero__card-label">{card.label}</span>
+                <span className="landing-hero__card-sep" aria-hidden="true">
+                  —
+                </span>
+                <strong className="landing-hero__card-title">{card.title}</strong>
+              </div>
+              {card.celebratory ? (
+                <div className="landing-hero__card-sparkles" aria-hidden="true">
+                  <span className="landing-hero__sparkle landing-hero__sparkle--1" />
+                  <span className="landing-hero__sparkle landing-hero__sparkle--2" />
+                  <span className="landing-hero__sparkle landing-hero__sparkle--3" />
+                  <span className="landing-hero__sparkle landing-hero__sparkle--4" />
+                </div>
+              ) : null}
+            </div>
+          ))}
         </div>
-      </div>
-    </div>
+      </section>
   );
 }
-

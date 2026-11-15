@@ -1,38 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Atom, FlaskConical, Dna, Calculator, ArrowRight, Loader2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { BookOpen, ArrowRight, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import api from '../services/api';
-import { useAuth } from '../context/AuthContext';
-
-const iconMap = {
-  Atom,
-  FlaskConical,
-  Dna,
-  Calculator
-};
+import {
+  HeroCard,
+  SectionHeader,
+  PaperCard,
+  Pin,
+  Tag,
+  Field,
+  Button,
+  ProgressBar,
+  Stamp,
+  Skeleton,
+  EmptyState,
+  resolveSubjectKey,
+  SUBJECT_PIN_COLORS,
+} from '../components/ui';
 
 export default function SubjectsPage() {
-  const { user } = useAuth();
+  const { i18n } = useTranslation();
   const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [query, setQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all');
 
   useEffect(() => {
     async function loadSubjects() {
       try {
         setLoading(true);
         const data = await api.getSubjects();
-        // If data from API is available, use it
         if (data && data.length > 0) {
-          // For each subject, fetch its chapters so we can link directly
           const withChapters = await Promise.all(
             data.map(async (sub) => {
               try {
                 const chapters = await api.getSubjectChapters(sub._id || sub.id);
-                return {
-                  ...sub,
-                  chapters: chapters || []
-                };
+                return { ...sub, chapters: chapters || [] };
               } catch {
                 return { ...sub, chapters: [] };
               }
@@ -40,17 +44,40 @@ export default function SubjectsPage() {
           );
           setSubjects(withChapters);
         } else {
-          // Fallback to default 4 subjects if none in DB
           setSubjects([
-            { id: 'physics', code: 'physics', name: 'Physics', nameHindi: 'भौतिक विज्ञान', color: '#2563EB', icon: 'Atom', chapters: [{ id: '1', title: 'Electricity' }] },
-            { id: 'chemistry', code: 'chemistry', name: 'Chemistry', nameHindi: 'रसायन विज्ञान', color: '#7C3AED', icon: 'FlaskConical', chapters: [{ id: '1', title: 'Chemical Reactions' }] },
-            { id: 'biology', code: 'biology', name: 'Biology', nameHindi: 'जीव विज्ञान', color: '#16A34A', icon: 'Dna', chapters: [{ id: '1', title: 'Life Processes' }] },
-            { id: 'mathematics', code: 'mathematics', name: 'Mathematics', nameHindi: 'गणित', color: '#CA8A04', icon: 'Calculator', chapters: [{ id: '1', title: 'Real Numbers' }] }
+            {
+              id: 'physics',
+              code: 'physics',
+              name: 'Physics',
+              nameHindi: 'भौतिक विज्ञान',
+              chapters: [{ id: '1', title: 'Electricity' }],
+            },
+            {
+              id: 'chemistry',
+              code: 'chemistry',
+              name: 'Chemistry',
+              nameHindi: 'रसायन विज्ञान',
+              chapters: [{ id: '1', title: 'Chemical Reactions' }],
+            },
+            {
+              id: 'biology',
+              code: 'biology',
+              name: 'Biology',
+              nameHindi: 'जीव विज्ञान',
+              chapters: [{ id: '1', title: 'Life Processes' }],
+            },
+            {
+              id: 'mathematics',
+              code: 'mathematics',
+              name: 'Mathematics',
+              nameHindi: 'गणित',
+              chapters: [{ id: '1', title: 'Real Numbers' }],
+            },
           ]);
         }
       } catch (err) {
         console.error('Failed to load subjects:', err);
-        setError('Could not load subjects. Showing standard curriculum.');
+        setError('Could not load subjects from server. Showing offline fallback.');
       } finally {
         setLoading(false);
       }
@@ -59,121 +86,210 @@ export default function SubjectsPage() {
     loadSubjects();
   }, []);
 
-  return (
-    <div>
-      <div style={{ marginBottom: '16px' }}>
-        <h1 style={{ fontSize: '1.4rem', fontWeight: '800' }}>
-          {user?.language === 'hi' ? 'पाठ्यक्रम विषय' : 'STEM Subjects'}
-        </h1>
-        <p style={{ color: 'var(--color-muted)', fontSize: '0.9rem' }}>
-          Class {user?.classLevel || 10} • {user?.board || 'CBSE'}
-        </p>
-      </div>
+  const filteredSubjects = subjects.filter((sub) => {
+    const key = resolveSubjectKey(sub.name || sub.code);
+    if (activeFilter !== 'all' && key !== activeFilter) return false;
+    if (!query.trim()) return true;
+    const q = query.trim().toLowerCase();
+    const matchSubject =
+      (sub.name || '').toLowerCase().includes(q) ||
+      (sub.nameHindi || '').toLowerCase().includes(q);
+    const matchChapter = (sub.chapters || []).some((ch) =>
+      (ch.title || '').toLowerCase().includes(q)
+    );
+    return matchSubject || matchChapter;
+  });
 
-      {/* Interactive STEM Labs Banner */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, #1E1B4B 0%, #312E81 100%)',
-          borderRadius: '14px',
-          padding: '16px 20px',
-          color: '#FFFFFF',
-          marginBottom: '20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '12px'
-        }}
-      >
-        <div>
-          <div style={{ fontSize: '0.72rem', fontWeight: '800', color: '#FDE047', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '2px' }}>
-            NEW: 3D SIMULATIONS & LABS
-          </div>
-          <div style={{ fontSize: '1rem', fontWeight: '800' }}>Interactive STEM Learning Platform</div>
-          <div style={{ fontSize: '0.82rem', color: '#E0E7FF' }}>Biology 3D organs, Physics ray optics & waves, Chemistry MolView, and Maths labs.</div>
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-5)' }}>
+        <Skeleton lines={3} />
+        <div className="paper-grid paper-grid--2">
+          <Skeleton lines={4} />
+          <Skeleton lines={4} />
         </div>
-        <Link
-          to="/learn"
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-6)' }}>
+      <HeroCard
+        eyebrow="Complete STEM Curriculum"
+        eyebrowVariant="paper"
+        title="Subject Index & Chapters"
+        subtitle="Select any pinned notebook sheet to open lessons and chapter tests."
+        description={error || 'Filter by subject or search any chapter keyword.'}
+      >
+        <div
           style={{
-            backgroundColor: '#4338CA',
-            color: '#FFFFFF',
-            padding: '8px 16px',
-            borderRadius: '8px',
-            fontSize: '0.82rem',
-            fontWeight: '700',
-            textDecoration: 'none',
-            display: 'inline-flex',
+            display: 'flex',
+            flexWrap: 'wrap',
             alignItems: 'center',
-            gap: '6px'
+            gap: 'var(--sp-3)',
+            marginTop: 'var(--sp-2)',
           }}
         >
-          Open STEM Labs <ArrowRight size={14} />
-        </Link>
-      </div>
+          <div style={{ flex: '1 1 240px', maxWidth: '340px' }}>
+            <Field
+              placeholder="Search chapters or subjects..."
+              aria-label="Search chapters or subjects"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </div>
 
-      {error && <div className="alert alert-error">{error}</div>}
-
-      {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0', color: 'var(--color-primary)' }}>
-          <Loader2 className="animate-spin" size={32} />
-        </div>
-      ) : (
-        /* Task 5.1: Done when the four subjects show as cards */
-        <div style={{ display: 'grid', gap: '12px' }}>
-          {subjects.map((sub) => {
-            const Icon = iconMap[sub.icon] || Atom;
-            const primaryChapter = (sub.chapters && sub.chapters[0]) || { id: '1', title: 'Introductory Concepts' };
-            const subId = sub._id || sub.id;
-            const chapId = primaryChapter._id || primaryChapter.id || '1';
-
-            return (
-              <Link
-                key={sub.code || sub.name}
-                to={`/subjects/${subId}/chapters/${chapId}`}
-                className="card"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  marginBottom: 0,
-                  textDecoration: 'none',
-                  color: 'inherit',
-                  transition: 'transform 0.1s ease',
-                  borderLeft: `4px solid ${sub.color || 'var(--color-primary)'}`
-                }}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
+            {[
+              { id: 'all', label: 'All' },
+              { id: 'maths', label: 'Maths' },
+              { id: 'physics', label: 'Physics' },
+              { id: 'chemistry', label: 'Chemistry' },
+              { id: 'biology', label: 'Biology' },
+            ].map((item) => (
+              <Button
+                key={item.id}
+                variant={activeFilter === item.id ? 'primary' : 'note'}
+                size="sm"
+                onClick={() => setActiveFilter(item.id)}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                {item.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      </HeroCard>
+
+      <section>
+        <SectionHeader
+          tag="Curriculum Shelves"
+          title="Subjects & Chapters"
+          note="Every chapter tracks lessons read and practice scores"
+        />
+
+        {filteredSubjects.length === 0 ? (
+          <EmptyState
+            icon={Search}
+            title="No Matching Chapters Found"
+            description="Clear your search filter to view all subjects."
+            actionLabel="Reset Filters"
+            onAction={() => {
+              setQuery('');
+              setActiveFilter('all');
+            }}
+          />
+        ) : (
+          <div className="paper-grid paper-grid--2 tilt-cycle">
+            {filteredSubjects.map((sub, idx) => {
+              const subId = sub._id || sub.id;
+              const subjectKey = resolveSubjectKey(sub.name || sub.code);
+              const pinColor = SUBJECT_PIN_COLORS[subjectKey] || 'blue';
+              const displayName =
+                i18n.language === 'hi' && sub.nameHindi ? sub.nameHindi : sub.name;
+              const chapters = sub.chapters || [];
+              const avgPct =
+                chapters.length > 0
+                  ? Math.round(
+                      chapters.reduce((sum, c) => sum + (c.completionPercentage || 0), 0) /
+                        chapters.length
+                    )
+                  : 0;
+
+              return (
+                <PaperCard
+                  key={subId || idx}
+                  as="article"
+                  style={{
+                    padding: 'var(--sp-5)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 'var(--sp-4)',
+                  }}
+                >
+                  <Pin color={pinColor} position="left" />
+
                   <div
                     style={{
-                      backgroundColor: `${sub.color || '#2563EB'}15`,
-                      color: sub.color || '#2563EB',
-                      padding: '12px',
-                      borderRadius: '12px'
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      gap: 'var(--sp-2)',
+                      flexWrap: 'wrap',
                     }}
                   >
-                    <Icon size={26} />
+                    <Tag variant={subjectKey}>{sub.name}</Tag>
+                    {avgPct >= 100 ? <Stamp variant="mastered">MASTERED</Stamp> : null}
                   </div>
-                  <div>
-                    <h2 style={{ fontSize: '1.05rem', fontWeight: '700' }}>
-                      {user?.language === 'hi' && sub.nameHindi ? sub.nameHindi : sub.name}
-                    </h2>
-                    <div style={{ color: 'var(--color-muted)', fontSize: '0.82rem' }}>
-                      {user?.language === 'hi' ? sub.name : sub.nameHindi}
-                    </div>
-                    <div style={{ fontSize: '0.8rem', color: sub.color || 'var(--color-primary)', fontWeight: '600', marginTop: '3px' }}>
-                      {primaryChapter.title}
-                    </div>
-                  </div>
-                </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-muted)' }}>
-                  <ArrowRight size={20} />
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
+                  <div>
+                    <h3 className="type-h2" style={{ color: 'var(--ink)' }}>
+                      {displayName}
+                    </h3>
+                    <div style={{ marginTop: 'var(--sp-2)' }}>
+                      <ProgressBar
+                        value={avgPct}
+                        subject={subjectKey}
+                        label={`${chapters.length} chapter${chapters.length === 1 ? '' : 's'}`}
+                        showPercent
+                      />
+                    </div>
+                  </div>
+
+                  {chapters.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
+                      {chapters.map((ch, chIdx) => {
+                        const chapId = ch._id || ch.id;
+                        const chPct = ch.completionPercentage || 0;
+                        return (
+                          <div
+                            key={chapId || chIdx}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: 'var(--sp-3)',
+                              padding: 'var(--sp-3)',
+                              borderRadius: 'var(--r-md)',
+                              background: 'var(--paper-warm)',
+                              border: '1px solid var(--paper-border-warm)',
+                            }}
+                          >
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
+                              <span className="type-label" style={{ color: 'var(--ink-soft)' }}>
+                                CHAPTER {String(chIdx + 1).padStart(2, '0')} · {chPct}%
+                              </span>
+                              <span
+                                className="type-body"
+                                style={{ fontWeight: 700, color: 'var(--ink)' }}
+                              >
+                                {ch.title}
+                              </span>
+                            </div>
+
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              to={`/subjects/${subId}/chapters/${chapId}`}
+                            >
+                              <BookOpen size={15} strokeWidth={2} aria-hidden="true" />
+                              Open
+                              <ArrowRight size={14} strokeWidth={2} aria-hidden="true" />
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="type-small" style={{ color: 'var(--ink-muted)' }}>
+                      Chapters are being prepared for this subject.
+                    </p>
+                  )}
+                </PaperCard>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

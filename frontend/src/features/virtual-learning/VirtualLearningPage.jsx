@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Sparkles, Box, Compass, CheckCircle2, ArrowRight, Search, Play } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { useTranslation } from 'react-i18next';
+import { Box, Play, CheckCircle, Search } from 'lucide-react';
 import { getVirtualTopics } from '../../services/api';
+import {
+  HeroCard,
+  SectionHeader,
+  PaperCard,
+  Pin,
+  Tag,
+  Stamp,
+  Field,
+  Button,
+  Skeleton,
+  EmptyState,
+  resolveSubjectKey,
+  SUBJECT_PIN_COLORS,
+} from '../../components/ui';
 
 export default function VirtualLearningPage() {
-  const { user } = useAuth();
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSubject, setSelectedSubject] = useState('all');
@@ -17,203 +24,186 @@ export default function VirtualLearningPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    const fetchTopics = async () => {
+    async function load() {
       try {
         setLoading(true);
         const data = await getVirtualTopics();
-        if (data && data.success) {
-          setTopics(data.data || []);
-        } else if (Array.isArray(data)) {
-          setTopics(data);
-        }
+        setTopics(data.topics || []);
       } catch (err) {
-        console.error('Failed to fetch virtual topics via api, trying fallback:', err);
-        try {
-          const token = localStorage.getItem('token');
-          const res = await fetch('/api/virtual', {
-            headers: { ...(token && { Authorization: `Bearer ${token}` }) }
-          });
-          const fallbackData = await res.json();
-          if (fallbackData.success) {
-            setTopics(fallbackData.data || []);
-          }
-        } catch (fallbackErr) {
-          console.error('Fallback fetch also failed:', fallbackErr);
-        }
+        console.error('Failed to fetch virtual topics:', err);
       } finally {
         setLoading(false);
       }
-    };
-    fetchTopics();
+    }
+    load();
   }, []);
 
   const filteredTopics = topics.filter((t) => {
-    const matchSubj = selectedSubject === 'all' || t.subject === selectedSubject;
-    const matchClass = selectedClass === 'all' || t.class_level === Number(selectedClass);
-    const matchSearch = !searchQuery.trim() ||
-      t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchSubj && matchClass && matchSearch;
+    const matchesSubject =
+      selectedSubject === 'all' ||
+      (t.subject || '').toLowerCase() === selectedSubject.toLowerCase();
+    const matchesClass =
+      selectedClass === 'all' || String(t.classLevel) === String(selectedClass);
+    const matchesSearch =
+      !searchQuery ||
+      (t.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (t.chapter || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (t.description || '').toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSubject && matchesClass && matchesSearch;
   });
 
+  if (loading) {
+    return <Skeleton lines={5} />;
+  }
+
   return (
-    <div style={{ maxWidth: '960px', margin: '0 auto', padding: '16px' }}>
-      {/* Hero Header */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%)',
-          borderRadius: '16px',
-          padding: '24px 28px',
-          color: '#FFFFFF',
-          marginBottom: '24px',
-          boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)'
-        }}
-      >
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(255,255,255,0.15)', padding: '4px 10px', borderRadius: '999px', fontSize: '0.75rem', fontWeight: '700', marginBottom: '10px' }}>
-          <Sparkles size={14} color="#FDE047" /> CBSE Interactive 3D Suite
-        </div>
-        <h1 style={{ fontSize: '1.6rem', fontWeight: '800', margin: '0 0 8px 0' }}>Virtual Learning & 3D Simulations</h1>
-        <p style={{ fontSize: '0.9rem', color: '#E0E7FF', margin: 0, maxWidth: '640px', lineHeight: 1.5 }}>
-          Manipulate ray optics, rotate 3D covalent molecules, slice conic sections, and inspect the human heart and blood circulation in real-time.
-        </p>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-6)' }}>
+      <HeroCard
+        eyebrow="3D Virtual STEM Lab Catalog"
+        eyebrowVariant="ready"
+        title="Interactive 3D Explorers"
+        subtitle="Inspect physical phenomena, human anatomy, and mathematical curves in real time."
+        actions={
+          <Button variant="kraft" to="/learn">
+            Open Classic STEM Hub
+          </Button>
+        }
+      />
 
-      {/* Filter & Search Bar */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '20px' }}>
-        {/* Subject Filter Pills */}
-        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
-          {[
-            { id: 'all', label: 'All Subjects' },
-            { id: 'physics', label: 'Physics' },
-            { id: 'chemistry', label: 'Chemistry' },
-            { id: 'biology', label: 'Biology' },
-            { id: 'mathematics', label: 'Maths' }
-          ].map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => setSelectedSubject(s.id)}
-              style={{
-                padding: '6px 14px',
-                fontSize: '0.78rem',
-                fontWeight: '700',
-                borderRadius: '999px',
-                border: selectedSubject === s.id ? '1px solid #4338CA' : '1px solid #CBD5E1',
-                backgroundColor: selectedSubject === s.id ? '#EEF2FF' : '#FFFFFF',
-                color: selectedSubject === s.id ? '#4338CA' : '#475569',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap'
-              }}
+      {/* Filter Bar */}
+      <PaperCard flat style={{ padding: 'var(--sp-4)' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 'var(--sp-3)',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
+            {['all', 'Physics', 'Chemistry', 'Biology', 'Mathematics'].map((sub) => (
+              <Button
+                key={sub}
+                variant={selectedSubject === sub ? 'primary' : 'note'}
+                size="sm"
+                onClick={() => setSelectedSubject(sub)}
+              >
+                {sub === 'all' ? 'All Subjects' : sub}
+              </Button>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-2)', alignItems: 'center' }}>
+            <Field
+              as="select"
+              aria-label="Class filter"
+              value={selectedClass}
+              onChange={(e) => setSelectedClass(e.target.value)}
             >
-              {s.label}
-            </button>
-          ))}
-        </div>
+              <option value="all">All Classes</option>
+              <option value="9">Class 9</option>
+              <option value="10">Class 10</option>
+              <option value="11">Class 11</option>
+              <option value="12">Class 12</option>
+            </Field>
 
-        {/* Class Filter & Search */}
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <select
-            value={selectedClass}
-            onChange={(e) => setSelectedClass(e.target.value)}
-            style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.8rem', backgroundColor: '#FFFFFF', fontWeight: '600' }}
-          >
-            <option value="all">All Classes</option>
-            <option value="10">Class 10</option>
-            <option value="12">Class 12</option>
-          </select>
-
-          <div style={{ position: 'relative' }}>
-            <Search size={15} style={{ position: 'absolute', left: '10px', top: '9px', color: '#94A3B8' }} />
-            <input
-              type="text"
-              placeholder="Search simulations..."
+            <Field
+              placeholder="Search 3D topics..."
+              aria-label="Search 3D topics"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ padding: '6px 12px 6px 32px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.8rem', outline: 'none', width: '160px' }}
             />
           </div>
         </div>
-      </div>
+      </PaperCard>
 
-      {/* Grid of Simulation Cards */}
-      {loading ? (
-        <div style={{ padding: '36px', textAlign: 'center', color: '#64748B' }}>Loading interactive 3D simulations...</div>
-      ) : filteredTopics.length === 0 ? (
-        <div style={{ padding: '40px', textAlign: 'center', backgroundColor: '#FFFFFF', borderRadius: '12px', border: '1px dashed #CBD5E1', color: '#64748B' }}>
-          <Compass size={32} style={{ margin: '0 auto 8px auto', color: '#94A3B8' }} />
-          <p style={{ margin: 0, fontWeight: '600' }}>No simulations match your filter criteria.</p>
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', gap: '16px' }}>
-          {filteredTopics.map((t) => (
-            <div
-              key={t.slug}
-              style={{
-                backgroundColor: '#FFFFFF',
-                borderRadius: '14px',
-                border: '1px solid var(--color-border)',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                overflow: 'hidden',
-                transition: 'transform 0.15s ease, box-shadow 0.15s ease'
-              }}
-            >
-              <div style={{ padding: '18px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                  <span
-                    style={{
-                      fontSize: '0.7rem',
-                      fontWeight: '700',
-                      textTransform: 'uppercase',
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      backgroundColor: '#EEF2FF',
-                      color: '#4338CA'
-                    }}
-                  >
-                    {t.subject} • Class {t.class_level}
-                  </span>
+      <section>
+        <SectionHeader
+          tag={`${filteredTopics.length} Topics Available`}
+          title="Select a 3D Simulation"
+          note="Includes concept notes and observation checks"
+        />
 
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', fontWeight: '700', color: '#059669', backgroundColor: '#ECFDF5', padding: '2px 6px', borderRadius: '4px' }}>
-                    <Box size={12} /> 3D Lab
-                  </span>
-                </div>
-
-                <h3 style={{ fontSize: '1.05rem', fontWeight: '800', margin: '0 0 6px 0', color: '#1E293B' }}>{t.title}</h3>
-                <p style={{ fontSize: '0.82rem', color: '#64748B', margin: 0, lineHeight: 1.5 }}>{t.description}</p>
-              </div>
-
-              <div style={{ padding: '12px 18px', borderTop: '1px solid #F1F5F9', backgroundColor: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '0.75rem', fontWeight: '600', color: t.completed ? '#059669' : '#64748B', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  {t.completed ? <CheckCircle2 size={15} /> : null}
-                  {t.completed ? `Score: ${t.score}%` : 'Ready to explore'}
-                </span>
-
-                <Link
-                  to={`/virtual-learning/${t.slug}`}
+        {filteredTopics.length === 0 ? (
+          <EmptyState
+            icon={Search}
+            title="No 3D Topics Match Your Filter"
+            description="Try resetting the subject or class filter."
+            actionLabel="Show All Topics"
+            onAction={() => {
+              setSelectedSubject('all');
+              setSelectedClass('all');
+              setSearchQuery('');
+            }}
+          />
+        ) : (
+          <div className="paper-grid paper-grid--3 tilt-cycle">
+            {filteredTopics.map((t, idx) => {
+              const subjectKey = resolveSubjectKey(t.subject);
+              return (
+                <PaperCard
+                  key={t.slug || idx}
+                  as="article"
+                  interactive
                   style={{
+                    padding: 'var(--sp-5)',
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    backgroundColor: '#4338CA',
-                    color: '#FFFFFF',
-                    padding: '6px 14px',
-                    borderRadius: '8px',
-                    fontSize: '0.78rem',
-                    fontWeight: '700',
-                    textDecoration: 'none'
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    gap: 'var(--sp-3)',
                   }}
                 >
-                  <Play size={13} fill="#FFFFFF" /> Launch 3D
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+                  <Pin color={SUBJECT_PIN_COLORS[subjectKey] || 'blue'} position="left" />
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--sp-2)', flexWrap: 'wrap' }}>
+                      <Tag variant={subjectKey}>
+                        {t.subject} · Class {t.classLevel}
+                      </Tag>
+                      {t.completed ? (
+                        <Stamp variant="mastered">
+                          <CheckCircle size={12} aria-hidden="true" />
+                          COMPLETED
+                        </Stamp>
+                      ) : null}
+                    </div>
+
+                    <h3 className="type-h3" style={{ color: 'var(--ink)' }}>
+                      {t.title}
+                    </h3>
+
+                    <p className="type-small" style={{ color: 'var(--ink-muted)' }}>
+                      {t.description}
+                    </p>
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      paddingTop: 'var(--sp-3)',
+                      borderTop: '1px solid var(--paper-border-warm)',
+                      marginTop: 'auto',
+                    }}
+                  >
+                    <span className="type-label" style={{ color: 'var(--ink-soft)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <Box size={14} strokeWidth={2} aria-hidden="true" />
+                      Interactive 3D
+                    </span>
+
+                    <Button variant="primary" size="sm" to={`/virtual-learning/${t.slug}`}>
+                      <Play size={14} strokeWidth={2} aria-hidden="true" />
+                      Launch 3D
+                    </Button>
+                  </div>
+                </PaperCard>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
-

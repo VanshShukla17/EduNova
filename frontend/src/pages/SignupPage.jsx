@@ -1,21 +1,29 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { UserPlus, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { Sparkles } from 'lucide-react';
+import {
+  PaperCard,
+  Tape,
+  Field,
+  Button,
+  StickyNote,
+  ChotuMascot,
+  Tag,
+} from '../components/ui';
 
 export default function SignupPage() {
-  const navigate = useNavigate();
   const { signup } = useAuth();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: '',
     identifier: '',
     password: '',
     board: 'CBSE',
-    class: 10,
-    language: 'en'
+    class: '10',
+    language: 'en',
   });
-
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -24,17 +32,17 @@ export default function SignupPage() {
     setError('');
 
     if (!formData.name.trim()) {
-      setError('Please enter your full name');
+      setError('Please enter your name.');
       return;
     }
 
     if (!formData.identifier.trim()) {
-      setError('Please provide an email address or mobile number');
+      setError('Please provide an email address or mobile number.');
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError('Password must be at least 6 characters long.');
       return;
     }
 
@@ -48,11 +56,10 @@ export default function SignupPage() {
         password: formData.password,
         board: formData.board,
         class: Number(formData.class),
-        language: formData.language
+        language: formData.language,
       };
 
       await signup(payload);
-      // Land on dashboard as per Task 4.5
       navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Signup failed. Please try again.');
@@ -62,135 +69,142 @@ export default function SignupPage() {
   };
 
   return (
-    <div style={{ maxWidth: '440px', margin: '40px auto', padding: '0 16px' }}>
-      <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--color-primary)', fontWeight: '700', fontSize: '1.4rem' }}>
-          <Sparkles /> STEM Edu
+    <div style={{ maxWidth: '540px', margin: 'var(--sp-5) auto 0' }}>
+      <PaperCard flat style={{ padding: 'var(--sp-6)', position: 'relative' }}>
+        <Tape tone="green" rotation="1.2deg" />
+
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            top: '-30px',
+            right: '24px',
+          }}
+        >
+          <ChotuMascot size={58} />
         </div>
-        <h2 style={{ fontSize: '1.4rem', fontWeight: '700', marginTop: '8px' }}>Create Student Account</h2>
-        <p style={{ color: 'var(--color-muted)', fontSize: '0.9rem' }}>Join free STEM learning personalized to your curriculum</p>
-      </div>
 
-      <div className="card">
-        {error && <div className="alert alert-error">{error}</div>}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)', marginBottom: 'var(--sp-5)' }}>
+          <Tag variant="ready">Onboarding · Class 9–12</Tag>
+          <h1 className="type-h1" style={{ color: 'var(--ink)' }}>
+            Create Your Notebook
+          </h1>
+          <p className="type-hand" style={{ color: 'var(--hand-rust)', fontSize: '1.35rem' }}>
+            Personalize your board, class, and preferred language in under a minute.
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="name">Full Name</label>
-            <input
-              id="name"
-              type="text"
-              className="form-input"
-              placeholder="e.g. Kushal Kumar"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              required
-            />
-          </div>
+        {error ? (
+          <StickyNote
+            tone="pink"
+            body
+            rotation="-0.4deg"
+            role="alert"
+            style={{ marginBottom: 'var(--sp-4)', fontWeight: 600 }}
+          >
+            {error}
+          </StickyNote>
+        ) : null}
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="identifier">Email or Phone Number</label>
-            <input
-              id="identifier"
-              type="text"
-              className="form-input"
-              placeholder="name@example.com or 9876543210"
-              value={formData.identifier}
-              onChange={(e) => setFormData({ ...formData, identifier: e.target.value })}
-              required
-            />
-          </div>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
+          <Field
+            id="signup-name"
+            label="Full Name"
+            type="text"
+            placeholder="e.g. Aarav Sharma"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            required
+          />
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              className="form-input"
-              placeholder="At least 6 characters"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              required
-            />
-          </div>
+          <Field
+            id="signup-id"
+            label="Email or Mobile Number"
+            type="text"
+            placeholder="e.g. aarav@example.com or 9876543210"
+            value={formData.identifier}
+            onChange={(e) => setFormData({ ...formData, identifier: e.target.value })}
+            required
+          />
 
-          {/* Board Selector */}
-          <div className="form-group">
-            <label className="form-label">Education Board</label>
-            <div className="pill-group">
-              <button
-                type="button"
-                className={`pill-btn ${formData.board === 'CBSE' ? 'active' : ''}`}
-                onClick={() => setFormData({ ...formData, board: 'CBSE' })}
-              >
-                CBSE
-              </button>
-              <button
-                type="button"
-                className={`pill-btn ${formData.board === 'State Board' ? 'active' : ''}`}
-                onClick={() => setFormData({ ...formData, board: 'State Board' })}
-              >
-                State Board
-              </button>
-            </div>
-          </div>
+          <Field
+            id="signup-password"
+            label="Password"
+            type="password"
+            placeholder="At least 6 characters"
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            helper="Use 6 or more characters so your offline progress stays protected."
+            required
+          />
 
-          {/* Class Selector */}
-          <div className="form-group">
-            <label className="form-label">Class Standard</label>
-            <div className="pill-group">
-              {[9, 10, 11, 12].map((cls) => (
-                <button
-                  key={cls}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <span className="field__label">Educational Board</span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 'var(--sp-3)' }}>
+              {['CBSE', 'State Board'].map((boardOption) => (
+                <Button
+                  key={boardOption}
                   type="button"
-                  className={`pill-btn ${formData.class === cls ? 'active' : ''}`}
-                  onClick={() => setFormData({ ...formData, class: cls })}
+                  variant={formData.board === boardOption ? 'primary' : 'note'}
+                  onClick={() => setFormData({ ...formData, board: boardOption })}
+                  aria-pressed={formData.board === boardOption ? 'true' : 'false'}
                 >
-                  Class {cls}
-                </button>
+                  {boardOption}
+                </Button>
               ))}
             </div>
           </div>
 
-          {/* Language Selector */}
-          <div className="form-group">
-            <label className="form-label">Preferred Language</label>
-            <div className="pill-group">
-              <button
-                type="button"
-                className={`pill-btn ${formData.language === 'en' ? 'active' : ''}`}
-                onClick={() => setFormData({ ...formData, language: 'en' })}
-              >
-                English
-              </button>
-              <button
-                type="button"
-                className={`pill-btn ${formData.language === 'hi' ? 'active' : ''}`}
-                onClick={() => setFormData({ ...formData, language: 'hi' })}
-              >
-                हिंदी (Hindi)
-              </button>
-            </div>
+          <div className="paper-grid paper-grid--2" style={{ gap: 'var(--sp-3)' }}>
+            <Field
+              id="signup-class"
+              as="select"
+              label="Class"
+              value={formData.class}
+              onChange={(e) => setFormData({ ...formData, class: e.target.value })}
+            >
+              <option value="9">Class 9</option>
+              <option value="10">Class 10</option>
+              <option value="11">Class 11</option>
+              <option value="12">Class 12</option>
+            </Field>
+
+            <Field
+              id="signup-lang"
+              as="select"
+              label="Language"
+              value={formData.language}
+              onChange={(e) => setFormData({ ...formData, language: e.target.value })}
+            >
+              <option value="en">English (EN)</option>
+              <option value="hi">Hindi (हिंदी)</option>
+              <option value="mr">Marathi (मराठी)</option>
+            </Field>
           </div>
 
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={submitting}
-            style={{ marginTop: '8px' }}
-          >
-            {submitting ? 'Creating account...' : 'Create Account & Start Learning'}
-          </button>
+          <Button type="submit" variant="primary" fullWidth disabled={submitting}>
+            <UserPlus size={18} strokeWidth={2} aria-hidden="true" />
+            {submitting ? 'Setting up Notebook...' : 'Create Account'}
+            {!submitting ? <ArrowRight size={16} strokeWidth={2} aria-hidden="true" /> : null}
+          </Button>
         </form>
-      </div>
 
-      <div style={{ textAlign: 'center', fontSize: '0.92rem', color: 'var(--color-muted)' }}>
-        Already have an account?{' '}
-        <Link to="/login" style={{ color: 'var(--color-primary)', fontWeight: '600', textDecoration: 'none' }}>
-          Log In
-        </Link>
-      </div>
+        <p
+          className="type-small"
+          style={{
+            textAlign: 'center',
+            color: 'var(--ink-muted)',
+            marginTop: 'var(--sp-5)',
+            paddingTop: 'var(--sp-4)',
+            borderTop: '1px solid var(--paper-border-warm)',
+          }}
+        >
+          Already have a notebook?{' '}
+          <Link to="/login" style={{ color: 'var(--emerald-700)', fontWeight: 700 }}>
+            Log in
+          </Link>
+        </p>
+      </PaperCard>
     </div>
   );
 }
-

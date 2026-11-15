@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Eye, RotateCcw, ZoomIn, Sun, Layers, Info } from 'lucide-react';
+import { RotateCcw, Sun } from 'lucide-react';
+import { PaperCard, Tag, Button } from './ui';
 
 const SPECIMENS = [
   {
@@ -68,52 +69,42 @@ export default function MicroscopeSimulation() {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1.2fr) minmax(280px, 1fr)', gap: '20px', alignItems: 'start' }}>
+    <div className="paper-grid paper-grid--2" style={{ alignItems: 'start' }}>
       {/* Microscope Circular Field of View Canvas */}
-      <div
-        className="card"
+      <PaperCard
+        flat
         style={{
-          padding: '16px',
+          padding: 'var(--sp-4)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          backgroundColor: '#0F172A',
-          color: 'white',
-          borderRadius: 'var(--radius-md)'
+          background: 'var(--slate-950)',
+          borderColor: 'var(--dark-paper-border)',
+          color: 'var(--white)',
         }}
       >
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-          <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#60A5FA' }}>
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--sp-2)', marginBottom: 'var(--sp-3)' }}>
+          <span className="type-small" style={{ fontWeight: 700, color: 'var(--physics-soft)' }}>
             Optical Eyepiece Field of View ({totalMagnification}x)
           </span>
-          <span
-            style={{
-              fontSize: '0.75rem',
-              fontWeight: '700',
-              padding: '2px 8px',
-              borderRadius: '999px',
-              backgroundColor: isInSharpFocus ? '#059669' : '#DC2626',
-              color: 'white'
-            }}
-          >
-            {isInSharpFocus ? '✓ Sharp Focus' : 'Blurry (Adjust Focus Knobs)'}
-          </span>
+          <Tag variant={isInSharpFocus ? 'verified' : 'paper'}>
+            {isInSharpFocus ? 'Sharp Focus' : 'Blurry (Adjust Focus Knobs)'}
+          </Tag>
         </div>
 
         {/* Circular Eyepiece Aperture */}
         <div
           style={{
-            width: '320px',
-            height: '320px',
+            width: 'min(320px, 100%)',
+            aspectRatio: '1 / 1',
             borderRadius: '50%',
             overflow: 'hidden',
-            border: '6px solid #334155',
-            boxShadow: 'inset 0 0 40px rgba(0,0,0,0.8), 0 10px 25px rgba(0,0,0,0.5)',
+            border: '6px solid var(--slate-700)',
             position: 'relative',
-            backgroundColor: '#000000',
+            background: 'var(--desk-950)',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
           }}
         >
           {/* Microscope Field Background with Illumination */}
@@ -121,23 +112,27 @@ export default function MicroscopeSimulation() {
             style={{
               width: '100%',
               height: '100%',
-              backgroundColor: selectedSpecimen.id === 'onion_peel' ? '#FEE2E2' : selectedSpecimen.id === 'cheek_cell' ? '#DBEAFE' : '#ECFDF5',
+              background:
+                selectedSpecimen.id === 'onion_peel'
+                  ? 'var(--note-pink)'
+                  : selectedSpecimen.id === 'cheek_cell'
+                  ? 'var(--physics-soft)'
+                  : 'var(--biology-soft)',
               opacity: lightIntensity / 100,
               filter: `blur(${blurPx}px)`,
               transition: 'filter 0.15s ease, opacity 0.2s ease',
               position: 'relative',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
             }}
           >
             {/* SVG Visual of Biological Specimen */}
             {selectedSpecimen.id === 'onion_peel' && (
               <svg viewBox="0 0 200 200" style={{ width: '90%', height: '90%', transform: `scale(${objectiveLens / 35})` }}>
-                {/* Brick-like rectangular plant cells */}
                 {[20, 60, 100, 140].map((y, rowIdx) => (
                   <g key={y}>
-                    {[10, 70, 130].map((x, colIdx) => (
+                    {[10, 70, 130].map((x) => (
                       <g key={x}>
                         <rect
                           x={x + (rowIdx % 2 === 0 ? 0 : 25)}
@@ -145,25 +140,23 @@ export default function MicroscopeSimulation() {
                           width="55"
                           height="35"
                           rx="3"
-                          fill="#FECDD3"
-                          stroke="#E11D48"
+                          fill="var(--red-soft)"
+                          stroke="var(--red-600)"
                           strokeWidth="2.5"
                         />
-                        {/* Dense nucleus */}
                         <circle
                           cx={x + (rowIdx % 2 === 0 ? 0 : 25) + 38}
                           cy={y + 18}
                           r="5.5"
-                          fill="#9F1239"
+                          fill="var(--red-ink)"
                         />
-                        {/* Vacuole indication */}
                         <ellipse
                           cx={x + (rowIdx % 2 === 0 ? 0 : 25) + 20}
                           cy={y + 18}
                           rx="12"
                           ry="8"
-                          fill="#FFE4E6"
-                          stroke="#FDA4AF"
+                          fill="var(--note-pink)"
+                          stroke="var(--red-border)"
                           strokeWidth="1"
                         />
                       </g>
@@ -175,142 +168,144 @@ export default function MicroscopeSimulation() {
 
             {selectedSpecimen.id === 'cheek_cell' && (
               <svg viewBox="0 0 200 200" style={{ width: '85%', height: '85%', transform: `scale(${objectiveLens / 35})` }}>
-                {/* Irregular animal cells */}
                 <path
                   d="M 60 70 C 40 90, 45 130, 75 140 C 115 150, 140 120, 135 90 C 130 60, 90 50, 60 70 Z"
-                  fill="#BFDBFE"
-                  stroke="#2563EB"
+                  fill="var(--physics-soft)"
+                  stroke="var(--physics)"
                   strokeWidth="2.5"
                 />
-                <circle cx="95" cy="100" r="7.5" fill="#1E3A8A" />
-
+                <circle cx="95" cy="100" r="7.5" fill="var(--physics-ink)" />
                 <path
                   d="M 120 40 C 105 50, 110 75, 130 80 C 150 85, 170 70, 165 50 C 160 30, 135 25, 120 40 Z"
-                  fill="#BFDBFE"
-                  stroke="#2563EB"
+                  fill="var(--physics-soft)"
+                  stroke="var(--physics)"
                   strokeWidth="2"
                   opacity="0.8"
                 />
-                <circle cx="140" cy="55" r="5" fill="#1E3A8A" />
+                <circle cx="140" cy="55" r="5" fill="var(--physics-ink)" />
               </svg>
             )}
 
             {selectedSpecimen.id === 'amoeba' && (
               <svg viewBox="0 0 200 200" style={{ width: '85%', height: '85%', transform: `scale(${objectiveLens / 35})` }}>
-                {/* Amoeboid irregular pseudopodial shape */}
                 <path
                   d="M 80 50 C 50 40, 30 70, 40 100 C 30 130, 60 160, 95 155 C 130 150, 160 170, 170 135 C 180 100, 150 85, 145 60 C 140 30, 105 55, 80 50 Z"
-                  fill="#A7F3D0"
-                  stroke="#059669"
+                  fill="var(--biology-soft)"
+                  stroke="var(--biology)"
                   strokeWidth="3"
                 />
-                <circle cx="105" cy="95" r="9" fill="#065F46" />
-                <circle cx="70" cy="85" r="6" fill="#6EE7B7" stroke="#047857" strokeWidth="1.5" />
-                <circle cx="135" cy="120" r="5" fill="#34D399" />
+                <circle cx="105" cy="95" r="9" fill="var(--biology-ink)" />
+                <circle cx="70" cy="85" r="6" fill="var(--emerald-soft)" stroke="var(--biology-ink)" strokeWidth="1.5" />
+                <circle cx="135" cy="120" r="5" fill="var(--biology)" />
               </svg>
             )}
           </div>
 
           {/* Reticle / Crosshair Scale Overlay */}
-          <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
-            <circle cx="160" cy="160" r="158" fill="none" stroke="#475569" strokeWidth="2" />
-            <line x1="160" y1="150" x2="160" y2="170" stroke="#94A3B8" strokeWidth="1" />
-            <line x1="150" y1="160" x2="170" y2="160" stroke="#94A3B8" strokeWidth="1" />
+          <svg viewBox="0 0 320 320" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}>
+            <circle cx="160" cy="160" r="158" fill="none" stroke="var(--slate-700)" strokeWidth="2" />
+            <line x1="160" y1="150" x2="160" y2="170" stroke="var(--ink-soft)" strokeWidth="1" />
+            <line x1="150" y1="160" x2="170" y2="160" stroke="var(--ink-soft)" strokeWidth="1" />
           </svg>
         </div>
 
         {/* Status Callout */}
-        <div style={{ marginTop: '14px', fontSize: '0.8rem', color: '#94A3B8', textAlign: 'center' }}>
+        <div className="type-small" style={{ marginTop: 'var(--sp-3)', color: 'var(--on-desk-muted)', textAlign: 'center' }}>
           Specimen: <strong>{selectedSpecimen.name}</strong> • Stain: <strong>{selectedSpecimen.stain}</strong>
         </div>
-      </div>
+      </PaperCard>
 
       {/* Right Column: Microscope Controls */}
-      <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <PaperCard flat style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
         <div>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: '700', marginBottom: '4px' }}>
+          <h2 className="type-h3" style={{ marginBottom: '4px' }}>
             Microscope Controls
           </h2>
-          <p style={{ fontSize: '0.82rem', color: 'var(--color-muted)' }}>
+          <p className="type-small" style={{ color: 'var(--ink-muted)', margin: 0 }}>
             Switch biological specimen slides, change objective lens magnification, and tune fine focus knobs.
           </p>
         </div>
 
         {/* Specimen Slide Selector */}
         <div>
-          <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--color-muted)' }}>Select Biological Slide</label>
-          <div style={{ display: 'grid', gap: '6px', marginTop: '6px' }}>
+          <label className="type-small" style={{ fontWeight: 700, color: 'var(--ink-muted)' }}>
+            Select Biological Slide
+          </label>
+          <div style={{ display: 'grid', gap: 'var(--sp-2)', marginTop: 'var(--sp-2)' }}>
             {SPECIMENS.map((s) => (
-              <button
+              <Button
                 key={s.id}
+                size="sm"
+                variant={selectedSpecimen.id === s.id ? 'primary' : 'ghost'}
                 onClick={() => {
                   setSelectedSpecimen(s);
                   setSelectedOrganelle(null);
                 }}
-                className={`btn ${selectedSpecimen.id === s.id ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ textAlign: 'left', padding: '8px 12px', fontSize: '0.82rem' }}
+                style={{ justifyContent: 'flex-start' }}
               >
                 {s.name}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
 
         {/* Objective Lens Turret */}
         <div>
-          <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--color-muted)' }}>
+          <label className="type-small" style={{ fontWeight: 700, color: 'var(--ink-muted)' }}>
             Objective Lens Turret (Total Magnification: {totalMagnification}x)
           </label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginTop: '6px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--sp-2)', marginTop: 'var(--sp-2)' }}>
             {[10, 40, 100].map((mag) => (
-              <button
+              <Button
                 key={mag}
+                size="sm"
+                variant={objectiveLens === mag ? 'primary' : 'ghost'}
                 onClick={() => setObjectiveLens(mag)}
-                className={`btn ${objectiveLens === mag ? 'btn-primary' : 'btn-secondary'}`}
-                style={{ padding: '8px', fontSize: '0.82rem' }}
               >
-                {mag}x ({mag * 10}x Total)
-              </button>
+                {mag}x ({mag * 10}x)
+              </Button>
             ))}
           </div>
         </div>
 
         {/* Focus Knobs */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        <div className="paper-grid paper-grid--2" style={{ gap: 'var(--sp-3)' }}>
           <div>
-            <label style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--color-muted)', display: 'flex', justifyContent: 'space-between' }}>
+            <label className="type-small" style={{ fontWeight: 700, color: 'var(--ink-muted)', display: 'flex', justifyContent: 'space-between' }}>
               <span>Coarse Focus</span>
               <span>{coarseFocus}</span>
             </label>
             <input
               type="range"
+              aria-label="Coarse focus"
               min="0"
               max="100"
               value={coarseFocus}
               onChange={(e) => setCoarseFocus(Number(e.target.value))}
-              style={{ width: '100%' }}
+              style={{ width: '100%', accentColor: 'var(--emerald-600)' }}
             />
           </div>
 
           <div>
-            <label style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--color-muted)', display: 'flex', justifyContent: 'space-between' }}>
+            <label className="type-small" style={{ fontWeight: 700, color: 'var(--ink-muted)', display: 'flex', justifyContent: 'space-between' }}>
               <span>Fine Focus</span>
               <span>{fineFocus}</span>
             </label>
             <input
               type="range"
+              aria-label="Fine focus"
               min="0"
               max="100"
               value={fineFocus}
               onChange={(e) => setFineFocus(Number(e.target.value))}
-              style={{ width: '100%' }}
+              style={{ width: '100%', accentColor: 'var(--emerald-600)' }}
             />
           </div>
         </div>
 
         {/* Substage Iris Diaphragm / Light Intensity */}
         <div>
-          <label style={{ fontSize: '0.78rem', fontWeight: '600', color: 'var(--color-muted)', display: 'flex', justifyContent: 'space-between' }}>
+          <label className="type-small" style={{ fontWeight: 700, color: 'var(--ink-muted)', display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
               <Sun size={14} /> Iris Diaphragm Aperture
             </span>
@@ -318,37 +313,34 @@ export default function MicroscopeSimulation() {
           </label>
           <input
             type="range"
+            aria-label="Light intensity"
             min="30"
             max="100"
             value={lightIntensity}
             onChange={(e) => setLightIntensity(Number(e.target.value))}
-            style={{ width: '100%' }}
+            style={{ width: '100%', accentColor: 'var(--amber-500)' }}
           />
         </div>
 
         {/* Organelle Key & Notes */}
-        <div style={{ backgroundColor: 'var(--color-background)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
-          <div style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--color-text)', marginBottom: '6px' }}>
-            Distinct Visible Organelles:
+        <div style={{ background: 'var(--paper-warm)', padding: 'var(--sp-3)', borderRadius: 'var(--r-sm)', border: '1px solid var(--paper-edge)' }}>
+          <div className="type-small" style={{ fontWeight: 700, color: 'var(--ink)', marginBottom: 'var(--sp-2)' }}>
+            Distinct Visible Organelles
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {selectedSpecimen.organelles.map((org, idx) => (
-              <div key={idx} style={{ fontSize: '0.8rem', lineHeight: '1.4' }}>
-                <strong style={{ color: 'var(--color-primary)' }}>• {org.name}: </strong>
-                <span style={{ color: 'var(--color-muted)' }}>{org.note}</span>
+              <div key={idx} className="type-small" style={{ lineHeight: 1.4 }}>
+                <strong style={{ color: 'var(--biology-ink)' }}>• {org.name}: </strong>
+                <span style={{ color: 'var(--ink-muted)' }}>{org.note}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <button
-          onClick={handleReset}
-          className="btn btn-secondary"
-          style={{ width: '100%', padding: '8px', fontSize: '0.82rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-        >
+        <Button onClick={handleReset} variant="secondary" style={{ width: '100%' }}>
           <RotateCcw size={14} /> Reset Microscope to Initial Position
-        </button>
-      </div>
+        </Button>
+      </PaperCard>
     </div>
   );
 }
