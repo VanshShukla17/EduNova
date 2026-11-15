@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Volume2, VolumeX, Play, Pause, RotateCcw, Activity, Layers, Info } from 'lucide-react';
+import { Volume2, VolumeX, Play, Pause } from 'lucide-react';
+import { Button, PaperCard } from '../../components/ui';
+import { resolveCssVar } from '../../components/ui/subjectUtils';
 
 /**
  * Waves & Sound Simulation (P2-8.5)
@@ -98,13 +100,22 @@ export default function WavesSoundSimulation() {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
+    const cGrid = resolveCssVar('--paper-edge');
+    const cAxis = resolveCssVar('--ink-soft');
+    const cPhysics = resolveCssVar('--physics');
+    const cRed = resolveCssVar('--red-600');
+    const cInk = resolveCssVar('--ink');
+    const cMuted = resolveCssVar('--ink-muted');
+    const cEmerald = resolveCssVar('--emerald-600');
+    const cMaths = resolveCssVar('--maths');
+
     const render = () => {
       const width = canvas.width;
       const height = canvas.height;
       ctx.clearRect(0, 0, width, height);
 
       // Background grid
-      ctx.strokeStyle = '#F1F5F9';
+      ctx.strokeStyle = cGrid;
       ctx.lineWidth = 1;
       for (let x = 0; x < width; x += 30) {
         ctx.beginPath();
@@ -122,7 +133,7 @@ export default function WavesSoundSimulation() {
       const centerY = height / 2;
 
       // Equilibrium baseline
-      ctx.strokeStyle = '#CBD5E1';
+      ctx.strokeStyle = cAxis;
       ctx.setLineDash([4, 4]);
       ctx.beginPath();
       ctx.moveTo(0, centerY);
@@ -137,7 +148,7 @@ export default function WavesSoundSimulation() {
       if (waveType === 'transverse') {
         // Draw primary transverse sine wave
         ctx.beginPath();
-        ctx.strokeStyle = '#2563EB';
+        ctx.strokeStyle = cPhysics;
         ctx.lineWidth = 3;
         for (let x = 0; x < width; x++) {
           const y = centerY + amplitude * Math.sin(k * x - omega * t);
@@ -151,7 +162,7 @@ export default function WavesSoundSimulation() {
           const y = centerY + amplitude * Math.sin(k * x - omega * t);
           ctx.beginPath();
           ctx.arc(x, y, 5, 0, Math.PI * 2);
-          ctx.fillStyle = '#DC2626';
+          ctx.fillStyle = cRed;
           ctx.fill();
 
           // Particle velocity vector indicator
@@ -159,13 +170,13 @@ export default function WavesSoundSimulation() {
           ctx.beginPath();
           ctx.moveTo(x, y);
           ctx.lineTo(x, y + vy);
-          ctx.strokeStyle = '#DC2626';
+          ctx.strokeStyle = cRed;
           ctx.lineWidth = 2;
           ctx.stroke();
         }
 
         // Labels
-        ctx.fillStyle = '#1E293B';
+        ctx.fillStyle = cInk;
         ctx.font = '11px sans-serif';
         ctx.fillText('Crest (Max +A)', 10, centerY - amplitude - 8);
         ctx.fillText('Trough (Min -A)', 10, centerY + amplitude + 16);
@@ -180,35 +191,35 @@ export default function WavesSoundSimulation() {
           const py = centerY - ((rows - 1) * spacingY) / 2 + r * spacingY;
           for (let c = 0; c < cols; c++) {
             const baseX = c * spacingX;
-            // Horizontal displacement: s = s_0 * cos(kx - omega*t)
             const dx = (amplitude * 0.6) * Math.cos(k * baseX - omega * t);
             const px = baseX + dx;
 
             ctx.beginPath();
             ctx.arc(px, py, 3.5, 0, Math.PI * 2);
-            // Color based on density/compression
             const compression = -Math.sin(k * baseX - omega * t);
             if (compression > 0.4) {
-              ctx.fillStyle = '#EF4444'; // Dense (Compression)
+              ctx.fillStyle = cRed; // Dense (Compression)
             } else if (compression < -0.4) {
-              ctx.fillStyle = '#3B82F6'; // Rare (Rarefaction)
+              ctx.fillStyle = cPhysics; // Rare (Rarefaction)
             } else {
-              ctx.fillStyle = '#64748B';
+              ctx.fillStyle = cMuted;
             }
             ctx.fill();
           }
         }
 
         // Compression / Rarefaction annotations
-        ctx.fillStyle = '#DC2626';
+        ctx.fillStyle = cRed;
         ctx.font = '12px sans-serif';
         ctx.fillText('Compression (High Pressure)', 30, centerY - 65);
-        ctx.fillStyle = '#2563EB';
+        ctx.fillStyle = cPhysics;
         ctx.fillText('Rarefaction (Low Pressure)', width - 210, centerY - 65);
       } else if (waveType === 'superposition') {
-        // Wave 1: Blue
+        // Wave 1: Physics blue
+        ctx.save();
+        ctx.globalAlpha = 0.45;
         ctx.beginPath();
-        ctx.strokeStyle = 'rgba(59, 130, 246, 0.4)';
+        ctx.strokeStyle = cPhysics;
         ctx.lineWidth = 2;
         for (let x = 0; x < width; x++) {
           const y1 = centerY + (amplitude * 0.6) * Math.sin(k * x - omega * t);
@@ -217,9 +228,9 @@ export default function WavesSoundSimulation() {
         }
         ctx.stroke();
 
-        // Wave 2: Green (opposite direction, standing wave)
+        // Wave 2: Emerald green (opposite direction, standing wave)
         ctx.beginPath();
-        ctx.strokeStyle = 'rgba(16, 185, 129, 0.4)';
+        ctx.strokeStyle = cEmerald;
         ctx.lineWidth = 2;
         for (let x = 0; x < width; x++) {
           const y2 = centerY + (amplitude * 0.6) * Math.sin(k * x + omega * t);
@@ -227,10 +238,11 @@ export default function WavesSoundSimulation() {
           else ctx.lineTo(x, y2);
         }
         ctx.stroke();
+        ctx.restore();
 
-        // Resultant Superposition Wave: Purple
+        // Resultant Superposition Wave: Maths purple
         ctx.beginPath();
-        ctx.strokeStyle = '#7C3AED';
+        ctx.strokeStyle = cMaths;
         ctx.lineWidth = 3;
         for (let x = 0; x < width; x++) {
           const y1 = (amplitude * 0.6) * Math.sin(k * x - omega * t);
@@ -241,7 +253,7 @@ export default function WavesSoundSimulation() {
         }
         ctx.stroke();
 
-        ctx.fillStyle = '#7C3AED';
+        ctx.fillStyle = cMaths;
         ctx.font = 'bold 12px sans-serif';
         ctx.fillText('Resultant Wave y = y₁ + y₂ (Standing Wave Interference)', 20, 25);
       }
@@ -259,80 +271,52 @@ export default function WavesSoundSimulation() {
   const wavelength = Math.round(340 / (soundFreq || 1) * 100) / 100;
 
   return (
-    <div style={{ backgroundColor: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+    <PaperCard flat style={{ padding: 'var(--sp-4)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
       {/* Top Controls Toolbar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-        <div style={{ display: 'flex', backgroundColor: '#F1F5F9', borderRadius: '8px', padding: '3px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
           {[
             { id: 'transverse', label: 'Transverse Wave' },
             { id: 'longitudinal', label: 'Longitudinal Wave' },
             { id: 'superposition', label: 'Superposition' }
-          ].map(m => (
-            <button
+          ].map((m) => (
+            <Button
               key={m.id}
               type="button"
+              size="sm"
+              variant={waveType === m.id ? 'primary' : 'secondary'}
               onClick={() => setWaveType(m.id)}
-              style={{
-                padding: '6px 12px',
-                fontSize: '0.78rem',
-                fontWeight: '700',
-                borderRadius: '6px',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: waveType === m.id ? '#2563EB' : 'transparent',
-                color: waveType === m.id ? '#FFFFFF' : '#64748B'
-              }}
             >
               {m.label}
-            </button>
+            </Button>
           ))}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
+          <Button
             type="button"
+            size="sm"
+            variant="secondary"
             onClick={() => setIsAnimating(!isAnimating)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '6px 12px',
-              borderRadius: '8px',
-              border: '1px solid #CBD5E1',
-              backgroundColor: '#F8FAFC',
-              fontSize: '0.78rem',
-              fontWeight: '600',
-              cursor: 'pointer'
-            }}
           >
-            {isAnimating ? <Pause size={14} /> : <Play size={14} />} {isAnimating ? 'Pause' : 'Play'}
-          </button>
+            {isAnimating ? <Pause size={14} /> : <Play size={14} />}
+            {isAnimating ? 'Pause' : 'Play'}
+          </Button>
 
-          <button
+          <Button
             type="button"
+            size="sm"
+            variant={isPlayingAudio ? 'danger' : 'primary'}
             onClick={toggleAudio}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '6px 12px',
-              borderRadius: '8px',
-              border: 'none',
-              backgroundColor: isPlayingAudio ? '#EF4444' : '#10B981',
-              color: '#FFFFFF',
-              fontSize: '0.78rem',
-              fontWeight: '700',
-              cursor: 'pointer'
-            }}
           >
             {isPlayingAudio ? <VolumeX size={15} /> : <Volume2 size={15} />}
             {isPlayingAudio ? 'Mute Tone' : 'Play Sound Tone'}
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Main Wave Canvas */}
-      <div style={{ width: '100%', height: '220px', backgroundColor: '#F8FAFC', borderRadius: '10px', overflow: 'hidden', border: '1px solid #E2E8F0', position: 'relative' }}>
+      <div style={{ width: '100%', height: '220px', backgroundColor: 'var(--paper-warm)', borderRadius: 'var(--r-md)', overflow: 'hidden', border: '1px solid var(--paper-edge)', position: 'relative' }}>
         <canvas
           ref={canvasRef}
           width={760}
@@ -342,38 +326,38 @@ export default function WavesSoundSimulation() {
       </div>
 
       {/* Numerical Metrics Bar */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
-        <div style={{ padding: '8px 12px', backgroundColor: '#EFF6FF', borderRadius: '8px', border: '1px solid #BFDBFE' }}>
-          <div style={{ fontSize: '0.7rem', color: '#1D4ED8', fontWeight: '700' }}>Wave Speed (v)</div>
-          <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#1E3A8A' }}>340 m/s</div>
-          <div style={{ fontSize: '0.65rem', color: '#60A5FA' }}>Speed of sound in dry air (20°C)</div>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--sp-2)' }}>
+        <PaperCard flat style={{ padding: 'var(--sp-2) var(--sp-3)', backgroundColor: 'var(--physics-soft)', borderColor: 'var(--physics)' }}>
+          <div style={{ fontSize: '0.7rem', color: 'var(--physics-ink)', fontWeight: 700 }}>Wave Speed (v)</div>
+          <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-mono)' }}>340 m/s</div>
+          <div style={{ fontSize: '0.68rem', color: 'var(--physics-ink)' }}>Speed of sound in dry air (20°C)</div>
+        </PaperCard>
 
-        <div style={{ padding: '8px 12px', backgroundColor: '#FAF5FF', borderRadius: '8px', border: '1px solid #E9D5FF' }}>
-          <div style={{ fontSize: '0.7rem', color: '#7E22CE', fontWeight: '700' }}>Frequency (f)</div>
-          <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#581C87' }}>{soundFreq} Hz</div>
-          <div style={{ fontSize: '0.65rem', color: '#A855F7' }}>Pitch: {soundFreq > 800 ? 'High / Shrill' : 'Low / Bass'}</div>
-        </div>
+        <PaperCard flat style={{ padding: 'var(--sp-2) var(--sp-3)', backgroundColor: 'var(--maths-soft)', borderColor: 'var(--maths)' }}>
+          <div style={{ fontSize: '0.7rem', color: 'var(--maths-ink)', fontWeight: 700 }}>Frequency (f)</div>
+          <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-mono)' }}>{soundFreq} Hz</div>
+          <div style={{ fontSize: '0.68rem', color: 'var(--maths-ink)' }}>Pitch: {soundFreq > 800 ? 'High / Shrill' : 'Low / Bass'}</div>
+        </PaperCard>
 
-        <div style={{ padding: '8px 12px', backgroundColor: '#F0FDF4', borderRadius: '8px', border: '1px solid #BBF7D0' }}>
-          <div style={{ fontSize: '0.7rem', color: '#15803D', fontWeight: '700' }}>Wavelength (λ)</div>
-          <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#14532D' }}>{wavelength} m</div>
-          <div style={{ fontSize: '0.65rem', color: '#4ADE80' }}>λ = v / f</div>
-        </div>
+        <PaperCard flat style={{ padding: 'var(--sp-2) var(--sp-3)', backgroundColor: 'var(--emerald-soft)', borderColor: 'var(--emerald-600)' }}>
+          <div style={{ fontSize: '0.7rem', color: 'var(--emerald-800)', fontWeight: 700 }}>Wavelength (λ)</div>
+          <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--emerald-800)', fontFamily: 'var(--font-mono)' }}>{wavelength} m</div>
+          <div style={{ fontSize: '0.68rem', color: 'var(--emerald-700)' }}>λ = v / f</div>
+        </PaperCard>
 
-        <div style={{ padding: '8px 12px', backgroundColor: '#FFFBEB', borderRadius: '8px', border: '1px solid #FDE68A' }}>
-          <div style={{ fontSize: '0.7rem', color: '#B45309', fontWeight: '700' }}>Amplitude (A)</div>
-          <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#78350F' }}>{amplitude} px</div>
-          <div style={{ fontSize: '0.65rem', color: '#F59E0B' }}>Loudness ∝ A²</div>
-        </div>
+        <PaperCard flat style={{ padding: 'var(--sp-2) var(--sp-3)', backgroundColor: 'var(--amber-soft)', borderColor: 'var(--amber-500)' }}>
+          <div style={{ fontSize: '0.7rem', color: 'var(--amber-ink)', fontWeight: 700 }}>Amplitude (A)</div>
+          <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--amber-ink)', fontFamily: 'var(--font-mono)' }}>{amplitude} px</div>
+          <div style={{ fontSize: '0.68rem', color: 'var(--amber-ink)' }}>Loudness ∝ A²</div>
+        </PaperCard>
       </div>
 
       {/* Interactive Controls Sliders */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', padding: '12px', backgroundColor: '#F8FAFC', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+      <PaperCard flat style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--sp-3)', padding: 'var(--sp-3)', backgroundColor: 'var(--paper-warm)' }}>
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: '600', marginBottom: '4px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 700, marginBottom: '4px' }}>
             <span>Visual Frequency:</span>
-            <span>{frequency} Hz</span>
+            <span style={{ fontFamily: 'var(--font-mono)' }}>{frequency} Hz</span>
           </div>
           <input
             type="range"
@@ -382,14 +366,15 @@ export default function WavesSoundSimulation() {
             step="0.5"
             value={frequency}
             onChange={(e) => setFrequency(parseFloat(e.target.value))}
-            style={{ width: '100%', cursor: 'pointer' }}
+            aria-label="Visual Frequency in Hz"
+            style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--physics)' }}
           />
         </div>
 
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: '600', marginBottom: '4px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 700, marginBottom: '4px' }}>
             <span>Wave Amplitude:</span>
-            <span>{amplitude} px</span>
+            <span style={{ fontFamily: 'var(--font-mono)' }}>{amplitude} px</span>
           </div>
           <input
             type="range"
@@ -397,15 +382,16 @@ export default function WavesSoundSimulation() {
             max="60"
             step="2"
             value={amplitude}
-            onChange={(e) => setAmplitude(parseInt(e.target.value))}
-            style={{ width: '100%', cursor: 'pointer' }}
+            onChange={(e) => setAmplitude(parseInt(e.target.value, 10))}
+            aria-label="Wave Amplitude in pixels"
+            style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--physics)' }}
           />
         </div>
 
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: '600', marginBottom: '4px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 700, marginBottom: '4px' }}>
             <span>Audible Tone Frequency:</span>
-            <span>{soundFreq} Hz</span>
+            <span style={{ fontFamily: 'var(--font-mono)' }}>{soundFreq} Hz</span>
           </div>
           <input
             type="range"
@@ -413,15 +399,16 @@ export default function WavesSoundSimulation() {
             max="1200"
             step="10"
             value={soundFreq}
-            onChange={(e) => setSoundFreq(parseInt(e.target.value))}
-            style={{ width: '100%', cursor: 'pointer' }}
+            onChange={(e) => setSoundFreq(parseInt(e.target.value, 10))}
+            aria-label="Audible Tone Frequency in Hz"
+            style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--maths)' }}
           />
         </div>
 
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: '600', marginBottom: '4px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 700, marginBottom: '4px' }}>
             <span>Audio Volume (Mute safe):</span>
-            <span>{Math.round(volume * 100)}%</span>
+            <span style={{ fontFamily: 'var(--font-mono)' }}>{Math.round(volume * 100)}%</span>
           </div>
           <input
             type="range"
@@ -430,11 +417,12 @@ export default function WavesSoundSimulation() {
             step="0.05"
             value={volume}
             onChange={(e) => setVolume(parseFloat(e.target.value))}
-            style={{ width: '100%', cursor: 'pointer' }}
+            aria-label="Audio Volume"
+            style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--emerald-600)' }}
           />
         </div>
-      </div>
-    </div>
+      </PaperCard>
+    </PaperCard>
   );
 }
 

@@ -1,40 +1,38 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Sliders, HelpCircle } from 'lucide-react';
+import { PaperCard, Tag } from '../../components/ui';
 
 export default function ConicSectionsSimulation() {
   const mountRef = useRef(null);
   const [planeAngle, setPlaneAngle] = useState(90); // beta in degrees: 15 to 90
   const [planeHeight, setPlaneHeight] = useState(0.8); // translation along axis
 
-  const alpha = 45; // cone semi-vertical angle in degrees
-
   // Conic classification
   let conicType = '';
   let eccentricity = '';
   let equation = '';
-  let color = '#2563EB';
+  let color = 'var(--physics)';
 
   if (planeAngle >= 88) {
     conicType = 'Circle (वृत्त)';
     eccentricity = 'e = 0';
     equation = 'x² + y² = r²';
-    color = '#2563EB';
+    color = 'var(--physics)';
   } else if (planeAngle > 46) {
     conicType = 'Ellipse (दीर्घवृत्त)';
     eccentricity = '0 < e < 1';
     equation = 'x²/a² + y²/b² = 1';
-    color = '#16A34A';
+    color = 'var(--biology)';
   } else if (planeAngle >= 44 && planeAngle <= 46) {
     conicType = 'Parabola (परवलय)';
     eccentricity = 'e = 1';
     equation = 'y² = 4ax';
-    color = '#EA580C';
+    color = 'var(--chemistry)';
   } else {
     conicType = 'Hyperbola (अतिपरवलय)';
     eccentricity = 'e > 1';
     equation = 'x²/a² - y²/b² = 1';
-    color = '#DC2626';
+    color = 'var(--red-600)';
   }
 
   useEffect(() => {
@@ -167,28 +165,28 @@ export default function ConicSectionsSimulation() {
   }, [planeAngle, planeHeight]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
       {/* 3D Viewport */}
-      <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+      <div style={{ position: 'relative', borderRadius: 'var(--r-md)', overflow: 'hidden', border: '1px solid var(--dark-paper-border)', backgroundColor: 'var(--slate-950)' }}>
         <div ref={mountRef} style={{ width: '100%', height: '340px', cursor: 'grab' }} />
 
         {/* Live Identification Badge */}
-        <div style={{ position: 'absolute', top: '12px', left: '12px', backgroundColor: 'rgba(15, 23, 42, 0.85)', padding: '8px 14px', borderRadius: '8px', border: `2px solid ${color}`, backdropFilter: 'blur(4px)' }}>
-          <div style={{ fontSize: '0.7rem', color: '#94A3B8', fontWeight: '700' }}>INTERSECTION CONIC SECTION</div>
-          <div style={{ fontSize: '1.05rem', fontWeight: '800', color: '#FFFFFF' }}>{conicType}</div>
+        <div style={{ position: 'absolute', top: '12px', left: '12px', backgroundColor: 'var(--slate-900)', padding: '8px 14px', borderRadius: 'var(--r-md)', border: `2px solid ${color}` }}>
+          <div style={{ fontSize: '0.68rem', color: 'var(--on-desk-muted)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>INTERSECTION CONIC SECTION</div>
+          <div style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--white)' }}>{conicType}</div>
         </div>
 
-        <div style={{ position: 'absolute', bottom: '12px', right: '12px', backgroundColor: 'rgba(15, 23, 42, 0.8)', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', color: '#CBD5E1' }}>
+        <div style={{ position: 'absolute', bottom: '12px', right: '12px', backgroundColor: 'var(--slate-900)', border: '1px solid var(--dark-paper-border)', padding: '6px 12px', borderRadius: 'var(--r-sm)', fontSize: '0.75rem', color: 'var(--on-desk)' }}>
           Drag to orbit 3D view
         </div>
       </div>
 
       {/* Angle & Position Sliders */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
+      <PaperCard flat style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--sp-3)', padding: 'var(--sp-4)' }}>
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: '700', marginBottom: '4px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', fontWeight: 700, marginBottom: '4px' }}>
             <span>Cutting Plane Angle (β)</span>
-            <span style={{ color }}>{planeAngle}°</span>
+            <Tag tone="maths">{planeAngle}°</Tag>
           </div>
           <input
             type="range"
@@ -196,9 +194,10 @@ export default function ConicSectionsSimulation() {
             max={90}
             value={planeAngle}
             onChange={(e) => setPlaneAngle(Number(e.target.value))}
-            style={{ width: '100%', accentColor: color }}
+            aria-label="Cutting Plane Angle beta in degrees"
+            style={{ width: '100%', accentColor: 'var(--maths)' }}
           />
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: '#94A3B8', marginTop: '2px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--ink-soft)', marginTop: '2px' }}>
             <span>Hyperbola (15°)</span>
             <span>Parabola (45°)</span>
             <span>Circle (90°)</span>
@@ -206,9 +205,9 @@ export default function ConicSectionsSimulation() {
         </div>
 
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: '700', marginBottom: '4px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', fontWeight: 700, marginBottom: '4px' }}>
             <span>Plane Height Offset</span>
-            <span style={{ color: '#475569' }}>{planeHeight}</span>
+            <Tag tone="neutral">{planeHeight}</Tag>
           </div>
           <input
             type="range"
@@ -217,25 +216,26 @@ export default function ConicSectionsSimulation() {
             step={0.1}
             value={planeHeight}
             onChange={(e) => setPlaneHeight(Number(e.target.value))}
-            style={{ width: '100%', accentColor: '#475569' }}
+            aria-label="Plane Height Offset"
+            style={{ width: '100%', accentColor: 'var(--ink-muted)' }}
           />
         </div>
-      </div>
+      </PaperCard>
 
       {/* Mathematical Readouts */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
-        <div style={{ backgroundColor: '#F8FAFC', padding: '12px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-          <div style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: '700' }}>Eccentricity</div>
-          <div style={{ fontSize: '1rem', fontWeight: '800', color }}>{eccentricity}</div>
-        </div>
-        <div style={{ backgroundColor: '#F8FAFC', padding: '12px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-          <div style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: '700' }}>Standard Equation</div>
-          <div style={{ fontSize: '0.95rem', fontWeight: '800', color: '#1E293B' }}>{equation}</div>
-        </div>
-        <div style={{ backgroundColor: '#F8FAFC', padding: '12px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-          <div style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: '700' }}>Semi-Vertical Angle (α)</div>
-          <div style={{ fontSize: '1rem', fontWeight: '800', color: '#475569' }}>45°</div>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--sp-2)' }}>
+        <PaperCard flat style={{ backgroundColor: 'var(--paper-warm)', padding: 'var(--sp-3)' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--ink-soft)', fontWeight: 700 }}>Eccentricity</div>
+          <div style={{ fontSize: '1rem', fontWeight: 800, color }}>{eccentricity}</div>
+        </PaperCard>
+        <PaperCard flat style={{ backgroundColor: 'var(--paper-warm)', padding: 'var(--sp-3)' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--ink-soft)', fontWeight: 700 }}>Standard Equation</div>
+          <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-mono)' }}>{equation}</div>
+        </PaperCard>
+        <PaperCard flat style={{ backgroundColor: 'var(--paper-warm)', padding: 'var(--sp-3)' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--ink-soft)', fontWeight: 700 }}>Semi-Vertical Angle (α)</div>
+          <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--ink-muted)', fontFamily: 'var(--font-mono)' }}>45°</div>
+        </PaperCard>
       </div>
     </div>
   );

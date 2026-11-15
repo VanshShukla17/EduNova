@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Rotate3D, Play, Pause, Info } from 'lucide-react';
+import { Play, Pause, Info } from 'lucide-react';
+import { Button, PaperCard, Tag } from '../../components/ui';
 
 const MOLECULES = {
   methane: {
@@ -227,93 +228,79 @@ export default function MoleculeViewerSimulation() {
   }, [selectedKey, autoRotate]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
       {/* Molecule Switcher Pills */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
         {Object.entries(MOLECULES).map(([key, m]) => (
-          <button
+          <Button
             key={key}
             type="button"
+            size="sm"
+            variant={selectedKey === key ? 'primary' : 'secondary'}
             onClick={() => setSelectedKey(key)}
-            style={{
-              padding: '6px 14px',
-              fontSize: '0.8rem',
-              fontWeight: '700',
-              borderRadius: '8px',
-              border: selectedKey === key ? '2px solid #3B82F6' : '1px solid #CBD5E1',
-              backgroundColor: selectedKey === key ? '#EFF6FF' : '#FFFFFF',
-              color: selectedKey === key ? '#1D4ED8' : '#475569',
-              cursor: 'pointer'
-            }}
           >
             {m.name}
-          </button>
+          </Button>
         ))}
       </div>
 
       {/* 3D Canvas Viewport */}
-      <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+      <div style={{ position: 'relative', borderRadius: 'var(--r-md)', overflow: 'hidden', border: '1px solid var(--dark-paper-border)', backgroundColor: 'var(--slate-950)' }}>
         <div ref={mountRef} style={{ width: '100%', height: '340px', cursor: 'grab' }} />
 
         {/* Orbit / Rotate Overlay Controls */}
         <div style={{ position: 'absolute', bottom: '12px', right: '12px', display: 'flex', gap: '8px' }}>
-          <button
+          <Button
             type="button"
+            size="sm"
+            variant="secondary"
             onClick={() => setAutoRotate(!autoRotate)}
-            style={{
-              padding: '6px 12px',
-              backgroundColor: 'rgba(15, 23, 42, 0.75)',
-              color: '#FFFFFF',
-              borderRadius: '8px',
-              border: '1px solid rgba(255,255,255,0.2)',
-              fontSize: '0.75rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
+            style={{ backgroundColor: 'var(--slate-900)', color: 'var(--white)', borderColor: 'var(--dark-paper-border)' }}
           >
-            {autoRotate ? <Pause size={14} /> : <Play size={14} />} {autoRotate ? 'Pause Orbit' : 'Rotate'}
-          </button>
+            {autoRotate ? <Pause size={14} /> : <Play size={14} />}
+            {autoRotate ? 'Pause Orbit' : 'Rotate'}
+          </Button>
         </div>
 
         {/* Element Legend Overlay */}
-        <div style={{ position: 'absolute', top: '12px', left: '12px', display: 'flex', gap: '10px', backgroundColor: 'rgba(15, 23, 42, 0.75)', padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', color: '#E2E8F0' }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#334155', border: '1px solid #94A3B8' }} /> C
+        <div style={{ position: 'absolute', top: '12px', left: '12px', display: 'flex', gap: '10px', backgroundColor: 'var(--slate-900)', padding: '6px 12px', borderRadius: 'var(--r-md)', border: '1px solid var(--dark-paper-border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', color: 'var(--on-desk)', fontFamily: 'var(--font-mono)' }}>
+            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: 'var(--slate-700)', border: '1px solid var(--on-desk-muted)' }} /> C
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', color: '#E2E8F0' }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#FFFFFF' }} /> H
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', color: 'var(--on-desk)', fontFamily: 'var(--font-mono)' }}>
+            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: 'var(--white)' }} /> H
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', color: '#E2E8F0' }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#DC2626' }} /> O
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', color: 'var(--on-desk)', fontFamily: 'var(--font-mono)' }}>
+            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: 'var(--red-600)' }} /> O
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', color: '#E2E8F0' }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#2563EB' }} /> N
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', color: 'var(--on-desk)', fontFamily: 'var(--font-mono)' }}>
+            <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: 'var(--physics)' }} /> N
           </div>
         </div>
       </div>
 
       {/* VSEPR Geometry Data Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
-        <div style={{ backgroundColor: '#F8FAFC', padding: '12px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-          <div style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: '700' }}>VSEPR Geometry</div>
-          <div style={{ fontSize: '0.95rem', fontWeight: '800', color: '#1E293B' }}>{molData.geometry}</div>
-        </div>
-        <div style={{ backgroundColor: '#F8FAFC', padding: '12px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-          <div style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: '700' }}>Hybridization</div>
-          <div style={{ fontSize: '0.95rem', fontWeight: '800', color: '#2563EB' }}>{molData.hybridization}</div>
-        </div>
-        <div style={{ backgroundColor: '#F8FAFC', padding: '12px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-          <div style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: '700' }}>Bond Angle</div>
-          <div style={{ fontSize: '0.95rem', fontWeight: '800', color: '#16A34A' }}>{molData.angle}</div>
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 'var(--sp-2)' }}>
+        <PaperCard flat style={{ backgroundColor: 'var(--paper-warm)', padding: 'var(--sp-3)' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--ink-soft)', fontWeight: 700 }}>VSEPR Geometry</div>
+          <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--ink)' }}>{molData.geometry}</div>
+        </PaperCard>
+        <PaperCard flat style={{ backgroundColor: 'var(--paper-warm)', padding: 'var(--sp-3)' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--ink-soft)', fontWeight: 700 }}>Hybridization</div>
+          <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--physics)' }}>{molData.hybridization}</div>
+        </PaperCard>
+        <PaperCard flat style={{ backgroundColor: 'var(--paper-warm)', padding: 'var(--sp-3)' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--ink-soft)', fontWeight: 700 }}>Bond Angle</div>
+          <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--biology)' }}>{molData.angle}</div>
+        </PaperCard>
       </div>
 
-      <p style={{ margin: 0, fontSize: '0.85rem', color: '#475569', lineHeight: 1.5, backgroundColor: '#EFF6FF', padding: '10px 14px', borderRadius: '8px', border: '1px solid #BFDBFE' }}>
-        💡 <strong>CBSE Concept:</strong> {molData.description}
-      </p>
+      <PaperCard flat style={{ backgroundColor: 'var(--physics-soft)', borderColor: 'var(--physics)', padding: 'var(--sp-3)' }}>
+        <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--physics-ink)', lineHeight: 1.5, display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+          <Info size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+          <span><strong>CBSE Concept:</strong> {molData.description}</span>
+        </p>
+      </PaperCard>
     </div>
   );
 }

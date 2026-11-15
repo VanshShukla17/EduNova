@@ -12,6 +12,8 @@ import TrigUnitCircleSimulation from './TrigUnitCircleSimulation';
 import NewtonLawsSimulation from './NewtonLawsSimulation';
 import BreathingRespirationSimulation from './BreathingRespirationSimulation';
 import SkeletonMusclesSimulation from './SkeletonMusclesSimulation';
+import { PaperCard, Tag, Button, Skeleton, EmptyState } from '../../components/ui';
+import { SUBJECT_PIN_COLORS, resolveSubjectKey } from '../../components/ui/subjectUtils';
 
 export default function TopicViewerPage() {
   const { topicSlug } = useParams();
@@ -89,16 +91,27 @@ export default function TopicViewerPage() {
   };
 
   if (loading) {
-    return <div style={{ padding: '32px', textAlign: 'center', color: '#64748B' }}>Loading 3D simulation...</div>;
+    return (
+      <div style={{ maxWidth: '940px', margin: '0 auto', padding: 'var(--sp-5) 0' }}>
+        <Skeleton lines={6} />
+      </div>
+    );
   }
 
   if (!topic) {
     return (
-      <div style={{ padding: '32px', textAlign: 'center' }}>
-        <h2>Topic not found</h2>
-        <Link to="/virtual-learning" className="btn btn-primary" style={{ marginTop: '12px' }}>
-          Back to Virtual Learning
-        </Link>
+      <div style={{ maxWidth: '640px', margin: '0 auto', padding: 'var(--sp-6) 0' }}>
+        <PaperCard pinned pinColor="amber">
+          <EmptyState
+            title="Topic not found"
+            description="This 3D learning module could not be loaded."
+            action={
+              <Button as={Link} to="/virtual-learning" variant="primary">
+                Back to Virtual Learning
+              </Button>
+            }
+          />
+        </PaperCard>
       </div>
     );
   }
@@ -123,11 +136,11 @@ export default function TopicViewerPage() {
               minHeight="480px"
               defaultHeight="620px"
             />
-            <div style={{ marginTop: '14px', padding: '12px 14px', backgroundColor: '#F8FAFC', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '0.82rem', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ marginTop: 'var(--sp-3)', padding: 'var(--sp-3)', background: 'var(--paper-warm)', borderRadius: 'var(--r-sm)', border: '1px solid var(--paper-edge)', fontSize: '0.84rem', color: 'var(--ink-muted)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
               <div>
-                <strong style={{ color: '#0F172A' }}>💡 Controls:</strong> Click/touch & drag to rotate 3D view. Scroll or pinch to zoom. Use Fullscreen for laboratory study.
+                <strong style={{ color: 'var(--ink)' }}>Controls:</strong> Click/touch &amp; drag to rotate 3D view. Scroll or pinch to zoom. Use Fullscreen for laboratory study.
               </div>
-              <Link to="/learn/biology/human-heart" style={{ color: 'var(--color-primary, #2563EB)', fontWeight: '700', textDecoration: 'none' }}>
+              <Link to="/learn/biology/human-heart" style={{ color: 'var(--emerald-700)', fontWeight: 700, textDecoration: 'none' }}>
                 Full Lesson Guide →
               </Link>
             </div>
@@ -141,43 +154,25 @@ export default function TopicViewerPage() {
         return (
           <div>
             {/* View Mode Toggle: 3D Holographic Experience vs 2D Numerical Lab */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-              <div style={{ display: 'flex', backgroundColor: '#F1F5F9', borderRadius: '8px', padding: '3px' }}>
-                <button
-                  type="button"
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-3)', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
+              <div style={{ display: 'flex', gap: 'var(--sp-2)', flexWrap: 'wrap' }}>
+                <Button
+                  size="sm"
+                  variant={newtonViewMode === '3d' ? 'primary' : 'ghost'}
                   onClick={() => setNewtonViewMode('3d')}
-                  style={{
-                    padding: '5px 12px',
-                    fontSize: '0.78rem',
-                    fontWeight: '700',
-                    borderRadius: '6px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    backgroundColor: newtonViewMode === '3d' ? '#2563EB' : 'transparent',
-                    color: newtonViewMode === '3d' ? '#FFFFFF' : '#64748B'
-                  }}
                 >
-                  ✨ 3D Holographic Model
-                </button>
-                <button
-                  type="button"
+                  3D Holographic Model
+                </Button>
+                <Button
+                  size="sm"
+                  variant={newtonViewMode === '2d' ? 'primary' : 'ghost'}
                   onClick={() => setNewtonViewMode('2d')}
-                  style={{
-                    padding: '5px 12px',
-                    fontSize: '0.78rem',
-                    fontWeight: '700',
-                    borderRadius: '6px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    backgroundColor: newtonViewMode === '2d' ? '#2563EB' : 'transparent',
-                    color: newtonViewMode === '2d' ? '#FFFFFF' : '#64748B'
-                  }}
                 >
-                  📐 2D Numerical Physics Lab
-                </button>
+                  2D Numerical Physics Lab
+                </Button>
               </div>
 
-              <span style={{ fontSize: '0.74rem', color: '#64748B' }}>
+              <span className="type-small" style={{ color: 'var(--ink-muted)' }}>
                 {newtonViewMode === '3d' ? 'Interactive 3D Hologram by iamtechartist' : 'Friction, F = ma & Recoil calculations'}
               </span>
             </div>
@@ -192,11 +187,11 @@ export default function TopicViewerPage() {
                   minHeight="480px"
                   defaultHeight="620px"
                 />
-                <div style={{ marginTop: '14px', padding: '12px 14px', backgroundColor: '#F8FAFC', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '0.82rem', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ marginTop: 'var(--sp-3)', padding: 'var(--sp-3)', background: 'var(--paper-warm)', borderRadius: 'var(--r-sm)', border: '1px solid var(--paper-edge)', fontSize: '0.84rem', color: 'var(--ink-muted)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
                   <div>
-                    <strong style={{ color: '#0F172A' }}>💡 Controls:</strong> Click & drag to orbit in 3D. Use the chapter rail on the right side to inspect each law with Newton's bust.
+                    <strong style={{ color: 'var(--ink)' }}>Controls:</strong> Click &amp; drag to orbit in 3D. Use the chapter rail on the right side to inspect each law with Newton's bust.
                   </div>
-                  <Link to="/learn/physics/newtons-laws" style={{ color: 'var(--color-primary, #2563EB)', fontWeight: '700', textDecoration: 'none' }}>
+                  <Link to="/learn/physics/newtons-laws" style={{ color: 'var(--emerald-700)', fontWeight: 700, textDecoration: 'none' }}>
                     Full Lesson Guide →
                   </Link>
                 </div>
@@ -215,203 +210,175 @@ export default function TopicViewerPage() {
     }
   };
 
-  return (
-    <div style={{ maxWidth: '860px', margin: '0 auto', padding: '16px' }}>
-      {/* Header & Back Link */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-        <Link
-          to="/virtual-learning"
-          style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#64748B', textDecoration: 'none', fontSize: '0.85rem', fontWeight: '600' }}
-        >
-          <ArrowLeft size={16} /> Back to Simulations
-        </Link>
+  const subjectKey = resolveSubjectKey(topic.subject);
 
-        {/* Ask Saarthi Button */}
-        <button
-          type="button"
-          onClick={() => navigate('/mentor')}
+  return (
+    <div style={{ maxWidth: '940px', margin: '0 auto', paddingBottom: 'var(--sp-8)' }}>
+      {/* Header & Back Link */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--sp-2)', marginBottom: 'var(--sp-4)' }}>
+        <Button as={Link} to="/virtual-learning" variant="ghost" size="sm">
+          <ArrowLeft size={16} /> Back to Simulations
+        </Button>
+
+        <Button variant="secondary" size="sm" onClick={() => navigate('/mentor')}>
+          <Bot size={15} /> Ask Chotu about this
+        </Button>
+      </div>
+
+      <PaperCard
+        pinned
+        pinColor={SUBJECT_PIN_COLORS[subjectKey] || 'blue'}
+        tilt={0}
+        style={{ marginBottom: 'var(--sp-5)' }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)', flexWrap: 'wrap', marginBottom: 'var(--sp-2)' }}>
+          <Tag variant="verified">{topic.subject} • Class {topic.class_level}</Tag>
+          <Tag variant="paper">CBSE 3D Lab</Tag>
+        </div>
+        <h1 className="type-h1" style={{ margin: 0 }}>{topic.title}</h1>
+        <p className="type-body" style={{ color: 'var(--ink-muted)', margin: 'var(--sp-2) 0 0 0' }}>{topic.description}</p>
+
+        {/* Tabs */}
+        <div
+          role="tablist"
+          aria-label="Topic viewer sections"
           style={{
             display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            backgroundColor: '#EDE9FE',
-            color: '#6D28D9',
-            border: '1px solid #C4B5FD',
-            padding: '6px 12px',
-            borderRadius: '999px',
-            fontSize: '0.78rem',
-            fontWeight: '700',
-            cursor: 'pointer'
+            flexWrap: 'wrap',
+            gap: 'var(--sp-2)',
+            marginTop: 'var(--sp-4)',
+            paddingTop: 'var(--sp-4)',
+            borderTop: '1px dashed var(--paper-edge)',
           }}
         >
-          <Bot size={15} /> Ask Saarthi about this
-        </button>
-      </div>
-
-      <div style={{ marginBottom: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-          <span style={{ fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', backgroundColor: '#EFF6FF', color: '#1D4ED8', padding: '2px 8px', borderRadius: '4px' }}>
-            {topic.subject} • Class {topic.class_level}
-          </span>
-          <span style={{ fontSize: '0.7rem', fontWeight: '700', backgroundColor: '#F1F5F9', color: '#475569', padding: '2px 8px', borderRadius: '4px' }}>
-            CBSE 3D Lab
-          </span>
+          {[
+            { id: 'simulation', label: 'Interactive 3D Simulation' },
+            { id: 'notes', label: 'CBSE Notes & Formulas' },
+            { id: 'quiz', label: `Self-Check Quiz (${topic.quiz?.length || 3})` },
+          ].map((tab) => (
+            <Button
+              key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              size="sm"
+              variant={activeTab === tab.id ? 'primary' : 'ghost'}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </Button>
+          ))}
         </div>
-        <h1 style={{ fontSize: '1.4rem', fontWeight: '800', margin: 0, color: '#1E293B' }}>{topic.title}</h1>
-        <p style={{ fontSize: '0.88rem', color: '#64748B', margin: '4px 0 0 0' }}>{topic.description}</p>
-      </div>
-
-      {/* Tabs */}
-      <div style={{ display: 'flex', borderBottom: '1px solid #E2E8F0', marginBottom: '16px' }}>
-        {[
-          { id: 'simulation', label: 'Interactive 3D Simulation' },
-          { id: 'notes', label: 'CBSE Notes & Formulas' },
-          { id: 'quiz', label: `Self-Check Quiz (${topic.quiz?.length || 3})` }
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setActiveTab(tab.id)}
-            style={{
-              padding: '10px 16px',
-              fontSize: '0.85rem',
-              fontWeight: '700',
-              border: 'none',
-              borderBottom: activeTab === tab.id ? '3px solid #2563EB' : '3px solid transparent',
-              backgroundColor: 'transparent',
-              color: activeTab === tab.id ? '#1D4ED8' : '#64748B',
-              cursor: 'pointer'
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      </PaperCard>
 
       {/* Tab 1: Simulation */}
       {activeTab === 'simulation' && (
-        <div style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '12px', border: '1px solid #E2E8F0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+        <PaperCard flat>
           {renderSimulation()}
-        </div>
+        </PaperCard>
       )}
 
       {/* Tab 2: Notes & Formulas */}
       {activeTab === 'notes' && (
-        <div style={{ backgroundColor: '#FFFFFF', padding: '20px', borderRadius: '12px', border: '1px solid #E2E8F0', fontSize: '0.9rem', lineHeight: 1.6, color: '#334155', whiteSpace: 'pre-line' }}>
+        <PaperCard flat style={{ whiteSpace: 'pre-line', lineHeight: 1.7 }}>
           {topic.notes}
-        </div>
+        </PaperCard>
       )}
 
       {/* Tab 3: Quiz Mode */}
       {activeTab === 'quiz' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
           {quizSubmitted && (
-            <div style={{ backgroundColor: '#ECFDF5', padding: '16px', borderRadius: '12px', border: '1px solid #A7F3D0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Award size={28} color="#059669" />
-                <div>
-                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: '800', color: '#065F46' }}>Quiz Completed!</h3>
-                  <p style={{ margin: '2px 0 0 0', fontSize: '0.8rem', color: '#047857' }}>You scored {score}% in this topic diagnostic.</p>
+            <PaperCard flat style={{ background: 'var(--emerald-soft)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--sp-3)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)' }}>
+                  <Award size={28} style={{ color: 'var(--emerald-700)' }} />
+                  <div>
+                    <h3 className="type-h3" style={{ margin: 0, color: 'var(--emerald-800)' }}>Quiz Completed!</h3>
+                    <p className="type-small" style={{ margin: '2px 0 0 0', color: 'var(--emerald-700)' }}>
+                      You scored {score}% in this topic diagnostic.
+                    </p>
+                  </div>
                 </div>
+                <Button
+                  size="sm"
+                  variant="primary"
+                  onClick={() => {
+                    setQuizSubmitted(false);
+                    setSelectedAnswers({});
+                  }}
+                >
+                  Retake Quiz
+                </Button>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setQuizSubmitted(false);
-                  setSelectedAnswers({});
-                }}
-                style={{ padding: '6px 12px', backgroundColor: '#059669', color: '#FFFFFF', border: 'none', borderRadius: '8px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer' }}
-              >
-                Retake Quiz
-              </button>
-            </div>
+            </PaperCard>
           )}
 
           {(topic.quiz || []).map((q, qIdx) => {
-            const isAnswered = selectedAnswers[qIdx] !== undefined;
+            const isSelected = (optIdx) => selectedAnswers[qIdx] === optIdx;
             const isCorrect = selectedAnswers[qIdx] === q.correctIndex;
 
             return (
-              <div key={qIdx} style={{ backgroundColor: '#FFFFFF', padding: '16px', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
-                <div style={{ fontSize: '0.9rem', fontWeight: '700', color: '#1E293B', marginBottom: '12px' }}>
+              <PaperCard key={qIdx} flat>
+                <div className="type-h3" style={{ marginBottom: 'var(--sp-3)' }}>
                   {qIdx + 1}. {q.question}
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
                   {q.options.map((opt, optIdx) => {
-                    const isSelected = selectedAnswers[qIdx] === optIdx;
-                    let optBg = '#F8FAFC';
-                    let optBorder = '#E2E8F0';
-
+                    const chosen = isSelected(optIdx);
+                    let stateClass = '';
                     if (quizSubmitted) {
-                      if (optIdx === q.correctIndex) {
-                        optBg = '#ECFDF5';
-                        optBorder = '#10B981';
-                      } else if (isSelected) {
-                        optBg = '#FEF2F2';
-                        optBorder = '#EF4444';
-                      }
-                    } else if (isSelected) {
-                      optBg = '#EFF6FF';
-                      optBorder = '#2563EB';
+                      if (optIdx === q.correctIndex) stateClass = ' is-correct';
+                      else if (chosen) stateClass = ' is-wrong';
+                    } else if (chosen) {
+                      stateClass = ' is-selected';
                     }
 
                     return (
                       <button
                         key={optIdx}
                         type="button"
+                        className={`option-card${stateClass}`}
                         onClick={() => handleSelectAnswer(qIdx, optIdx)}
-                        style={{
-                          textAlign: 'left',
-                          padding: '10px 14px',
-                          borderRadius: '8px',
-                          border: `1px solid ${optBorder}`,
-                          backgroundColor: optBg,
-                          fontSize: '0.85rem',
-                          color: '#334155',
-                          cursor: quizSubmitted ? 'default' : 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between'
-                        }}
+                        disabled={quizSubmitted}
                       >
-                        <span>{opt}</span>
-                        {quizSubmitted && optIdx === q.correctIndex && <Check size={16} color="#059669" />}
-                        {quizSubmitted && isSelected && !isCorrect && <X size={16} color="#DC2626" />}
+                        <span className="option-card__letter">{String.fromCharCode(65 + optIdx)}</span>
+                        <span style={{ flex: 1 }}>{opt}</span>
+                        {quizSubmitted && optIdx === q.correctIndex && <Check size={16} style={{ color: 'var(--emerald-600)' }} />}
+                        {quizSubmitted && chosen && !isCorrect && <X size={16} style={{ color: 'var(--red-600)' }} />}
                       </button>
                     );
                   })}
                 </div>
 
                 {quizSubmitted && (
-                  <div style={{ marginTop: '10px', padding: '8px 12px', backgroundColor: '#F8FAFC', borderRadius: '6px', fontSize: '0.78rem', color: '#475569', borderLeft: '3px solid #2563EB' }}>
-                    💡 <strong>CBSE Explanation:</strong> {q.explanation}
+                  <div
+                    className="type-small"
+                    style={{
+                      marginTop: 'var(--sp-3)',
+                      padding: 'var(--sp-3)',
+                      background: 'var(--paper-warm)',
+                      borderRadius: 'var(--r-sm)',
+                      borderLeft: '3px solid var(--emerald-600)',
+                      color: 'var(--ink-muted)',
+                    }}
+                  >
+                    <strong>CBSE Explanation:</strong> {q.explanation}
                   </div>
                 )}
-              </div>
+              </PaperCard>
             );
           })}
 
           {!quizSubmitted && (
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                type="button"
+              <Button
+                variant="primary"
                 onClick={handleQuizSubmit}
                 disabled={Object.keys(selectedAnswers).length === 0}
-                style={{
-                  backgroundColor: '#2563EB',
-                  color: '#FFFFFF',
-                  padding: '10px 20px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  fontSize: '0.85rem',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  opacity: Object.keys(selectedAnswers).length === 0 ? 0.6 : 1
-                }}
               >
                 Submit Answers
-              </button>
+              </Button>
             </div>
           )}
         </div>

@@ -1,21 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  MessageSquare,
-  Users,
-  Send,
-  Sparkles,
-  Shield,
-  ExternalLink,
-  Hash,
-  Bot,
-  AlertCircle,
-  HelpCircle
-} from 'lucide-react';
+import { Hash, Send, Bot, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import {
+  HeroCard,
+  PaperCard,
+  Pin,
+  Tag,
+  StickyNote,
+  Field,
+  Button,
+  EmptyState,
+  Skeleton,
+} from '../components/ui';
 
 export default function CommunityPage() {
-  const { user } = useAuth();
-
+  const { token } = useAuth();
   const [channels, setChannels] = useState([]);
   const [activeChannel, setActiveChannel] = useState('general-chat');
   const [messages, setMessages] = useState([]);
@@ -23,9 +22,8 @@ export default function CommunityPage() {
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const messagesEndRef = useRef(null);
+  const endOfMessagesRef = useRef(null);
 
-  // Load channels
   useEffect(() => {
     async function loadChannels() {
       try {
@@ -41,7 +39,6 @@ export default function CommunityPage() {
     loadChannels();
   }, []);
 
-  // Load channel messages
   const fetchMessages = async (slug) => {
     try {
       const res = await fetch(`/api/community/channels/${slug}/messages`);
@@ -59,12 +56,14 @@ export default function CommunityPage() {
   useEffect(() => {
     setLoading(true);
     fetchMessages(activeChannel);
-    const interval = setInterval(() => fetchMessages(activeChannel), 3000);
+    const interval = setInterval(() => {
+      fetchMessages(activeChannel);
+    }, 6000);
     return () => clearInterval(interval);
   }, [activeChannel]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleSendMessage = async (e) => {
@@ -73,14 +72,14 @@ export default function CommunityPage() {
 
     try {
       setSending(true);
-      const token = localStorage.getItem('token');
+      const authToken = token || localStorage.getItem('token');
       const res = await fetch(`/api/community/channels/${activeChannel}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token && { Authorization: `Bearer ${token}` })
+          ...(authToken && { Authorization: `Bearer ${authToken}` }),
         },
-        body: JSON.stringify({ content: inputText })
+        body: JSON.stringify({ content: inputText }),
       });
 
       const data = await res.json();
@@ -95,197 +94,188 @@ export default function CommunityPage() {
     }
   };
 
-  const currentChannelObj = channels.find(c => c.slug === activeChannel) || { name: 'Discussion Room' };
+  const currentChannelObj = channels.find((c) => c.slug === activeChannel) || {
+    name: activeChannel,
+    description: 'Discuss questions with classmates and mention @saarthi for AI hints.',
+  };
 
   return (
-    <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '16px' }}>
-      <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
-        <div>
-          <h1 style={{ fontSize: '1.4rem', fontWeight: '800', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Users size={24} color="#7C3AED" /> Peer Study Community & Discord Hub
-          </h1>
-          <p style={{ fontSize: '0.88rem', color: 'var(--color-muted)', margin: '4px 0 0 0' }}>
-            Collaborate with Class 10 & 12 peers, discuss doubts in subject rooms, or tag @saarthi for instant Socratic help!
-          </p>
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-5)' }}>
+      <HeroCard
+        eyebrow="Peer Study Lounge"
+        eyebrowVariant="ready"
+        title="Classroom Study Community"
+        subtitle="Collaborate with fellow STEM students or mention @saarthi in any channel."
+        badges={<Tag variant="paper"><Users size={13} aria-hidden="true" /> {channels.length || 1} Channels</Tag>}
+      />
 
-        {/* Discord Join Pill */}
-        <a
-          href="https://discord.gg/stem-edu-cbse"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn btn-primary"
-          style={{
-            width: 'auto',
-            padding: '8px 16px',
-            fontSize: '0.85rem',
-            backgroundColor: '#5865F2',
-            borderColor: '#5865F2',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            textDecoration: 'none'
-          }}
-        >
-          <ExternalLink size={16} /> Join StemEdu Discord Server (2.4k Students)
-        </a>
-      </div>
-
-      {/* Main Grid: Channels Sidebar vs Chat Stream */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(240px, 1fr) minmax(360px, 2.5fr)', gap: '16px', alignItems: 'start' }}>
-        {/* Left Sidebar: Channels & Guidelines */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {/* Channel list */}
-          <div className="card" style={{ padding: '12px' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Study Rooms
-            </span>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px' }}>
-              {channels.map((ch) => (
-                <button
-                  key={ch.slug}
-                  onClick={() => setActiveChannel(ch.slug)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '8px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: 'none',
-                    backgroundColor: activeChannel === ch.slug ? 'var(--color-primary-light)' : 'transparent',
-                    color: activeChannel === ch.slug ? 'var(--color-primary)' : 'var(--color-text)',
-                    fontWeight: activeChannel === ch.slug ? '700' : '500',
-                    fontSize: '0.88rem',
-                    cursor: 'pointer',
-                    textAlign: 'left'
-                  }}
-                >
-                  <Hash size={16} color={activeChannel === ch.slug ? 'var(--color-primary)' : '#94A3B8'} />
-                  <span>{ch.name}</span>
-                </button>
-              ))}
-            </div>
+      <div
+        className="paper-grid paper-grid--split"
+        style={{
+          gridTemplateColumns: 'minmax(220px, 280px) minmax(0, 1fr)',
+          alignItems: 'stretch',
+        }}
+      >
+        {/* Channel Index Paper Sheet */}
+        <PaperCard flat style={{ padding: 'var(--sp-4)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
+          <Pin color="blue" position="left" />
+          <div className="type-label" style={{ color: 'var(--ink-muted)', marginTop: 'var(--sp-1)' }}>
+            STUDY CHANNELS
           </div>
-
-          {/* Guidelines & Safety (P2-11.2) */}
-          <div className="card" style={{ padding: '14px', backgroundColor: '#F8FAFC' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '700', fontSize: '0.85rem', color: '#1E293B', marginBottom: '8px' }}>
-              <Shield size={16} color="#059669" />
-              Community Safety Rules
-            </div>
-            <ul style={{ paddingLeft: '18px', margin: 0, fontSize: '0.78rem', color: '#64748B', lineHeight: '1.5' }}>
-              <li>Be encouraging and respectful to fellow students.</li>
-              <li>Never share phone numbers, addresses, or private info.</li>
-              <li>Tag <strong>@saarthi</strong> anytime to invite AI mentor tips into the chat.</li>
-              <li>No exam cheating or unauthorized paper leaks.</li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Right Area: Chat Message Stream */}
-        <div className="card" style={{ padding: '0', display: 'flex', flexDirection: 'column', height: '580px', overflow: 'hidden' }}>
-          {/* Channel Header */}
-          <div style={{ padding: '12px 18px', borderBottom: '1px solid var(--color-border)', backgroundColor: '#F8FAFC', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Hash size={20} color="var(--color-primary)" />
-            <div>
-              <div style={{ fontWeight: '700', fontSize: '0.98rem' }}>{currentChannelObj.name}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--color-muted)' }}>{currentChannelObj.description}</div>
-            </div>
-          </div>
-
-          {/* Messages Feed */}
-          <div style={{ flex: 1, padding: '16px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {messages.map((m, idx) => {
-              const isSaarthi = m.is_bot;
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
+            {(channels.length > 0
+              ? channels
+              : [{ slug: 'general-chat', name: 'general-chat', description: 'Main STEM discussion' }]
+            ).map((ch) => {
+              const isActive = activeChannel === ch.slug;
               return (
-                <div
-                  key={m.id || idx}
-                  style={{
-                    display: 'flex',
-                    gap: '10px',
-                    alignItems: 'flex-start',
-                    backgroundColor: isSaarthi ? '#EDE9FE' : 'transparent',
-                    padding: isSaarthi ? '10px 12px' : '4px 0',
-                    borderRadius: isSaarthi ? '8px' : '0',
-                    borderLeft: isSaarthi ? '3px solid #7C3AED' : 'none'
-                  }}
+                <Button
+                  key={ch.slug}
+                  variant={isActive ? 'primary' : 'note'}
+                  size="sm"
+                  onClick={() => setActiveChannel(ch.slug)}
+                  style={{ justifyContent: 'flex-start' }}
                 >
-                  {/* Avatar */}
-                  <div
-                    style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '50%',
-                      backgroundColor: isSaarthi ? '#7C3AED' : '#2563EB',
-                      color: 'white',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '0.8rem',
-                      fontWeight: '700',
-                      flexShrink: 0
-                    }}
-                  >
-                    {isSaarthi ? <Bot size={18} /> : (m.user_name || 'S')[0].toUpperCase()}
-                  </div>
-
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                      <span style={{ fontWeight: '700', fontSize: '0.85rem', color: isSaarthi ? '#6D28D9' : '#0F172A' }}>
-                        {m.user_name}
-                      </span>
-                      {isSaarthi && (
-                        <span style={{ fontSize: '0.68rem', backgroundColor: '#7C3AED', color: 'white', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>
-                          BOT
-                        </span>
-                      )}
-                      <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>
-                        {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-
-                    <div style={{ fontSize: '0.88rem', color: '#334155', lineHeight: '1.4' }}>
-                      {m.content}
-                    </div>
-                  </div>
-                </div>
+                  <Hash size={15} strokeWidth={2} aria-hidden="true" />
+                  <span>{ch.name}</span>
+                </Button>
               );
             })}
-            <div ref={messagesEndRef} />
+          </div>
+        </PaperCard>
+
+        {/* Thread Sheet */}
+        <PaperCard
+          flat
+          style={{
+            padding: 'var(--sp-4)',
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: '460px',
+            maxHeight: '640px',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 'var(--sp-2)',
+              paddingBottom: 'var(--sp-3)',
+              borderBottom: '1px solid var(--paper-border-warm)',
+            }}
+          >
+            <div>
+              <h2 className="type-h3" style={{ color: 'var(--ink)' }}>
+                #{currentChannelObj.name}
+              </h2>
+              {currentChannelObj.description ? (
+                <p className="type-small" style={{ color: 'var(--ink-muted)' }}>
+                  {currentChannelObj.description}
+                </p>
+              ) : null}
+            </div>
+            <Tag variant="verified">@saarthi active</Tag>
           </div>
 
-          {/* Message Input Box */}
+          <div
+            style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: 'var(--sp-4) var(--sp-1)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--sp-3)',
+            }}
+          >
+            {loading ? (
+              <Skeleton card={false} lines={4} />
+            ) : messages.length === 0 ? (
+              <EmptyState
+                title="Start the Conversation"
+                description="Ask a classmate or type @saarthi to ask Chotu for a quick explanation."
+              />
+            ) : (
+              messages.map((m, idx) => {
+                const isSaarthi = m.is_bot;
+                return (
+                  <StickyNote
+                    key={m.id || idx}
+                    tone={isSaarthi ? 'yellow' : 'blue'}
+                    body
+                    rotation={isSaarthi ? '-0.3deg' : '0.2deg'}
+                    style={{ maxWidth: '100%' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--sp-3)' }}>
+                      <div
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: 'var(--r-pill)',
+                          background: isSaarthi ? 'var(--maths)' : 'var(--emerald-700)',
+                          color: 'var(--white)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 700,
+                          fontSize: '0.8125rem',
+                          flexShrink: 0,
+                        }}
+                        aria-hidden="true"
+                      >
+                        {isSaarthi ? <Bot size={17} /> : (m.user_name || 'S')[0].toUpperCase()}
+                      </div>
+
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)', flexWrap: 'wrap' }}>
+                          <span className="type-body" style={{ fontWeight: 700, color: 'var(--ink)' }}>
+                            {m.user_name}
+                          </span>
+                          {isSaarthi ? <Tag variant="maths">BOT</Tag> : null}
+                          <span className="type-label" style={{ color: 'var(--ink-soft)' }}>
+                            {new Date(m.created_at).toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </span>
+                        </div>
+                        <p className="type-body" style={{ color: 'var(--ink)', marginTop: '4px', whiteSpace: 'pre-wrap' }}>
+                          {m.content}
+                        </p>
+                      </div>
+                    </div>
+                  </StickyNote>
+                );
+              })
+            )}
+            <div ref={endOfMessagesRef} />
+          </div>
+
           <form
             onSubmit={handleSendMessage}
             style={{
-              padding: '12px 16px',
-              borderTop: '1px solid var(--color-border)',
               display: 'flex',
-              gap: '8px',
+              gap: 'var(--sp-2)',
               alignItems: 'center',
-              backgroundColor: 'white'
+              paddingTop: 'var(--sp-3)',
+              borderTop: '1px solid var(--paper-border-warm)',
             }}
           >
-            <input
-              type="text"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              placeholder={`Message #${currentChannelObj.name} (type @saarthi for AI hints)...`}
-              className="input"
-              style={{ flex: 1, padding: '10px 14px', fontSize: '0.88rem' }}
-            />
-            <button
-              type="submit"
-              disabled={sending || !inputText.trim()}
-              className="btn btn-primary"
-              style={{ width: 'auto', padding: '10px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-            >
-              <Send size={16} /> Send
-            </button>
+            <div style={{ flex: 1 }}>
+              <Field
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                placeholder={`Message #${currentChannelObj.name} (type @saarthi for AI hints)...`}
+                aria-label="Message text"
+              />
+            </div>
+            <Button type="submit" variant="primary" disabled={sending || !inputText.trim()}>
+              <Send size={16} strokeWidth={2} aria-hidden="true" />
+              Send
+            </Button>
           </form>
-        </div>
+        </PaperCard>
       </div>
     </div>
   );
 }
-

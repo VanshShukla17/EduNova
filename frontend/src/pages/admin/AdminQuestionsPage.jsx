@@ -6,7 +6,6 @@ import {
   Trash2,
   CheckCircle2,
   AlertTriangle,
-  HelpCircle,
   X
 } from 'lucide-react';
 import {
@@ -16,6 +15,7 @@ import {
   createQuestion,
   deleteQuestion
 } from '../../services/api';
+import { Button, EmptyState, Field, Modal, PaperCard, SectionHeader, Skeleton, Tag } from '../../components/ui';
 
 export default function AdminQuestionsPage() {
   const [subjects, setSubjects] = useState([]);
@@ -28,8 +28,9 @@ export default function AdminQuestionsPage() {
   const [loading, setLoading] = useState(false);
   const [alertMsg, setAlertMsg] = useState(null);
 
-  // Modal State
+  // Modal States
   const [showModal, setShowModal] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState(null);
   const [form, setForm] = useState({
     chapterId: '',
     questionText: '',
@@ -94,7 +95,10 @@ export default function AdminQuestionsPage() {
       optionsHindi: ['', '', '', ''],
       correctIndex: 0,
       explanation: '',
-      difficulty: 'medium'
+      difficulty: 'medium',
+      board: 'CBSE',
+      classLevel: 10,
+      language: 'en'
     });
     setShowModal(true);
   };
@@ -120,50 +124,42 @@ export default function AdminQuestionsPage() {
     }
   };
 
-  const handleDeleteQuestion = async (qId) => {
-    if (!window.confirm('Are you sure you want to delete this question?')) return;
+  const handleConfirmDelete = async () => {
+    if (!deleteTargetId) return;
     try {
-      await deleteQuestion(qId);
+      await deleteQuestion(deleteTargetId);
       setAlertMsg({ type: 'success', text: 'Question deleted successfully.' });
+      setDeleteTargetId(null);
       loadQuestions(selectedChapterId);
     } catch (err) {
       setAlertMsg({ type: 'error', text: 'Failed to delete question: ' + err.message });
+      setDeleteTargetId(null);
     }
   };
 
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', paddingBottom: '32px' }}>
+    <div style={{ maxWidth: '960px', margin: '0 auto', paddingBottom: 'var(--sp-8)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
       {/* Top Navigation */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-        <Link
-          to="/admin"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            color: 'var(--color-primary)',
-            textDecoration: 'none',
-            fontSize: '0.9rem',
-            fontWeight: '600'
-          }}
-        >
+      <div>
+        <Button as={Link} to="/admin" variant="ghost" size="sm">
           <ArrowLeft size={16} /> Back to Admin Dashboard
-        </Link>
+        </Button>
       </div>
 
       {/* Banner Alert */}
       {alertMsg && (
-        <div
+        <PaperCard
+          flat
+          role="status"
           style={{
-            padding: '12px 16px',
-            borderRadius: 'var(--radius-sm, 6px)',
-            marginBottom: '14px',
-            backgroundColor: alertMsg.type === 'success' ? '#DCFCE7' : '#FEF2F2',
-            color: alertMsg.type === 'success' ? '#15803D' : '#991B1B',
-            border: `1px solid ${alertMsg.type === 'success' ? '#86EFAC' : '#FECACA'}`,
+            padding: 'var(--sp-3) var(--sp-4)',
+            backgroundColor: alertMsg.type === 'success' ? 'var(--emerald-soft)' : 'var(--red-soft)',
+            color: alertMsg.type === 'success' ? 'var(--emerald-800)' : 'var(--red-ink)',
+            borderColor: alertMsg.type === 'success' ? 'var(--emerald-600)' : 'var(--red-border)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            gap: 'var(--sp-2)',
             fontSize: '0.88rem'
           }}
         >
@@ -171,123 +167,118 @@ export default function AdminQuestionsPage() {
             {alertMsg.type === 'success' ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
             <span>{alertMsg.text}</span>
           </div>
-          <button
-            onClick={() => setAlertMsg(null)}
-            style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}
-          >
+          <Button type="button" variant="ghost" size="sm" onClick={() => setAlertMsg(null)} aria-label="Dismiss alert">
             <X size={16} />
-          </button>
-        </div>
+          </Button>
+        </PaperCard>
       )}
 
       {/* Header & Filter Controls */}
-      <div
-        className="card"
-        style={{
-          padding: '16px',
-          marginBottom: '16px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '12px'
-        }}
-      >
-        <div>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: '800', margin: '0 0 6px 0', color: '#0F172A' }}>
-            MCQ Practice Question Bank
-          </h1>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-            {/* Subject Select */}
-            <select
-              value={selectedSubjectId}
-              onChange={(e) => setSelectedSubjectId(e.target.value)}
-              style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
-            >
-              {subjects.map((sub) => (
-                <option key={sub._id} value={sub._id}>
-                  {sub.name}
-                </option>
-              ))}
-            </select>
+      <PaperCard flat style={{ padding: 'var(--sp-4)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 'var(--sp-3)' }}>
+          <div style={{ flex: '1 1 320px' }}>
+            <SectionHeader kicker="QUESTION BANK" title="MCQ Practice Question Bank" />
+            <div style={{ display: 'flex', gap: 'var(--sp-3)', alignItems: 'flex-end', flexWrap: 'wrap', marginTop: 'var(--sp-3)' }}>
+              <div style={{ minWidth: '180px', flex: '1 1 180px' }}>
+                <Field
+                  as="select"
+                  label="Subject"
+                  value={selectedSubjectId}
+                  onChange={(e) => setSelectedSubjectId(e.target.value)}
+                >
+                  {subjects.map((sub) => (
+                    <option key={sub._id} value={sub._id}>
+                      {sub.name}
+                    </option>
+                  ))}
+                </Field>
+              </div>
 
-            {/* Chapter Select */}
-            <select
-              value={selectedChapterId}
-              onChange={(e) => setSelectedChapterId(e.target.value)}
-              style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
-            >
-              {chapters.map((chap) => (
-                <option key={chap._id} value={chap._id}>
-                  Ch {chap.chapterNumber}: {chap.title}
-                </option>
-              ))}
-            </select>
+              <div style={{ minWidth: '220px', flex: '2 1 240px' }}>
+                <Field
+                  as="select"
+                  label="Chapter"
+                  value={selectedChapterId}
+                  onChange={(e) => setSelectedChapterId(e.target.value)}
+                >
+                  {chapters.map((chap) => (
+                    <option key={chap._id} value={chap._id}>
+                      Ch {chap.chapterNumber}: {chap.title}
+                    </option>
+                  ))}
+                </Field>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <button
-          onClick={handleOpenAddModal}
-          className="btn btn-primary"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 14px', fontSize: '0.85rem' }}
-        >
-          <Plus size={16} /> Add New MCQ
-        </button>
-      </div>
+          <Button type="button" variant="primary" size="md" onClick={handleOpenAddModal}>
+            <Plus size={16} /> Add New MCQ
+          </Button>
+        </div>
+      </PaperCard>
 
       {/* Questions List */}
-      {questions.length === 0 ? (
-        <div className="card" style={{ padding: '24px', textAlign: 'center', color: '#64748B' }}>
-          No questions found for this chapter. Click "Add New MCQ" to author one.
-        </div>
+      {loading ? (
+        <PaperCard flat style={{ padding: 'var(--sp-5)' }}>
+          <Skeleton lines={5} />
+        </PaperCard>
+      ) : questions.length === 0 ? (
+        <PaperCard flat style={{ padding: 'var(--sp-5)' }}>
+          <EmptyState
+            title="No questions found for this chapter"
+            description='Click "Add New MCQ" to author a board-style bilingual question.'
+          />
+        </PaperCard>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
           {questions.map((q, idx) => (
-            <div key={q._id} className="card" style={{ padding: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+            <PaperCard key={q._id} flat style={{ padding: 'var(--sp-4)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 'var(--sp-2)' }}>
                 <div>
-                  <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#DC2626', textTransform: 'uppercase', marginRight: '8px' }}>
-                    Question {idx + 1} • {q.difficulty || 'Medium'}
-                  </span>
-                  <div style={{ fontSize: '0.95rem', fontWeight: '700', color: '#0F172A', marginTop: '2px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)', flexWrap: 'wrap', marginBottom: '6px' }}>
+                    <Tag tone="red">Question {idx + 1} • {q.difficulty || 'Medium'}</Tag>
+                  </div>
+                  <div style={{ fontSize: '0.96rem', fontWeight: 700, color: 'var(--ink)' }}>
                     {q.questionText}
                   </div>
                   {q.questionTextHindi && (
-                    <div style={{ fontSize: '0.88rem', color: '#475569', marginTop: '2px' }}>
+                    <div style={{ fontSize: '0.88rem', color: 'var(--ink-muted)', marginTop: '4px' }}>
                       {q.questionTextHindi}
                     </div>
                   )}
                 </div>
-                <button
-                  onClick={() => handleDeleteQuestion(q._id)}
-                  style={{ background: 'none', border: 'none', color: '#DC2626', cursor: 'pointer', padding: '4px' }}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setDeleteTargetId(q._id)}
                   title="Delete Question"
+                  aria-label="Delete Question"
+                  style={{ color: 'var(--red-600)' }}
                 >
                   <Trash2 size={16} />
-                </button>
+                </Button>
               </div>
 
               {/* Options */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', margin: '10px 0' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--sp-2)' }}>
                 {q.options.map((opt, optIdx) => {
                   const isCorrect = q.correctIndex === optIdx;
                   return (
                     <div
                       key={optIdx}
+                      className={`option-card${isCorrect ? ' option-card--selected' : ''}`}
                       style={{
-                        padding: '8px 12px',
-                        borderRadius: '6px',
-                        fontSize: '0.85rem',
-                        backgroundColor: isCorrect ? '#DCFCE7' : '#F8FAFC',
-                        border: `1.5px solid ${isCorrect ? '#16A34A' : '#E2E8F0'}`,
-                        color: isCorrect ? '#15803D' : '#334155',
-                        fontWeight: isCorrect ? '700' : '400',
-                        display: 'flex',
-                        justifyContent: 'space-between'
+                        padding: 'var(--sp-2) var(--sp-3)',
+                        fontSize: '0.86rem',
+                        justifyContent: 'space-between',
+                        backgroundColor: isCorrect ? 'var(--emerald-soft)' : 'var(--paper-warm)',
+                        borderColor: isCorrect ? 'var(--emerald-600)' : 'var(--paper-edge)',
+                        color: isCorrect ? 'var(--emerald-800)' : 'var(--ink)'
                       }}
                     >
                       <span>{String.fromCharCode(65 + optIdx)}) {opt}</span>
-                      {isCorrect && <span style={{ fontSize: '0.72rem', color: '#15803D' }}>[Correct Key]</span>}
+                      {isCorrect && <Tag tone="emerald">Correct Key</Tag>}
                     </div>
                   );
                 })}
@@ -295,157 +286,120 @@ export default function AdminQuestionsPage() {
 
               {/* Explanation */}
               {q.explanation && (
-                <div style={{ fontSize: '0.82rem', color: '#64748B', backgroundColor: '#F1F5F9', padding: '8px 12px', borderRadius: '4px' }}>
+                <PaperCard flat style={{ padding: 'var(--sp-2) var(--sp-3)', backgroundColor: 'var(--paper-warm)', fontSize: '0.84rem', color: 'var(--ink-muted)' }}>
                   <strong>Explanation:</strong> {q.explanation}
-                </div>
+                </PaperCard>
               )}
-            </div>
+            </PaperCard>
           ))}
         </div>
       )}
 
       {/* ADD QUESTION MODAL */}
-      {showModal && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            backdropFilter: 'blur(3px)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 100,
-            padding: '16px'
-          }}
-        >
-          <div
-            className="card"
-            style={{
-              width: '100%',
-              maxWidth: '560px',
-              padding: '20px',
-              backgroundColor: '#FFFFFF',
-              maxHeight: '90vh',
-              overflowY: 'auto'
-            }}
+      <Modal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title="Add New MCQ"
+        tapeTone="yellow"
+        maxWidth="600px"
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--sp-2)' }}>
+            <Button type="button" variant="secondary" size="sm" onClick={() => setShowModal(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" form="admin-add-question-form" variant="primary" size="sm">
+              Save Question
+            </Button>
+          </div>
+        }
+      >
+        <form id="admin-add-question-form" onSubmit={handleSaveQuestion} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
+          <Field
+            as="select"
+            label="Target Chapter *"
+            value={form.chapterId}
+            onChange={(e) => setForm({ ...form, chapterId: e.target.value })}
+            required
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: '700', margin: 0 }}>
-                Add New MCQ
-              </h2>
-              <button
-                onClick={() => setShowModal(false)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748B' }}
-              >
-                <X size={18} />
-              </button>
+            {chapters.map((chap) => (
+              <option key={chap._id} value={chap._id}>
+                Ch {chap.chapterNumber}: {chap.title}
+              </option>
+            ))}
+          </Field>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 'var(--sp-2)' }}>
+            <Field
+              as="select"
+              label="Board"
+              value={form.board}
+              onChange={(e) => setForm({ ...form, board: e.target.value })}
+            >
+              <option value="CBSE">CBSE</option>
+              <option value="ICSE">ICSE</option>
+              <option value="State Board">State Board</option>
+            </Field>
+
+            <Field
+              as="select"
+              label="Class"
+              value={form.classLevel}
+              onChange={(e) => setForm({ ...form, classLevel: Number(e.target.value) })}
+            >
+              <option value={10}>Class 10</option>
+              <option value={12}>Class 12</option>
+            </Field>
+
+            <Field
+              as="select"
+              label="Language"
+              value={form.language}
+              onChange={(e) => setForm({ ...form, language: e.target.value })}
+            >
+              <option value="en">English</option>
+              <option value="hi">Hindi</option>
+              <option value="mr">Marathi</option>
+            </Field>
+          </div>
+
+          <Field
+            as="textarea"
+            label="Question Statement (English) *"
+            rows={2}
+            required
+            value={form.questionText}
+            onChange={(e) => setForm({ ...form, questionText: e.target.value })}
+          />
+
+          <Field
+            as="textarea"
+            label="Question Statement (Hindi)"
+            rows={2}
+            value={form.questionTextHindi}
+            onChange={(e) => setForm({ ...form, questionTextHindi: e.target.value })}
+          />
+
+          <div>
+            <div style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--ink)', marginBottom: '6px' }}>
+              Options (A, B, C, D) &amp; Correct Key *
             </div>
-
-            <form onSubmit={handleSaveQuestion}>
-              {/* Chapter Select */}
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>
-                  Target Chapter *
-                </label>
-                <select
-                  value={form.chapterId}
-                  onChange={(e) => setForm({ ...form, chapterId: e.target.value })}
-                  required
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
-                >
-                  {chapters.map((chap) => (
-                    <option key={chap._id} value={chap._id}>
-                      Ch {chap.chapterNumber}: {chap.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Board, Class & Language Controls (P2-1.1) */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '12px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '4px' }}>Board</label>
-                  <select
-                    value={form.board}
-                    onChange={(e) => setForm({ ...form, board: e.target.value })}
-                    style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
-                  >
-                    <option value="CBSE">CBSE</option>
-                    <option value="ICSE">ICSE</option>
-                    <option value="State Board">State Board</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '4px' }}>Class</label>
-                  <select
-                    value={form.classLevel}
-                    onChange={(e) => setForm({ ...form, classLevel: Number(e.target.value) })}
-                    style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
-                  >
-                    <option value={10}>Class 10</option>
-                    <option value={12}>Class 12</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '4px' }}>Language</label>
-                  <select
-                    value={form.language}
-                    onChange={(e) => setForm({ ...form, language: e.target.value })}
-                    style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
-                  >
-                    <option value="en">English</option>
-                    <option value="hi">Hindi</option>
-                    <option value="mr">Marathi</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Question Text */}
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>
-                  Question Statement (English) *
-                </label>
-                <textarea
-                  rows="2"
-                  required
-                  value={form.questionText}
-                  onChange={(e) => setForm({ ...form, questionText: e.target.value })}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
-                />
-              </div>
-
-              {/* Question Text Hindi */}
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>
-                  Question Statement (Hindi)
-                </label>
-                <textarea
-                  rows="2"
-                  value={form.questionTextHindi}
-                  onChange={(e) => setForm({ ...form, questionTextHindi: e.target.value })}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
-                />
-              </div>
-
-              {/* 4 Options */}
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>
-                  Options (A, B, C, D) & Correct Key *
-                </label>
-                {[0, 1, 2, 3].map((optIdx) => (
-                  <div key={optIdx} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                    <input
-                      type="radio"
-                      name="correctKey"
-                      checked={form.correctIndex === optIdx}
-                      onChange={() => setForm({ ...form, correctIndex: optIdx })}
-                      title="Set as correct answer"
-                    />
-                    <span style={{ fontSize: '0.85rem', fontWeight: '700', width: '20px' }}>
-                      {String.fromCharCode(65 + optIdx)})
-                    </span>
-                    <input
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
+              {[0, 1, 2, 3].map((optIdx) => (
+                <div key={optIdx} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)' }}>
+                  <input
+                    type="radio"
+                    name="correctKey"
+                    checked={form.correctIndex === optIdx}
+                    onChange={() => setForm({ ...form, correctIndex: optIdx })}
+                    title="Set as correct answer"
+                    aria-label={`Set Option ${String.fromCharCode(65 + optIdx)} as correct answer`}
+                    style={{ accentColor: 'var(--emerald-600)', width: '18px', height: '18px' }}
+                  />
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, width: '22px', fontFamily: 'var(--font-mono)' }}>
+                    {String.fromCharCode(65 + optIdx)})
+                  </span>
+                  <div style={{ flex: 1 }}>
+                    <Field
                       type="text"
                       required
                       placeholder={`Option ${String.fromCharCode(65 + optIdx)}`}
@@ -455,51 +409,48 @@ export default function AdminQuestionsPage() {
                         newOpts[optIdx] = e.target.value;
                         setForm({ ...form, options: newOpts });
                       }}
-                      style={{ flex: 1, padding: '6px 10px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
                     />
                   </div>
-                ))}
-                <span style={{ fontSize: '0.75rem', color: '#64748B' }}>
-                  Select the radio button next to the correct answer.
-                </span>
-              </div>
-
-              {/* Explanation */}
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>
-                  Step-by-step Physics / Science Explanation *
-                </label>
-                <textarea
-                  rows="2"
-                  required
-                  value={form.explanation}
-                  onChange={(e) => setForm({ ...form, explanation: e.target.value })}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
-                />
-              </div>
-
-              {/* Submit Buttons */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="btn btn-secondary"
-                  style={{ padding: '8px 14px' }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  style={{ padding: '8px 16px' }}
-                >
-                  Save Question
-                </button>
-              </div>
-            </form>
+                </div>
+              ))}
+            </div>
+            <span style={{ fontSize: '0.75rem', color: 'var(--ink-soft)', display: 'block', marginTop: '4px' }}>
+              Select the radio button next to the correct answer.
+            </span>
           </div>
-        </div>
-      )}
+
+          <Field
+            as="textarea"
+            label="Step-by-step Physics / Science Explanation *"
+            rows={2}
+            required
+            value={form.explanation}
+            onChange={(e) => setForm({ ...form, explanation: e.target.value })}
+          />
+        </form>
+      </Modal>
+
+      {/* DELETE CONFIRMATION MODAL */}
+      <Modal
+        open={Boolean(deleteTargetId)}
+        onClose={() => setDeleteTargetId(null)}
+        title="Delete Practice Question"
+        tapeTone="yellow"
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--sp-2)' }}>
+            <Button type="button" variant="secondary" size="sm" onClick={() => setDeleteTargetId(null)}>
+              Cancel
+            </Button>
+            <Button type="button" variant="danger" size="sm" onClick={handleConfirmDelete}>
+              Delete Question
+            </Button>
+          </div>
+        }
+      >
+        <p style={{ margin: 0, fontSize: '0.92rem', color: 'var(--ink-muted)' }}>
+          Are you sure you want to delete this question from the question bank? This action cannot be undone.
+        </p>
+      </Modal>
     </div>
   );
 }

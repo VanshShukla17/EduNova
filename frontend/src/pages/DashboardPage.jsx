@@ -1,66 +1,75 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import {
-  BookOpen,
-  CheckCircle,
-  Cpu,
-  ArrowRight,
+  Play,
+  FlaskConical,
   Award,
-  Loader2,
-  Atom,
-  FlaskConical,
-  Dna,
-  Calculator
+  Flame,
+  ArrowRight,
+  Compass,
+  Video,
+  Shapes,
+  Sparkles,
+  CheckCircle2,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-
-const iconMap = {
-  Atom,
-  FlaskConical,
-  Dna,
-  Calculator
-};
+import {
+  HeroCard,
+  SectionHeader,
+  PaperCard,
+  ChapterCard,
+  StatChip,
+  ProgressRing,
+  Tag,
+  Stamp,
+  Button,
+  StickyNote,
+  Skeleton,
+  EmptyState,
+  resolveSubjectKey,
+} from '../components/ui';
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { t, i18n } = useTranslation();
 
   const [subjects, setSubjects] = useState([]);
   const [progressList, setProgressList] = useState([]);
   const [recentScores, setRecentScores] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch real data from the API (Task 5.4)
   useEffect(() => {
     async function loadDashboardData() {
       try {
         setLoading(true);
-
         const [subjectsRes, progressRes, resultsRes] = await Promise.allSettled([
           api.getSubjects(),
           api.getProgress(),
-          api.getResults()
+          api.getResults(),
         ]);
 
         const loadedSubjects = subjectsRes.status === 'fulfilled' ? subjectsRes.value : [];
         const loadedProgress = progressRes.status === 'fulfilled' ? progressRes.value : [];
         const loadedResults = resultsRes.status === 'fulfilled' ? resultsRes.value : [];
 
-        // For each subject, fetch its chapters so we have progress per subject
         const subjectsWithProgress = await Promise.all(
-          loadedSubjects.map(async (sub) => {
+          (Array.isArray(loadedSubjects) ? loadedSubjects : []).map(async (sub) => {
             try {
               const chapters = await api.getSubjectChapters(sub._id || sub.id);
-              // Calculate average subject completion
               let avgProgress = 0;
               if (chapters && chapters.length > 0) {
-                const totalPct = chapters.reduce((acc, c) => acc + (c.completionPercentage || 0), 0);
+                const totalPct = chapters.reduce(
+                  (acc, c) => acc + (c.completionPercentage || 0),
+                  0
+                );
                 avgProgress = Math.round(totalPct / chapters.length);
               }
               return {
                 ...sub,
                 chapters: chapters || [],
-                progressPercentage: avgProgress
+                progressPercentage: avgProgress,
               };
             } catch {
               return { ...sub, chapters: [], progressPercentage: 0 };
@@ -69,8 +78,8 @@ export default function DashboardPage() {
         );
 
         setSubjects(subjectsWithProgress);
-        setProgressList(loadedProgress);
-        setRecentScores(loadedResults);
+        setProgressList(Array.isArray(loadedProgress) ? loadedProgress : []);
+        setRecentScores(Array.isArray(loadedResults) ? loadedResults : []);
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
       } finally {
@@ -81,277 +90,297 @@ export default function DashboardPage() {
     loadDashboardData();
   }, []);
 
-  // Determine Continue Learning bookmark
-  const latestProgress = progressList && progressList.length > 0 ? progressList[0] : null;
-  const firstSubject = subjects && subjects.length > 0 ? subjects[0] : null;
-  const firstChapter = firstSubject && firstSubject.chapters && firstSubject.chapters[0] ? firstSubject.chapters[0] : null;
+  const latestProgress = progressList.length > 0 ? progressList[0] : null;
+  const firstSubject = subjects.length > 0 ? subjects[0] : null;
+  const firstChapter =
+    firstSubject && firstSubject.chapters && firstSubject.chapters.length > 0
+      ? firstSubject.chapters[0]
+      : null;
 
-  const continueChapterTitle = latestProgress?.chapterId?.title || firstChapter?.title || 'Electricity (विद्युत)';
-  const continueSubjectId = latestProgress?.chapterId?.subjectId || firstSubject?._id || firstSubject?.id || 'physics';
-  const continueChapterId = latestProgress?.chapterId?._id || latestProgress?.chapterId || firstChapter?._id || firstChapter?.id || '1';
-  const continuePercentage = latestProgress?.completionPercentage || firstSubject?.progressPercentage || 0;
-  const continueLessonText = latestProgress?.lastAccessedLessonId?.title
-    ? `Resuming: ${latestProgress.lastAccessedLessonId.title}`
-    : 'Start learning the basics of electric charge & circuits';
+  const continueChapterTitle =
+    latestProgress?.chapterId?.title || firstChapter?.title || 'Electricity (विद्युत)';
+  const continueSubjectId =
+    latestProgress?.chapterId?.subjectId || firstSubject?._id || firstSubject?.id || 'physics';
+  const continueChapterId =
+    latestProgress?.chapterId?._id ||
+    latestProgress?.chapterId ||
+    firstChapter?._id ||
+    firstChapter?.id ||
+    '1';
+
+  const overallMastery =
+    subjects.length > 0
+      ? Math.round(
+          subjects.reduce((acc, s) => acc + (s.progressPercentage || 0), 0) / subjects.length
+        )
+      : 0;
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-5)' }}>
+        <Skeleton lines={4} />
+        <div className="paper-grid paper-grid--2">
+          <Skeleton lines={3} />
+          <Skeleton lines={3} />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      {/* Student Welcome Header */}
-      <div style={{ marginBottom: '20px' }}>
-        <h1 style={{ fontSize: '1.4rem', fontWeight: '800' }}>
-          Namaste, {user?.name || 'Student'}! 👋
-        </h1>
-        <p style={{ color: 'var(--color-muted)', fontSize: '0.9rem' }}>
-          Class {user?.classLevel || 10} • {user?.board || 'CBSE'} • {user?.language === 'hi' ? 'हिंदी माध्यम' : 'English Medium'}
-        </p>
-      </div>
-
-      {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0', color: 'var(--color-primary)' }}>
-          <Loader2 className="animate-spin" size={32} />
-        </div>
-      ) : (
-        <>
-          {/* Section 1: Continue Learning (Task 5.4) */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-6)' }}>
+      {/* Hero Card: Resume Current Notebook */}
+      <HeroCard
+        eyebrow="CONTINUE LEARNING"
+        eyebrowVariant="ready"
+        title={t('dashboard.welcome', {
+          name: user?.name || 'Student',
+          defaultValue: `Welcome back, ${user?.name || 'Student'}`,
+        })}
+        subtitle={continueChapterTitle}
+        description={`Class ${user?.classLevel || user?.class || 10} · ${user?.board || 'CBSE'} Notebook · Resume your current chapter or jump straight into hands-on STEM experiments.`}
+        progress={latestProgress?.completionPercentage ?? overallMastery}
+        progressLabel="Active chapter completion"
+        subject={firstSubject?.name || 'physics'}
+        badges={
+          <>
+            <StatChip variant="level" icon={Award}>
+              {recentScores.length} Tests
+            </StatChip>
+            <StatChip variant="streak" icon={Flame}>
+              Active Notebook
+            </StatChip>
+          </>
+        }
+        actions={
+          <>
+            <Button
+              variant="primary"
+              to={`/subjects/${continueSubjectId}/chapters/${continueChapterId}`}
+            >
+              <Play size={16} strokeWidth={2} aria-hidden="true" />
+              Resume Chapter
+            </Button>
+            <Button variant="kraft" to="/labs">
+              <FlaskConical size={16} strokeWidth={2} aria-hidden="true" />
+              Open Virtual Labs
+            </Button>
+          </>
+        }
+        illustration={
           <div
-            className="card"
             style={{
-              background: 'linear-gradient(135deg, #1E40AF 0%, #2563EB 100%)',
-              color: 'white',
-              border: 'none',
-              marginBottom: '20px'
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 'var(--sp-3)',
+              background: 'var(--paper-warm)',
+              border: '1px solid var(--paper-border-warm)',
+              borderRadius: 'var(--r-lg)',
+              padding: 'var(--sp-4)',
+              width: '100%',
+              maxWidth: '280px',
             }}
           >
-            <div style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.05em', opacity: 0.85, marginBottom: '6px' }}>
-              CONTINUE LEARNING
-            </div>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '6px' }}>
-              {continueChapterTitle}
-            </h2>
-            <p style={{ fontSize: '0.88rem', opacity: 0.9, marginBottom: '14px' }}>
-              {continueLessonText}
-            </p>
-
-            <div className="progress-bar-bg" style={{ backgroundColor: 'rgba(255,255,255,0.25)', height: '6px' }}>
-              <div
-                className="progress-bar-fill"
-                style={{ width: `${continuePercentage}%`, backgroundColor: '#60A5FA' }}
-              ></div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
-              <span style={{ fontSize: '0.82rem', opacity: 0.85 }}>
-                {continuePercentage}% completed
-              </span>
-              <Link
-                to={`/subjects/${continueSubjectId}/chapters/${continueChapterId}`}
-                style={{
-                  backgroundColor: 'white',
-                  color: 'var(--color-primary)',
-                  padding: '8px 14px',
-                  borderRadius: 'var(--radius-sm)',
-                  fontWeight: '600',
-                  fontSize: '0.88rem',
-                  textDecoration: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                Resume <ArrowRight size={14} />
-              </Link>
+            <ProgressRing
+              value={overallMastery}
+              size={84}
+              strokeWidth={8}
+              tone="emerald"
+              label="Overall Syllabus Mastery"
+            />
+            <div style={{ textAlign: 'center' }}>
+              <div className="type-label" style={{ color: 'var(--ink)' }}>
+                SYLLABUS MASTERY
+              </div>
+              <p className="type-small" style={{ color: 'var(--ink-muted)' }}>
+                {subjects.length} subjects active
+              </p>
             </div>
           </div>
+        }
+      />
 
-          {/* Section 2: Progress Per Subject (Task 5.4) */}
-          <div style={{ marginBottom: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: '700' }}>Progress per Subject</h2>
-              <Link to="/subjects" style={{ color: 'var(--color-primary)', fontSize: '0.85rem', fontWeight: '600', textDecoration: 'none' }}>
-                View All
-              </Link>
-            </div>
+      {/* Section: Progress per Subject */}
+      <section aria-labelledby="dashboard-subjects-heading">
+        <SectionHeader
+          tag="My STEM Notebooks"
+          title="Progress per Subject"
+          note="Tap any pinned subject card to open its chapters and lessons"
+          action={
+            <Button variant="note" size="sm" to="/subjects">
+              All Chapters
+              <ArrowRight size={15} strokeWidth={2} aria-hidden="true" />
+            </Button>
+          }
+        />
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-              {subjects.map((sub) => {
-                const Icon = iconMap[sub.icon] || Atom;
-                const pct = sub.progressPercentage || 0;
-                const primaryChap = sub.chapters && sub.chapters[0];
-                const linkUrl = primaryChap
-                  ? `/subjects/${sub._id || sub.id}/chapters/${primaryChap._id || primaryChap.id}`
-                  : '/subjects';
+        {subjects.length > 0 ? (
+          <div className="paper-grid paper-grid--2 tilt-cycle">
+            {subjects.map((sub, idx) => {
+              const firstChap = sub.chapters && sub.chapters[0];
+              const subId = sub._id || sub.id;
+              const chapId = firstChap ? firstChap._id || firstChap.id : null;
+              const targetTo = chapId ? `/subjects/${subId}/chapters/${chapId}` : '/subjects';
+              const displayName =
+                i18n.language === 'hi' && sub.nameHindi ? sub.nameHindi : sub.name;
+              const subjectKey = resolveSubjectKey(sub.name || sub.code);
 
+              return (
+                <ChapterCard
+                  key={subId || idx}
+                  code={`NOTEBOOK 0${idx + 1}`}
+                  subject={subjectKey}
+                  subjectLabel={sub.name}
+                  title={displayName}
+                  description={`${sub.chapters?.length || 0} chapters synced · Offline ready`}
+                  progress={sub.progressPercentage || 0}
+                  meta={`${sub.chapters?.length || 0} chapters`}
+                  mastered={(sub.progressPercentage || 0) >= 100}
+                  isNew={(sub.progressPercentage || 0) === 0}
+                  to={targetTo}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <EmptyState
+            title="No Subjects Assigned Yet"
+            description="Browse the full syllabus explorer or check back once subjects are published for your board."
+            actionLabel="Explore Syllabus"
+            to="/subjects"
+          />
+        )}
+      </section>
+
+      {/* Section: Interactive Desk Shortcuts */}
+      <section aria-labelledby="dashboard-tools-heading">
+        <SectionHeader
+          tag="Workbench & Media"
+          title="Hands-on Lab & Revision Tools"
+          note="Jump into 3D modules, interactive diagrams, or your personal Chotu notes"
+        />
+
+        <div className="paper-grid paper-grid--4 tilt-cycle">
+          <PaperCard interactive style={{ padding: 'var(--sp-4)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
+            <Compass size={20} strokeWidth={2} style={{ color: 'var(--physics-ink)' }} aria-hidden="true" />
+            <h3 className="type-h3">Interactive Hub</h3>
+            <p className="type-small" style={{ color: 'var(--ink-muted)' }}>
+              Heart, optics, trigonometry & molecular 3D explorers.
+            </p>
+            <Button variant="primary" size="sm" to="/learn" style={{ marginTop: 'auto' }}>
+              Open Hub
+            </Button>
+          </PaperCard>
+
+          <PaperCard interactive style={{ padding: 'var(--sp-4)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
+            <Shapes size={20} strokeWidth={2} style={{ color: 'var(--maths-ink)' }} aria-hidden="true" />
+            <h3 className="type-h3">Visual Diagrams</h3>
+            <p className="type-small" style={{ color: 'var(--ink-muted)' }}>
+              Pinpoint organ, circuit & geometry labels interactively.
+            </p>
+            <Button variant="primary" size="sm" to="/diagrams" style={{ marginTop: 'auto' }}>
+              View Diagrams
+            </Button>
+          </PaperCard>
+
+          <PaperCard interactive style={{ padding: 'var(--sp-4)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
+            <Video size={20} strokeWidth={2} style={{ color: 'var(--chemistry-ink)' }} aria-hidden="true" />
+            <h3 className="type-h3">Concept Videos</h3>
+            <p className="type-small" style={{ color: 'var(--ink-muted)' }}>
+              Short topic explainers indexed chapter by chapter.
+            </p>
+            <Button variant="primary" size="sm" to="/videos" style={{ marginTop: 'auto' }}>
+              Watch Videos
+            </Button>
+          </PaperCard>
+
+          <PaperCard interactive style={{ padding: 'var(--sp-4)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
+            <Sparkles size={20} strokeWidth={2} style={{ color: 'var(--biology-ink)' }} aria-hidden="true" />
+            <h3 className="type-h3">Chotu AI Tutor</h3>
+            <p className="type-small" style={{ color: 'var(--ink-muted)' }}>
+              Photo doubt solver & Socratic STEM revision chat.
+            </p>
+            <Button variant="primary" size="sm" to="/mentor" style={{ marginTop: 'auto' }}>
+              Ask Chotu
+            </Button>
+          </PaperCard>
+        </div>
+      </section>
+
+      {/* Section: Recent Test Scores */}
+      <section aria-labelledby="dashboard-scores-heading">
+        <SectionHeader
+          tag="Exam Logbook"
+          title="Recent Test Scores"
+          note="Every MCQ attempt is recorded for weak-topic diagnosis"
+          action={
+            <Button variant="note" size="sm" to="/results">
+              Full Diagnostics
+              <ArrowRight size={15} strokeWidth={2} aria-hidden="true" />
+            </Button>
+          }
+        />
+
+        {recentScores.length > 0 ? (
+          <PaperCard flat style={{ padding: 'var(--sp-4)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
+              {recentScores.slice(0, 3).map((res) => {
+                const chapName = res.chapterId?.title || 'Chapter Practice Test';
+                const dateStr = new Date(res.createdAt).toLocaleDateString();
+                const isHigh = Number(res.percentage) >= 80;
                 return (
-                  <Link
-                    key={sub.code || sub.name}
-                    to={linkUrl}
-                    className="card"
+                  <div
+                    key={res._id || res.id}
                     style={{
-                      marginBottom: 0,
-                      textDecoration: 'none',
-                      color: 'inherit',
-                      padding: '14px',
                       display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between'
+                      flexWrap: 'wrap',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 'var(--sp-3)',
+                      padding: 'var(--sp-3)',
+                      borderRadius: 'var(--r-md)',
+                      background: 'var(--paper-warm)',
+                      border: '1px solid var(--paper-border-warm)',
                     }}
                   >
-                    <div>
-                      <div style={{ color: sub.color || 'var(--color-primary)', marginBottom: '8px' }}>
-                        <Icon size={24} />
-                      </div>
-                      <h3 style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '2px' }}>{sub.name}</h3>
-                      <div style={{ color: 'var(--color-muted)', fontSize: '0.78rem' }}>{sub.nameHindi}</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <span className="type-h3" style={{ fontSize: '1rem', color: 'var(--ink)' }}>
+                        {chapName}
+                      </span>
+                      <span className="type-label" style={{ color: 'var(--ink-muted)' }}>
+                        {dateStr}
+                      </span>
                     </div>
 
-                    <div style={{ marginTop: '12px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: '600', color: 'var(--color-muted)', marginBottom: '4px' }}>
-                        <span>Progress</span>
-                        <span style={{ color: pct > 0 ? 'var(--color-primary)' : 'inherit' }}>{pct}%</span>
-                      </div>
-                      <div className="progress-bar-bg" style={{ height: '5px', margin: 0 }}>
-                        <div
-                          className="progress-bar-fill"
-                          style={{ width: `${pct}%`, backgroundColor: sub.color || 'var(--color-primary)' }}
-                        ></div>
-                      </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)' }}>
+                      {isHigh ? (
+                        <Stamp variant="mastered">
+                          <CheckCircle2 size={13} strokeWidth={2} aria-hidden="true" />
+                          HIGH SCORE
+                        </Stamp>
+                      ) : (
+                        <Tag variant="paper">PRACTICED</Tag>
+                      )}
+                      <span className="type-label" style={{ fontSize: '0.875rem', color: 'var(--ink)' }}>
+                        {res.score}/{res.totalQuestions} ({res.percentage}%)
+                      </span>
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>
-          </div>
-
-          {/* Section 3: Recent Test Scores (Task 5.4) */}
-          <div style={{ marginBottom: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: '700' }}>Recent Test Scores</h2>
-              <Link to="/results" style={{ color: 'var(--color-primary)', fontSize: '0.85rem', fontWeight: '600', textDecoration: 'none' }}>
-                All Results
-              </Link>
-            </div>
-
-            {recentScores && recentScores.length > 0 ? (
-              <div style={{ display: 'grid', gap: '10px' }}>
-                {recentScores.slice(0, 3).map((res) => {
-                  const chapName = res.chapterId?.title || 'Chapter Practice Test';
-                  const dateStr = new Date(res.createdAt).toLocaleDateString();
-
-                  return (
-                    <div
-                      key={res._id || res.id}
-                      className="card"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginBottom: 0,
-                        padding: '12px 14px'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ backgroundColor: 'var(--color-primary-light)', color: 'var(--color-primary)', padding: '8px', borderRadius: '8px' }}>
-                          <Award size={18} />
-                        </div>
-                        <div>
-                          <div style={{ fontWeight: '600', fontSize: '0.92rem' }}>{chapName}</div>
-                          <div style={{ color: 'var(--color-muted)', fontSize: '0.78rem' }}>{dateStr}</div>
-                        </div>
-                      </div>
-                      <div
-                        style={{
-                          fontWeight: '700',
-                          fontSize: '0.92rem',
-                          color: res.percentage >= 80 ? 'var(--color-success)' : 'var(--color-primary)',
-                          backgroundColor: res.percentage >= 80 ? 'var(--color-success-light)' : 'var(--color-primary-light)',
-                          padding: '4px 10px',
-                          borderRadius: '999px'
-                        }}
-                      >
-                        {res.score}/{res.totalQuestions} ({res.percentage}%)
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div
-                className="card"
-                style={{
-                  textAlign: 'center',
-                  padding: '24px',
-                  color: 'var(--color-muted)',
-                  fontSize: '0.9rem'
-                }}
-              >
-                No test attempts yet. Practice chapter MCQs to track your performance!
-              </div>
-            )}
-          </div>
-
-          {/* Virtual Learning 3D Topics Banner (Task P2-8) */}
-          <div
-            className="card"
-            style={{
-              background: 'linear-gradient(135deg, #1E1B4B 0%, #312E81 100%)',
-              color: '#FFFFFF',
-              border: 'none',
-              padding: '16px 20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '16px'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: '#FDE047', padding: '10px', borderRadius: '10px' }}>
-                <Cpu size={24} />
-              </div>
-              <div>
-                <div style={{ fontSize: '0.72rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#A5B4FC' }}>
-                  NEW FEATURE • 3D SIMULATIONS
-                </div>
-                <div style={{ fontWeight: '800', fontSize: '1.05rem', color: '#FFFFFF' }}>Virtual Learning 3D Labs</div>
-                <div style={{ color: '#C7D2FE', fontSize: '0.8rem' }}>Ray Optics, Conics, 3D Molecules & Human Heart</div>
-              </div>
-            </div>
-            <Link
-              to="/virtual-learning"
-              style={{
-                backgroundColor: '#FFFFFF',
-                color: '#312E81',
-                padding: '8px 16px',
-                borderRadius: '8px',
-                fontWeight: '700',
-                fontSize: '0.85rem',
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              Explore 3D <ArrowRight size={14} />
-            </Link>
-          </div>
-
-          {/* Quick 3D Virtual Lab Link */}
-          <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ backgroundColor: '#F3E8FF', color: 'var(--color-secondary)', padding: '10px', borderRadius: '10px' }}>
-                <Cpu size={22} />
-              </div>
-              <div>
-                <div style={{ fontWeight: '600', fontSize: '0.92rem' }}>Physics Virtual Lab</div>
-                <div style={{ color: 'var(--color-muted)', fontSize: '0.8rem' }}>Simple Pendulum Simulation</div>
-              </div>
-            </div>
-            <Link to="/labs/pendulum" className="btn btn-secondary" style={{ width: 'auto', padding: '6px 12px', fontSize: '0.85rem' }}>
-              Open Lab
-            </Link>
-          </div>
-        </>
-      )}
+          </PaperCard>
+        ) : (
+          <StickyNote tone="yellow" body rotation="-0.5deg" style={{ maxWidth: '100%' }}>
+            <strong>No test logs yet.</strong> Pick any chapter in{' '}
+            <Link to="/subjects" style={{ color: 'var(--emerald-800)', fontWeight: 700 }}>
+              Syllabus
+            </Link>{' '}
+            and finish a quick MCQ check to unlock weak-topic diagnostics.
+          </StickyNote>
+        )}
+      </section>
     </div>
   );
 }

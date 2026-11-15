@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { RotateCcw, Check, Sparkles, HelpCircle } from 'lucide-react';
+import { Button, PaperCard, Tag } from '../../components/ui';
+import { resolveCssVar } from '../../components/ui/subjectUtils';
 
 /**
  * Trigonometric Unit Circle Simulation (P2-8.8)
@@ -43,8 +44,17 @@ export default function TrigUnitCircleSimulation() {
     const cy = height / 2;
     const R = 110; // Radius in pixels
 
+    const cGrid = resolveCssVar('--paper-edge');
+    const cAxis = resolveCssVar('--ink-soft');
+    const cCircle = resolveCssVar('--physics');
+    const cMaths = resolveCssVar('--maths');
+    const cInk = resolveCssVar('--ink');
+    const cRed = resolveCssVar('--red-600');
+    const cEmerald = resolveCssVar('--emerald-600');
+    const cWhite = resolveCssVar('--paper');
+
     // Background grid
-    ctx.strokeStyle = '#F1F5F9';
+    ctx.strokeStyle = cGrid;
     ctx.lineWidth = 1;
     for (let x = 0; x < width; x += 25) {
       ctx.beginPath();
@@ -60,7 +70,7 @@ export default function TrigUnitCircleSimulation() {
     }
 
     // Axes
-    ctx.strokeStyle = '#94A3B8';
+    ctx.strokeStyle = cAxis;
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.moveTo(20, cy);
@@ -73,7 +83,7 @@ export default function TrigUnitCircleSimulation() {
     ctx.stroke();
 
     // Axis labels
-    ctx.fillStyle = '#64748B';
+    ctx.fillStyle = cAxis;
     ctx.font = '10px sans-serif';
     ctx.fillText('+X (cos)', width - 45, cy - 8);
     ctx.fillText('+Y (sin)', cx + 8, 30);
@@ -83,7 +93,7 @@ export default function TrigUnitCircleSimulation() {
     // Unit circle
     ctx.beginPath();
     ctx.arc(cx, cy, R, 0, Math.PI * 2);
-    ctx.strokeStyle = '#3B82F6';
+    ctx.strokeStyle = cCircle;
     ctx.lineWidth = 2.5;
     ctx.stroke();
 
@@ -95,9 +105,12 @@ export default function TrigUnitCircleSimulation() {
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.arc(cx, cy, 32, 0, -rad, true);
-    ctx.fillStyle = 'rgba(99, 102, 241, 0.2)';
+    ctx.save();
+    ctx.globalAlpha = 0.2;
+    ctx.fillStyle = cMaths;
     ctx.fill();
-    ctx.strokeStyle = '#6366F1';
+    ctx.restore();
+    ctx.strokeStyle = cMaths;
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
@@ -105,7 +118,7 @@ export default function TrigUnitCircleSimulation() {
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(px, py);
-    ctx.strokeStyle = '#1E293B';
+    ctx.strokeStyle = cInk;
     ctx.lineWidth = 2.5;
     ctx.stroke();
 
@@ -113,7 +126,7 @@ export default function TrigUnitCircleSimulation() {
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(px, cy);
-    ctx.strokeStyle = '#2563EB'; // Blue for Cos
+    ctx.strokeStyle = cCircle; // Blue for Cos
     ctx.lineWidth = 3.5;
     ctx.stroke();
 
@@ -121,7 +134,7 @@ export default function TrigUnitCircleSimulation() {
     ctx.beginPath();
     ctx.moveTo(px, cy);
     ctx.lineTo(px, py);
-    ctx.strokeStyle = '#DC2626'; // Red for Sin
+    ctx.strokeStyle = cRed; // Red for Sin
     ctx.lineWidth = 3.5;
     ctx.stroke();
 
@@ -132,7 +145,7 @@ export default function TrigUnitCircleSimulation() {
       ctx.beginPath();
       ctx.moveTo(cx + R, cy);
       ctx.lineTo(cx + R, Math.max(10, Math.min(height - 10, tanY)));
-      ctx.strokeStyle = '#059669'; // Green for Tan
+      ctx.strokeStyle = cEmerald; // Green for Tan
       ctx.lineWidth = 2.5;
       ctx.setLineDash([4, 4]);
       ctx.stroke();
@@ -142,14 +155,14 @@ export default function TrigUnitCircleSimulation() {
     // Terminal point P (cos θ, sin θ)
     ctx.beginPath();
     ctx.arc(px, py, 6, 0, Math.PI * 2);
-    ctx.fillStyle = '#4F46E5';
+    ctx.fillStyle = cMaths;
     ctx.fill();
-    ctx.strokeStyle = '#FFFFFF';
+    ctx.strokeStyle = cWhite;
     ctx.lineWidth = 2;
     ctx.stroke();
 
     // Coordinates tooltip
-    ctx.fillStyle = '#1E293B';
+    ctx.fillStyle = cInk;
     ctx.font = 'bold 11px sans-serif';
     ctx.fillText(
       `P(${cosVal.toFixed(2)}, ${sinVal.toFixed(2)})`,
@@ -159,70 +172,47 @@ export default function TrigUnitCircleSimulation() {
   }, [angleDeg, rad, sinVal, cosVal, tanVal, showTangent]);
 
   return (
-    <div style={{ backgroundColor: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+    <PaperCard flat style={{ padding: 'var(--sp-4)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
       {/* Top Header and Presets */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '0.8rem', fontWeight: '700', color: '#1E293B' }}>Standard CBSE Angles:</span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ink)' }}>Standard CBSE Angles:</span>
           {[0, 30, 45, 60, 90, 180, 270, 360].map((deg) => (
-            <button
+            <Button
               key={deg}
               type="button"
+              size="sm"
+              variant={angleDeg === deg ? 'primary' : 'secondary'}
               onClick={() => setAngleDeg(deg)}
-              style={{
-                padding: '4px 8px',
-                fontSize: '0.72rem',
-                fontWeight: '700',
-                borderRadius: '6px',
-                border: '1px solid #CBD5E1',
-                backgroundColor: angleDeg === deg ? '#4F46E5' : '#F8FAFC',
-                color: angleDeg === deg ? '#FFFFFF' : '#475569',
-                cursor: 'pointer'
-              }}
             >
               {deg}°
-            </button>
+            </Button>
           ))}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
+          <Button
             type="button"
+            size="sm"
+            variant="secondary"
             onClick={() => setIsRadians(!isRadians)}
-            style={{
-              padding: '5px 10px',
-              fontSize: '0.75rem',
-              fontWeight: '700',
-              borderRadius: '6px',
-              border: '1px solid #CBD5E1',
-              backgroundColor: '#F1F5F9',
-              cursor: 'pointer'
-            }}
           >
             Mode: {isRadians ? 'Radians (π)' : 'Degrees (°)'}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            size="sm"
+            variant={showTangent ? 'primary' : 'secondary'}
             onClick={() => setShowTangent(!showTangent)}
-            style={{
-              padding: '5px 10px',
-              fontSize: '0.75rem',
-              fontWeight: '700',
-              borderRadius: '6px',
-              border: '1px solid #CBD5E1',
-              backgroundColor: showTangent ? '#ECFDF5' : '#F8FAFC',
-              color: showTangent ? '#059669' : '#64748B',
-              cursor: 'pointer'
-            }}
           >
             Tangent Line: {showTangent ? 'ON' : 'OFF'}
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Main Simulation Viewport */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: '16px' }}>
-        <div style={{ backgroundColor: '#F8FAFC', borderRadius: '12px', border: '1px solid #E2E8F0', height: '320px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 'var(--sp-3)' }}>
+        <div style={{ backgroundColor: 'var(--paper-warm)', borderRadius: 'var(--r-md)', border: '1px solid var(--paper-edge)', height: '320px', position: 'relative', overflow: 'hidden' }}>
           <canvas
             ref={canvasRef}
             width={480}
@@ -232,47 +222,47 @@ export default function TrigUnitCircleSimulation() {
         </div>
 
         {/* Live Mathematical Calculations */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ padding: '10px 14px', backgroundColor: '#EFF6FF', borderRadius: '8px', border: '1px solid #BFDBFE' }}>
-            <div style={{ fontSize: '0.7rem', color: '#1D4ED8', fontWeight: '700' }}>cos θ (Adjacent / Base)</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1E3A8A' }}>{cosVal.toFixed(4)}</div>
-            <div style={{ fontSize: '0.65rem', color: '#3B82F6' }}>Horizontal projection on X-axis</div>
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
+          <PaperCard flat style={{ padding: 'var(--sp-3)', backgroundColor: 'var(--physics-soft)', borderColor: 'var(--physics)' }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--physics-ink)', fontWeight: 700 }}>cos θ (Adjacent / Base)</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-mono)' }}>{cosVal.toFixed(4)}</div>
+            <div style={{ fontSize: '0.68rem', color: 'var(--physics-ink)' }}>Horizontal projection on X-axis</div>
+          </PaperCard>
 
-          <div style={{ padding: '10px 14px', backgroundColor: '#FEF2F2', borderRadius: '8px', border: '1px solid #FECACA' }}>
-            <div style={{ fontSize: '0.7rem', color: '#B91C1C', fontWeight: '700' }}>sin θ (Opposite / Perpendicular)</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#991B1B' }}>{sinVal.toFixed(4)}</div>
-            <div style={{ fontSize: '0.65rem', color: '#EF4444' }}>Vertical projection on Y-axis</div>
-          </div>
+          <PaperCard flat style={{ padding: 'var(--sp-3)', backgroundColor: 'var(--red-soft)', borderColor: 'var(--red-border)' }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--red-ink)', fontWeight: 700 }}>sin θ (Opposite / Perpendicular)</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--red-ink)', fontFamily: 'var(--font-mono)' }}>{sinVal.toFixed(4)}</div>
+            <div style={{ fontSize: '0.68rem', color: 'var(--red-ink)' }}>Vertical projection on Y-axis</div>
+          </PaperCard>
 
-          <div style={{ padding: '10px 14px', backgroundColor: '#ECFDF5', borderRadius: '8px', border: '1px solid #A7F3D0' }}>
-            <div style={{ fontSize: '0.7rem', color: '#047857', fontWeight: '700' }}>tan θ = sin θ / cos θ</div>
-            <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#064E3B' }}>
+          <PaperCard flat style={{ padding: 'var(--sp-3)', backgroundColor: 'var(--emerald-soft)', borderColor: 'var(--emerald-600)' }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--emerald-800)', fontWeight: 700 }}>tan θ = sin θ / cos θ</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--emerald-800)', fontFamily: 'var(--font-mono)' }}>
               {Math.abs(tanVal) > 1000 ? 'Undefined (±∞)' : tanVal.toFixed(4)}
             </div>
-            <div style={{ fontSize: '0.65rem', color: '#10B981' }}>Slope of terminal radius</div>
-          </div>
+            <div style={{ fontSize: '0.68rem', color: 'var(--emerald-700)' }}>Slope of terminal radius</div>
+          </PaperCard>
 
           {/* Quadrant & Identity Proof */}
-          <div style={{ padding: '8px 12px', backgroundColor: '#FAF5FF', borderRadius: '8px', border: '1px solid #E9D5FF' }}>
-            <div style={{ fontSize: '0.68rem', color: '#7E22CE', fontWeight: '700' }}>ASTC Rule & Identity:</div>
-            <div style={{ fontSize: '0.8rem', fontWeight: '800', color: '#581C87', marginTop: '2px' }}>
+          <PaperCard flat style={{ padding: 'var(--sp-3)', backgroundColor: 'var(--maths-soft)', borderColor: 'var(--maths)' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--maths-ink)', fontWeight: 700 }}>ASTC Rule &amp; Identity:</div>
+            <div style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--ink)', marginTop: '2px' }}>
               {quadrantInfo.label}
             </div>
-            <div style={{ fontSize: '0.7rem', color: '#6B21A8', marginTop: '4px', fontFamily: 'monospace' }}>
-              sin²θ + cos²θ = { (sinVal * sinVal + cosVal * cosVal).toFixed(2) } = 1
+            <div style={{ fontSize: '0.72rem', color: 'var(--maths-ink)', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
+              sin²θ + cos²θ = {(sinVal * sinVal + cosVal * cosVal).toFixed(2)} = 1
             </div>
-          </div>
+          </PaperCard>
         </div>
       </div>
 
       {/* Slider Controls */}
-      <div style={{ padding: '12px 16px', backgroundColor: '#F8FAFC', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', fontWeight: '700', marginBottom: '6px' }}>
+      <PaperCard flat style={{ padding: 'var(--sp-3)', backgroundColor: 'var(--paper-warm)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.82rem', fontWeight: 700, marginBottom: '6px' }}>
           <span>Adjust Angle θ:</span>
-          <span style={{ color: '#4F46E5' }}>
+          <Tag tone="maths">
             {angleDeg}° {isRadians && `≈ ${(rad / Math.PI).toFixed(2)}π rad`}
-          </span>
+          </Tag>
         </div>
         <input
           type="range"
@@ -280,11 +270,12 @@ export default function TrigUnitCircleSimulation() {
           max="360"
           step="1"
           value={angleDeg}
-          onChange={(e) => setAngleDeg(parseInt(e.target.value))}
-          style={{ width: '100%', cursor: 'pointer' }}
+          onChange={(e) => setAngleDeg(parseInt(e.target.value, 10))}
+          aria-label="Adjust Angle theta in degrees"
+          style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--maths)' }}
         />
-      </div>
-    </div>
+      </PaperCard>
+    </PaperCard>
   );
 }
 

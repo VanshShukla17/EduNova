@@ -2,173 +2,161 @@ export const SUBJECTS_CONFIG = {
   biology: {
     id: 'biology',
     name: 'Biology',
-    color: '#059669',
-    bgColor: '#ECFDF5',
-    borderColor: '#A7F3D0',
+    color: 'var(--biology-ink)',
+    bgColor: 'var(--biology-soft)',
+    borderColor: 'var(--biology)',
     icon: 'Dna',
-    gradeRange: 'Class 10–12',
-    description: 'Explore human anatomy, physiology, cellular respiration, and organ system biomechanics with immersive 3D interactive models.',
-    chapters: 'Life Processes, Locomotion & Movement, Breathing & Exchange of Gases'
+    description:
+      'Explore human anatomy, physiology, cellular respiration, and organ system biomechanics with interactive 3D models.',
   },
   physics: {
     id: 'physics',
     name: 'Physics',
-    color: '#2563EB',
-    bgColor: '#EFF6FF',
-    borderColor: '#BFDBFE',
+    color: 'var(--physics-ink)',
+    bgColor: 'var(--physics-soft)',
+    borderColor: 'var(--physics)',
     icon: 'Atom',
-    gradeRange: 'Class 10–12',
-    description: 'Investigate ray optics, wave acoustics, harmonic motion, and classical Newtonian dynamics through real-time interactive physics labs.',
-    chapters: 'Light - Reflection & Refraction, Waves & Sound, Laws of Motion'
+    description:
+      'Investigate ray optics, wave acoustics, harmonic motion, and Newtonian dynamics through interactive physics labs.',
   },
   chemistry: {
     id: 'chemistry',
     name: 'Chemistry',
-    color: '#D97706',
-    bgColor: '#FFFBEB',
-    borderColor: '#FDE68A',
+    color: 'var(--chemistry-ink)',
+    bgColor: 'var(--chemistry-soft)',
+    borderColor: 'var(--chemistry)',
     icon: 'FlaskConical',
-    gradeRange: 'Class 10–12',
-    description: 'Visualize atomic architecture, chemical bonding, 3D molecular conformations, and VSEPR geometries with MolView and 3D WebGL.',
-    chapters: 'Chemical Bonding & Molecular Structure, Hydrocarbons, Carbon Compounds'
+    description:
+      'Visualize atomic architecture, chemical bonding, 3D molecular conformations, and VSEPR geometries.',
   },
   mathematics: {
     id: 'mathematics',
     name: 'Mathematics',
-    color: '#7C3AED',
-    bgColor: '#F5F3FF',
-    borderColor: '#DDD6FE',
+    color: 'var(--maths-ink)',
+    bgColor: 'var(--maths-soft)',
+    borderColor: 'var(--maths)',
     icon: 'Compass',
-    gradeRange: 'Class 10–12',
-    description: 'Master geometric coordinate spaces, unit circle projections, sinusoidal wave transformations, and 3D conic sections with dynamic parameter sliders.',
-    chapters: 'Introduction to Trigonometry, Trigonometric Functions, Conic Sections'
-  }
+    description:
+      'Master geometric coordinate spaces, unit circle projections, sinusoidal wave transformations, and 3D conic sections.',
+  },
 };
 
 export const MODULES_DATA = [
-  // BIOLOGY
   {
     id: 'human-heart',
     subject: 'biology',
-    subjectLabel: 'BIOLOGY',
-    grade: 'Class 10',
+    subjectLabel: 'Biology',
+    grade: 'Class 10–12',
     title: 'Human Heart & Double Circulatory Cycle',
-    description: 'Inspect the 4-chambered human heart in 3D. Control cardiac BPM, trace oxygenated vs deoxygenated blood pathways, and understand systemic vs pulmonary circulation.',
+    description:
+      'Inspect the 4-chambered human heart in 3D. Control cardiac BPM, trace oxygenated vs deoxygenated blood pathways, and understand systemic vs pulmonary circulation.',
     route: '/learn/biology/human-heart',
     type: '3D Lab',
-    badgeColor: '#4338CA',
-    badgeBg: '#EEF2FF',
-    attribution: 'iamtechartist.com'
+    badgeColor: 'var(--biology-ink)',
+    badgeBg: 'var(--biology-soft)',
   },
   {
     id: 'muscular-system',
     subject: 'biology',
-    subjectLabel: 'BIOLOGY',
-    grade: 'Class 11',
+    subjectLabel: 'Biology',
+    grade: 'Class 11–12',
     title: 'Human Muscular System – The 13 Muscles',
-    description: 'Explore the 13 major superficial muscles of the human body in 3D. Inspect anterior and posterior groups, muscle origins, and joint mechanics.',
+    description:
+      'Explore the 13 major superficial muscles of the human body in 3D. Inspect anterior and posterior groups, muscle origins, and joint mechanics.',
     route: '/learn/biology/muscular-system',
     type: '3D Lab',
-    badgeColor: '#4338CA',
-    badgeBg: '#EEF2FF',
-    attribution: 'iamtechartist.com'
+    badgeColor: 'var(--biology-ink)',
+    badgeBg: 'var(--biology-soft)',
   },
   {
     id: 'respiration',
     subject: 'biology',
-    subjectLabel: 'BIOLOGY',
-    grade: 'Class 10 & 11',
+    subjectLabel: 'Biology',
+    grade: 'Class 10–11',
     title: 'Breathing and Pulmonary Respiration',
-    description: 'Interactive 3D simulation of human pulmonary ventilation, diaphragm biomechanics, bronchial tree branching, and alveolar gas exchange.',
+    description:
+      'Interactive 3D simulation of human pulmonary ventilation, diaphragm biomechanics, bronchial tree branching, and alveolar gas exchange.',
     route: '/learn/biology/respiration',
     type: '3D Lab',
-    badgeColor: '#4338CA',
-    badgeBg: '#EEF2FF',
-    attribution: 'iamtechartist.com'
+    badgeColor: 'var(--biology-ink)',
+    badgeBg: 'var(--biology-soft)',
   },
-
-  // PHYSICS
   {
     id: 'light-optics',
     subject: 'physics',
-    subjectLabel: 'PHYSICS',
-    grade: 'Class 10 & 12',
+    subjectLabel: 'Physics',
+    grade: 'Class 10–12',
     title: 'Light & Ray Optics Interactive Lab',
-    description: 'Interactive ray optics simulation covering reflection, spherical mirrors, Snell’s law of refraction, thin lenses, and real-time image formation.',
+    description:
+      'Interactive ray optics simulation covering reflection, spherical mirrors, Snell’s law of refraction, thin lenses, and real-time image formation.',
     route: '/learn/physics/light-and-optics',
-    type: '3D Lab',
-    badgeColor: '#1E40AF',
-    badgeBg: '#EFF6FF',
-    attribution: 'iamtechartist.com'
+    type: 'Interactive Lab',
+    badgeColor: 'var(--physics-ink)',
+    badgeBg: 'var(--physics-soft)',
   },
   {
     id: 'waves-sound',
     subject: 'physics',
-    subjectLabel: 'PHYSICS',
-    grade: 'Class 11',
+    subjectLabel: 'Physics',
+    grade: 'Class 9–11',
     title: 'Waves & Sound Acoustic Explorer',
-    description: 'Experiment with longitudinal and transverse wave propagation, frequency, wavelength, amplitude, Doppler acoustic effect, and echo acoustics.',
+    description:
+      'Experiment with longitudinal and transverse wave propagation, frequency, wavelength, amplitude, Doppler acoustic effect, and echo acoustics.',
     route: '/learn/physics/waves-and-sound',
     type: 'Interactive Lab',
-    badgeColor: '#1E40AF',
-    badgeBg: '#EFF6FF',
-    attribution: 'iamtechartist.com'
+    badgeColor: 'var(--physics-ink)',
+    badgeBg: 'var(--physics-soft)',
   },
   {
     id: 'newtons-laws',
     subject: 'physics',
-    subjectLabel: 'PHYSICS',
-    grade: 'Class 11',
+    subjectLabel: 'Physics',
+    grade: 'Class 9–11',
     title: 'Newton’s Laws of Motion & Dynamics',
-    description: 'Hands-on dynamics lab exploring inertia, Newton’s second law (F = ma), action-reaction pairs, momentum conservation, and real-world friction.',
+    description:
+      'Hands-on dynamics lab exploring inertia, Newton’s second law (F = ma), action-reaction pairs, momentum conservation, and real-world friction.',
     route: '/learn/physics/newtons-laws',
     type: 'Interactive Lab',
-    badgeColor: '#1E40AF',
-    badgeBg: '#EFF6FF',
-    attribution: 'iamtechartist.com'
+    badgeColor: 'var(--physics-ink)',
+    badgeBg: 'var(--physics-soft)',
   },
-
-  // CHEMISTRY
   {
     id: 'molecular-explorer',
     subject: 'chemistry',
-    subjectLabel: 'CHEMISTRY',
-    grade: 'Class 10 & 11',
+    subjectLabel: 'Chemistry',
+    grade: 'Class 11–12',
     title: 'Interactive 3D Molecular Explorer',
-    description: 'Explore 3D ball-and-stick molecular geometry, chemical bonds, VSEPR shapes, and chemical structures powered by MolView and native 3D WebGL.',
+    description:
+      'Explore 3D ball-and-stick molecular geometry, chemical bonds, VSEPR shapes, and chemical structures powered by MolView and native 3D WebGL.',
     route: '/learn/chemistry/molecular-explorer',
     type: '3D Lab',
-    badgeColor: '#B45309',
-    badgeBg: '#FFFBEB',
-    attribution: 'MolView & Native WebGL'
+    badgeColor: 'var(--chemistry-ink)',
+    badgeBg: 'var(--chemistry-soft)',
   },
-
-  // MATHEMATICS
   {
     id: 'trigonometry',
     subject: 'mathematics',
-    subjectLabel: 'MATHEMATICS',
-    grade: 'Class 10 & 11',
+    subjectLabel: 'Mathematics',
+    grade: 'Class 10–12',
     title: 'Trigonometry & Unit Circle Interactive Lab',
-    description: 'Master the trigonometric unit circle, ASTC quadrant rule, Pythagorean identities, and real-time sinusoidal wave transformations y = A sin(Bx + C) + D.',
+    description:
+      'Master the trigonometric unit circle, ASTC quadrant rule, Pythagorean identities, and real-time sinusoidal wave transformations y = A sin(Bx + C) + D.',
     route: '/learn/mathematics/trigonometry',
     type: 'Interactive Lab',
-    badgeColor: '#6D28D9',
-    badgeBg: '#F5F3FF',
-    attribution: 'Native Interactive Canvas'
+    badgeColor: 'var(--maths-ink)',
+    badgeBg: 'var(--maths-soft)',
   },
   {
     id: 'conic-sections',
     subject: 'mathematics',
-    subjectLabel: 'MATHEMATICS',
-    grade: 'Class 11',
+    subjectLabel: 'Mathematics',
+    grade: 'Class 11–12',
     title: 'Conic Sections 3D & 2D Graphing Lab',
-    description: '3D double cone slicing cross-sections paired with an interactive 2D Cartesian grapher for Circle, Parabola, Ellipse, and Hyperbola with live property calculations.',
+    description:
+      '3D double cone slicing cross-sections paired with an interactive 2D Cartesian grapher for Circle, Parabola, Ellipse, and Hyperbola.',
     route: '/learn/mathematics/conic-sections',
-    type: '3D Lab',
-    badgeColor: '#6D28D9',
-    badgeBg: '#F5F3FF',
-    attribution: 'Native WebGL & Canvas'
-  }
+    type: '3D & 2D Lab',
+    badgeColor: 'var(--maths-ink)',
+    badgeBg: 'var(--maths-soft)',
+  },
 ];
-

@@ -26,6 +26,7 @@ import {
   updateLesson,
   deleteLesson
 } from '../../services/api';
+import { Button, EmptyState, Field, Modal, PaperCard, SectionHeader, Tag } from '../../components/ui';
 
 export default function AdminContentPage() {
   const [activeTab, setActiveTab] = useState('chapters'); // 'chapters' | 'subjects' | 'lessons'
@@ -320,38 +321,28 @@ export default function AdminContentPage() {
   };
 
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', paddingBottom: '32px' }}>
+    <div style={{ maxWidth: '960px', margin: '0 auto', paddingBottom: 'var(--sp-8)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
       {/* Top Navigation */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-        <Link
-          to="/admin"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            color: 'var(--color-primary)',
-            textDecoration: 'none',
-            fontSize: '0.9rem',
-            fontWeight: '600'
-          }}
-        >
+      <div>
+        <Button as={Link} to="/admin" variant="ghost" size="sm">
           <ArrowLeft size={16} /> Back to Admin Dashboard
-        </Link>
+        </Button>
       </div>
 
       {/* Banner Alert */}
       {alertMsg && (
-        <div
+        <PaperCard
+          flat
+          role="status"
           style={{
-            padding: '12px 16px',
-            borderRadius: 'var(--radius-sm, 6px)',
-            marginBottom: '14px',
-            backgroundColor: alertMsg.type === 'success' ? '#DCFCE7' : '#FEF2F2',
-            color: alertMsg.type === 'success' ? '#15803D' : '#991B1B',
-            border: `1px solid ${alertMsg.type === 'success' ? '#86EFAC' : '#FECACA'}`,
+            padding: 'var(--sp-3) var(--sp-4)',
+            backgroundColor: alertMsg.type === 'success' ? 'var(--emerald-soft)' : 'var(--red-soft)',
+            color: alertMsg.type === 'success' ? 'var(--emerald-800)' : 'var(--red-ink)',
+            borderColor: alertMsg.type === 'success' ? 'var(--emerald-600)' : 'var(--red-border)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            gap: 'var(--sp-2)',
             fontSize: '0.88rem'
           }}
         >
@@ -359,207 +350,152 @@ export default function AdminContentPage() {
             {alertMsg.type === 'success' ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
             <span>{alertMsg.text}</span>
           </div>
-          <button
-            onClick={() => setAlertMsg(null)}
-            style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}
-          >
+          <Button type="button" variant="ghost" size="sm" onClick={() => setAlertMsg(null)} aria-label="Dismiss alert">
             <X size={16} />
-          </button>
-        </div>
+          </Button>
+        </PaperCard>
       )}
 
       {/* Page Title & Tab Navigation */}
-      <div className="card" style={{ padding: '16px', marginBottom: '16px' }}>
-        <h1 style={{ fontSize: '1.25rem', fontWeight: '800', margin: '0 0 12px 0', color: '#0F172A' }}>
-          Curriculum Content Manager
-        </h1>
+      <PaperCard flat style={{ padding: 'var(--sp-4)' }}>
+        <SectionHeader kicker="CONTENT MANAGER" title="Curriculum Content Manager" />
 
-        <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid #E2E8F0' }}>
-          <button
+        <div style={{ display: 'flex', gap: 'var(--sp-2)', flexWrap: 'wrap', marginTop: 'var(--sp-3)' }}>
+          <Button
+            type="button"
+            size="sm"
+            variant={activeTab === 'chapters' ? 'primary' : 'secondary'}
             onClick={() => setActiveTab('chapters')}
-            style={{
-              padding: '10px 16px',
-              fontSize: '0.9rem',
-              fontWeight: '600',
-              color: activeTab === 'chapters' ? 'var(--color-primary)' : '#64748B',
-              borderBottom: activeTab === 'chapters' ? '3px solid var(--color-primary)' : '3px solid transparent',
-              background: 'none',
-              borderTop: 'none',
-              borderLeft: 'none',
-              borderRight: 'none',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
           >
             <Layers size={16} /> Chapters (अध्याय)
-          </button>
+          </Button>
 
-          <button
+          <Button
+            type="button"
+            size="sm"
+            variant={activeTab === 'lessons' ? 'primary' : 'secondary'}
             onClick={() => setActiveTab('lessons')}
-            style={{
-              padding: '10px 16px',
-              fontSize: '0.9rem',
-              fontWeight: '600',
-              color: activeTab === 'lessons' ? 'var(--color-primary)' : '#64748B',
-              borderBottom: activeTab === 'lessons' ? '3px solid var(--color-primary)' : '3px solid transparent',
-              background: 'none',
-              borderTop: 'none',
-              borderLeft: 'none',
-              borderRight: 'none',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
           >
             <FileText size={16} /> Lessons (पाठ)
-          </button>
+          </Button>
 
-          <button
+          <Button
+            type="button"
+            size="sm"
+            variant={activeTab === 'subjects' ? 'primary' : 'secondary'}
             onClick={() => setActiveTab('subjects')}
-            style={{
-              padding: '10px 16px',
-              fontSize: '0.9rem',
-              fontWeight: '600',
-              color: activeTab === 'subjects' ? 'var(--color-primary)' : '#64748B',
-              borderBottom: activeTab === 'subjects' ? '3px solid var(--color-primary)' : '3px solid transparent',
-              background: 'none',
-              borderTop: 'none',
-              borderLeft: 'none',
-              borderRight: 'none',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
           >
             <BookOpen size={16} /> Subjects (विषय)
-          </button>
+          </Button>
         </div>
-      </div>
+      </PaperCard>
 
       {/* ========================================================= */}
       {/* TAB 1: CHAPTERS MANAGEMENT (Task 10.2 & 10.3) */}
       {/* ========================================================= */}
       {activeTab === 'chapters' && (
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
           {/* Subject Filter & Add Chapter Action */}
-          <div
-            className="card"
+          <PaperCard
+            flat
             style={{
-              padding: '14px',
-              marginBottom: '14px',
+              padding: 'var(--sp-3) var(--sp-4)',
               display: 'flex',
               justifyContent: 'space-between',
-              alignItems: 'center',
+              alignItems: 'flex-end',
               flexWrap: 'wrap',
-              gap: '12px'
+              gap: 'var(--sp-3)'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>
-                Filter by Subject:
-              </label>
-              <select
+            <div style={{ minWidth: '220px', flex: '1 1 240px' }}>
+              <Field
+                as="select"
+                label="Filter by Subject"
                 value={selectedSubjectId}
                 onChange={(e) => setSelectedSubjectId(e.target.value)}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: 'var(--radius-sm, 6px)',
-                  border: '1px solid #CBD5E1',
-                  fontSize: '0.88rem'
-                }}
               >
                 {subjects.map((sub) => (
                   <option key={sub._id} value={sub._id}>
                     {sub.name} ({sub.nameHindi})
                   </option>
                 ))}
-              </select>
+              </Field>
             </div>
 
-            <button
-              onClick={handleOpenAddChapter}
-              className="btn btn-primary"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '8px 14px',
-                fontSize: '0.85rem'
-              }}
-            >
+            <Button type="button" variant="primary" size="md" onClick={handleOpenAddChapter}>
               <Plus size={16} /> Add New Chapter
-            </button>
-          </div>
+            </Button>
+          </PaperCard>
 
           {/* Chapters Table / List */}
-          <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
+          <PaperCard flat style={{ padding: 0, overflow: 'hidden' }}>
             {chapters.length === 0 ? (
-              <div style={{ padding: '24px', textAlign: 'center', color: '#64748B' }}>
-                No chapters found for this subject. Click "Add New Chapter" to create one.
+              <div style={{ padding: 'var(--sp-5)' }}>
+                <EmptyState
+                  title="No chapters found for this subject"
+                  description='Click "Add New Chapter" to create one.'
+                />
               </div>
             ) : (
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: '0.75rem', color: '#64748B', textTransform: 'uppercase' }}>
-                    <th style={{ padding: '12px 16px' }}>#</th>
-                    <th style={{ padding: '12px 16px' }}>English Title</th>
-                    <th style={{ padding: '12px 16px' }}>Hindi Title</th>
-                    <th style={{ padding: '12px 16px' }}>Description</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {chapters.map((chap) => (
-                    <tr key={chap._id} style={{ borderBottom: '1px solid #F1F5F9', fontSize: '0.88rem' }}>
-                      <td style={{ padding: '12px 16px', fontWeight: '700', color: '#0284C7' }}>
-                        Ch {chap.chapterNumber}
-                      </td>
-                      <td style={{ padding: '12px 16px', fontWeight: '600', color: '#0F172A' }}>
-                        {chap.title}
-                      </td>
-                      <td style={{ padding: '12px 16px', color: '#475569' }}>
-                        {chap.titleHindi || '-'}
-                      </td>
-                      <td style={{ padding: '12px 16px', color: '#64748B', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {chap.description}
-                      </td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                        <button
-                          onClick={() => handleOpenEditChapter(chap)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: '#2563EB',
-                            cursor: 'pointer',
-                            marginRight: '8px'
-                          }}
-                          title="Edit Chapter"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteChapterClick(chap)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: '#DC2626',
-                            cursor: 'pointer'
-                          }}
-                          title="Delete Chapter Safely"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </td>
+              <div className="paper-table-wrap">
+                <table className="paper-table paper-table--stack">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>English Title</th>
+                      <th>Hindi Title</th>
+                      <th>Description</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {chapters.map((chap) => (
+                      <tr key={chap._id}>
+                        <td data-label="#" style={{ fontWeight: 700, color: 'var(--physics-ink)', fontFamily: 'var(--font-mono)' }}>
+                          Ch {chap.chapterNumber}
+                        </td>
+                        <td data-label="English Title" style={{ fontWeight: 700, color: 'var(--ink)' }}>
+                          {chap.title}
+                        </td>
+                        <td data-label="Hindi Title" style={{ color: 'var(--ink-muted)' }}>
+                          {chap.titleHindi || '-'}
+                        </td>
+                        <td data-label="Description" style={{ color: 'var(--ink-soft)', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {chap.description}
+                        </td>
+                        <td data-label="Actions" style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                          <div style={{ display: 'inline-flex', gap: '4px', justifyContent: 'flex-end' }}>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleOpenEditChapter(chap)}
+                              title="Edit Chapter"
+                              aria-label={`Edit ${chap.title}`}
+                              style={{ color: 'var(--physics)' }}
+                            >
+                              <Edit2 size={16} />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteChapterClick(chap)}
+                              title="Delete Chapter Safely"
+                              aria-label={`Delete ${chap.title}`}
+                              style={{ color: 'var(--red-600)' }}
+                            >
+                              <Trash2 size={16} />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
-          </div>
+          </PaperCard>
         </div>
       )}
 
@@ -567,109 +503,95 @@ export default function AdminContentPage() {
       {/* TAB 2: LESSONS MANAGEMENT */}
       {/* ========================================================= */}
       {activeTab === 'lessons' && (
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
           {/* Chapter Selector & Add Lesson */}
-          <div
-            className="card"
+          <PaperCard
+            flat
             style={{
-              padding: '14px',
-              marginBottom: '14px',
+              padding: 'var(--sp-3) var(--sp-4)',
               display: 'flex',
               justifyContent: 'space-between',
-              alignItems: 'center',
+              alignItems: 'flex-end',
               flexWrap: 'wrap',
-              gap: '12px'
+              gap: 'var(--sp-3)'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#475569' }}>
-                Select Chapter:
-              </label>
-              <select
+            <div style={{ minWidth: '220px', flex: '1 1 260px' }}>
+              <Field
+                as="select"
+                label="Select Chapter"
                 value={selectedChapterId}
                 onChange={(e) => setSelectedChapterId(e.target.value)}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: 'var(--radius-sm, 6px)',
-                  border: '1px solid #CBD5E1',
-                  fontSize: '0.88rem'
-                }}
               >
                 {chapters.map((chap) => (
                   <option key={chap._id} value={chap._id}>
                     Ch {chap.chapterNumber}: {chap.title}
                   </option>
                 ))}
-              </select>
+              </Field>
             </div>
 
-            <button
-              onClick={handleOpenAddLesson}
-              className="btn btn-primary"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '8px 14px',
-                fontSize: '0.85rem'
-              }}
-            >
+            <Button type="button" variant="primary" size="md" onClick={handleOpenAddLesson}>
               <Plus size={16} /> Add New Lesson
-            </button>
-          </div>
+            </Button>
+          </PaperCard>
 
           {/* Lessons List */}
-          <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
+          <PaperCard flat style={{ padding: 0, overflow: 'hidden' }}>
             {lessons.length === 0 ? (
-              <div style={{ padding: '24px', textAlign: 'center', color: '#64748B' }}>
-                No lessons found in this chapter. Click "Add New Lesson" to create one.
+              <div style={{ padding: 'var(--sp-5)' }}>
+                <EmptyState
+                  title="No lessons found in this chapter"
+                  description='Click "Add New Lesson" to create one.'
+                />
               </div>
             ) : (
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: '0.75rem', color: '#64748B', textTransform: 'uppercase' }}>
-                    <th style={{ padding: '12px 16px' }}>#</th>
-                    <th style={{ padding: '12px 16px' }}>Title</th>
-                    <th style={{ padding: '12px 16px' }}>Hindi Title</th>
-                    <th style={{ padding: '12px 16px' }}>Content Blocks</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'right' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lessons.map((les) => (
-                    <tr key={les._id} style={{ borderBottom: '1px solid #F1F5F9', fontSize: '0.88rem' }}>
-                      <td style={{ padding: '12px 16px', fontWeight: '700', color: '#7C3AED' }}>
-                        Lesson {les.lessonNumber}
-                      </td>
-                      <td style={{ padding: '12px 16px', fontWeight: '600', color: '#0F172A' }}>
-                        {les.title}
-                      </td>
-                      <td style={{ padding: '12px 16px', color: '#475569' }}>
-                        {les.titleHindi || '-'}
-                      </td>
-                      <td style={{ padding: '12px 16px', color: '#64748B' }}>
-                        {les.contentBlocks?.length || 0} blocks
-                      </td>
-                      <td style={{ padding: '12px 16px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                        <button
-                          onClick={() => handleDeleteLessonClick(les)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: '#DC2626',
-                            cursor: 'pointer'
-                          }}
-                          title="Delete Lesson Safely"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </td>
+              <div className="paper-table-wrap">
+                <table className="paper-table paper-table--stack">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Title</th>
+                      <th>Hindi Title</th>
+                      <th>Content Blocks</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {lessons.map((les) => (
+                      <tr key={les._id}>
+                        <td data-label="#" style={{ fontWeight: 700, color: 'var(--maths-ink)', fontFamily: 'var(--font-mono)' }}>
+                          Lesson {les.lessonNumber}
+                        </td>
+                        <td data-label="Title" style={{ fontWeight: 700, color: 'var(--ink)' }}>
+                          {les.title}
+                        </td>
+                        <td data-label="Hindi Title" style={{ color: 'var(--ink-muted)' }}>
+                          {les.titleHindi || '-'}
+                        </td>
+                        <td data-label="Content Blocks" style={{ color: 'var(--ink-soft)' }}>
+                          {les.contentBlocks?.length || 0} blocks
+                        </td>
+                        <td data-label="Actions" style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteLessonClick(les)}
+                            title="Delete Lesson Safely"
+                            aria-label={`Delete ${les.title}`}
+                            style={{ color: 'var(--red-600)' }}
+                          >
+                            <Trash2 size={16} />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
-          </div>
+          </PaperCard>
         </div>
       )}
 
@@ -677,515 +599,322 @@ export default function AdminContentPage() {
       {/* TAB 3: SUBJECTS OVERVIEW */}
       {/* ========================================================= */}
       {activeTab === 'subjects' && (
-        <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: '0.75rem', color: '#64748B', textTransform: 'uppercase' }}>
-                <th style={{ padding: '12px 16px' }}>Code</th>
-                <th style={{ padding: '12px 16px' }}>Subject Name</th>
-                <th style={{ padding: '12px 16px' }}>Hindi Name</th>
-                <th style={{ padding: '12px 16px' }}>Class / Board</th>
-                <th style={{ padding: '12px 16px' }}>Accent Color</th>
-              </tr>
-            </thead>
-            <tbody>
-              {subjects.map((sub) => (
-                <tr key={sub._id} style={{ borderBottom: '1px solid #F1F5F9', fontSize: '0.88rem' }}>
-                  <td style={{ padding: '12px 16px', fontWeight: '700', textTransform: 'uppercase', color: sub.color || '#2563EB' }}>
-                    {sub.code}
-                  </td>
-                  <td style={{ padding: '12px 16px', fontWeight: '600', color: '#0F172A' }}>
-                    {sub.name}
-                  </td>
-                  <td style={{ padding: '12px 16px', color: '#475569' }}>
-                    {sub.nameHindi}
-                  </td>
-                  <td style={{ padding: '12px 16px', color: '#64748B' }}>
-                    Class {sub.classLevel} • {sub.board}
-                  </td>
-                  <td style={{ padding: '12px 16px' }}>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                      <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: sub.color }} />
-                      <span style={{ fontSize: '0.8rem', fontFamily: 'monospace' }}>{sub.color}</span>
-                    </div>
-                  </td>
+        <PaperCard flat style={{ padding: 0, overflow: 'hidden' }}>
+          <div className="paper-table-wrap">
+            <table className="paper-table paper-table--stack">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Subject Name</th>
+                  <th>Hindi Name</th>
+                  <th>Class / Board</th>
+                  <th>Accent Color</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {subjects.map((sub) => (
+                  <tr key={sub._id}>
+                    <td data-label="Code" style={{ fontWeight: 700, textTransform: 'uppercase', color: sub.color || 'var(--physics)', fontFamily: 'var(--font-mono)' }}>
+                      {sub.code}
+                    </td>
+                    <td data-label="Subject Name" style={{ fontWeight: 700, color: 'var(--ink)' }}>
+                      {sub.name}
+                    </td>
+                    <td data-label="Hindi Name" style={{ color: 'var(--ink-muted)' }}>
+                      {sub.nameHindi}
+                    </td>
+                    <td data-label="Class / Board" style={{ color: 'var(--ink-soft)' }}>
+                      Class {sub.classLevel} • {sub.board}
+                    </td>
+                    <td data-label="Accent Color">
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: sub.color }} />
+                        <span style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)' }}>{sub.color}</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </PaperCard>
       )}
 
       {/* ========================================================= */}
       {/* ADD / EDIT CHAPTER MODAL (Task 10.2) */}
       {/* ========================================================= */}
-      {showChapterModal && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            backdropFilter: 'blur(3px)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 100,
-            padding: '16px'
-          }}
-        >
-          <div
-            className="card"
-            style={{
-              width: '100%',
-              maxWidth: '500px',
-              padding: '20px',
-              backgroundColor: '#FFFFFF',
-              maxHeight: '90vh',
-              overflowY: 'auto'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: '700', margin: 0 }}>
-                {editingChapterId ? 'Edit Chapter' : 'Add New Chapter'}
-              </h2>
-              <button
-                onClick={() => setShowChapterModal(false)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748B' }}
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveChapter}>
-              {/* Subject selector */}
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>
-                  Parent Subject
-                </label>
-                <select
-                  value={chapterForm.subjectId}
-                  onChange={(e) => setChapterForm({ ...chapterForm, subjectId: e.target.value })}
-                  required
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
-                >
-                  {subjects.map((sub) => (
-                    <option key={sub._id} value={sub._id}>
-                      {sub.name} ({sub.nameHindi})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Board, Class Level & Language (Task P2-1.1) */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '12px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '4px' }}>Board</label>
-                  <select
-                    value={chapterForm.board || 'CBSE'}
-                    onChange={(e) => setChapterForm({ ...chapterForm, board: e.target.value })}
-                    style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
-                  >
-                    <option value="CBSE">CBSE</option>
-                    <option value="ICSE">ICSE</option>
-                    <option value="State Board">State Board</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '4px' }}>Class</label>
-                  <select
-                    value={chapterForm.classLevel || 10}
-                    onChange={(e) => setChapterForm({ ...chapterForm, classLevel: Number(e.target.value) })}
-                    style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
-                  >
-                    <option value={10}>Class 10</option>
-                    <option value={12}>Class 12</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '4px' }}>Language</label>
-                  <select
-                    value={chapterForm.language || 'en'}
-                    onChange={(e) => setChapterForm({ ...chapterForm, language: e.target.value })}
-                    style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
-                  >
-                    <option value="en">English</option>
-                    <option value="hi">Hindi</option>
-                    <option value="mr">Marathi</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Title & Hindi Title */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>
-                    Title (English) *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={chapterForm.title}
-                    onChange={(e) => setChapterForm({ ...chapterForm, title: e.target.value })}
-                    placeholder="e.g. Electricity"
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>
-                    Title (Hindi)
-                  </label>
-                  <input
-                    type="text"
-                    value={chapterForm.titleHindi}
-                    onChange={(e) => setChapterForm({ ...chapterForm, titleHindi: e.target.value })}
-                    placeholder="e.g. विद्युत"
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
-                  />
-                </div>
-              </div>
-
-              {/* Chapter Number */}
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>
-                  Chapter Number *
-                </label>
-                <input
-                  type="number"
-                  required
-                  min="1"
-                  value={chapterForm.chapterNumber}
-                  onChange={(e) => setChapterForm({ ...chapterForm, chapterNumber: parseInt(e.target.value, 10) || 1 })}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
-                />
-              </div>
-
-              {/* Description */}
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>
-                  Description (English)
-                </label>
-                <textarea
-                  rows="2"
-                  value={chapterForm.description}
-                  onChange={(e) => setChapterForm({ ...chapterForm, description: e.target.value })}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
-                />
-              </div>
-
-              {/* Description Hindi */}
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>
-                  Description (Hindi)
-                </label>
-                <textarea
-                  rows="2"
-                  value={chapterForm.descriptionHindi}
-                  onChange={(e) => setChapterForm({ ...chapterForm, descriptionHindi: e.target.value })}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
-                />
-              </div>
-
-              {/* Submit / Cancel Buttons */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowChapterModal(false)}
-                  className="btn btn-secondary"
-                  style={{ padding: '8px 14px' }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  style={{ padding: '8px 16px' }}
-                >
-                  {editingChapterId ? 'Update Chapter' : 'Create Chapter'}
-                </button>
-              </div>
-            </form>
+      <Modal
+        open={showChapterModal}
+        onClose={() => setShowChapterModal(false)}
+        title={editingChapterId ? 'Edit Chapter' : 'Add New Chapter'}
+        tapeTone="yellow"
+        maxWidth="540px"
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--sp-2)' }}>
+            <Button type="button" variant="secondary" size="sm" onClick={() => setShowChapterModal(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" form="admin-chapter-form" variant="primary" size="sm">
+              {editingChapterId ? 'Update Chapter' : 'Create Chapter'}
+            </Button>
           </div>
-        </div>
-      )}
+        }
+      >
+        <form id="admin-chapter-form" onSubmit={handleSaveChapter} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
+          <Field
+            as="select"
+            label="Parent Subject"
+            value={chapterForm.subjectId}
+            onChange={(e) => setChapterForm({ ...chapterForm, subjectId: e.target.value })}
+            required
+          >
+            {subjects.map((sub) => (
+              <option key={sub._id} value={sub._id}>
+                {sub.name} ({sub.nameHindi})
+              </option>
+            ))}
+          </Field>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 'var(--sp-2)' }}>
+            <Field
+              as="select"
+              label="Board"
+              value={chapterForm.board || 'CBSE'}
+              onChange={(e) => setChapterForm({ ...chapterForm, board: e.target.value })}
+            >
+              <option value="CBSE">CBSE</option>
+              <option value="ICSE">ICSE</option>
+              <option value="State Board">State Board</option>
+            </Field>
+            <Field
+              as="select"
+              label="Class"
+              value={chapterForm.classLevel || 10}
+              onChange={(e) => setChapterForm({ ...chapterForm, classLevel: Number(e.target.value) })}
+            >
+              <option value={10}>Class 10</option>
+              <option value={12}>Class 12</option>
+            </Field>
+            <Field
+              as="select"
+              label="Language"
+              value={chapterForm.language || 'en'}
+              onChange={(e) => setChapterForm({ ...chapterForm, language: e.target.value })}
+            >
+              <option value="en">English</option>
+              <option value="hi">Hindi</option>
+              <option value="mr">Marathi</option>
+            </Field>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--sp-2)' }}>
+            <Field
+              type="text"
+              label="Title (English) *"
+              required
+              value={chapterForm.title}
+              onChange={(e) => setChapterForm({ ...chapterForm, title: e.target.value })}
+              placeholder="e.g. Electricity"
+            />
+            <Field
+              type="text"
+              label="Title (Hindi)"
+              value={chapterForm.titleHindi}
+              onChange={(e) => setChapterForm({ ...chapterForm, titleHindi: e.target.value })}
+              placeholder="e.g. विद्युत"
+            />
+          </div>
+
+          <Field
+            type="number"
+            label="Chapter Number *"
+            required
+            min="1"
+            value={chapterForm.chapterNumber}
+            onChange={(e) => setChapterForm({ ...chapterForm, chapterNumber: parseInt(e.target.value, 10) || 1 })}
+          />
+
+          <Field
+            as="textarea"
+            label="Description (English)"
+            rows={2}
+            value={chapterForm.description}
+            onChange={(e) => setChapterForm({ ...chapterForm, description: e.target.value })}
+          />
+
+          <Field
+            as="textarea"
+            label="Description (Hindi)"
+            rows={2}
+            value={chapterForm.descriptionHindi}
+            onChange={(e) => setChapterForm({ ...chapterForm, descriptionHindi: e.target.value })}
+          />
+        </form>
+      </Modal>
 
       {/* ========================================================= */}
       {/* ADD / EDIT LESSON MODAL */}
       {/* ========================================================= */}
-      {showLessonModal && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.6)',
-            backdropFilter: 'blur(3px)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 100,
-            padding: '16px'
-          }}
-        >
-          <div
-            className="card"
-            style={{
-              width: '100%',
-              maxWidth: '520px',
-              padding: '20px',
-              backgroundColor: '#FFFFFF',
-              maxHeight: '90vh',
-              overflowY: 'auto'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <h2 style={{ fontSize: '1.15rem', fontWeight: '700', margin: 0 }}>
-                {editingLessonId ? 'Edit Lesson' : 'Add New Lesson'}
-              </h2>
-              <button
-                onClick={() => setShowLessonModal(false)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748B' }}
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveLesson}>
-              {/* Chapter selector */}
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>
-                  Parent Chapter
-                </label>
-                <select
-                  value={lessonForm.chapterId}
-                  onChange={(e) => setLessonForm({ ...lessonForm, chapterId: e.target.value })}
-                  required
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
-                >
-                  {chapters.map((chap) => (
-                    <option key={chap._id} value={chap._id}>
-                      Ch {chap.chapterNumber}: {chap.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Board, Class Level & Language (Task P2-1.1) */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '12px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '4px' }}>Board</label>
-                  <select
-                    value={lessonForm.board || 'CBSE'}
-                    onChange={(e) => setLessonForm({ ...lessonForm, board: e.target.value })}
-                    style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
-                  >
-                    <option value="CBSE">CBSE</option>
-                    <option value="ICSE">ICSE</option>
-                    <option value="State Board">State Board</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '4px' }}>Class</label>
-                  <select
-                    value={lessonForm.classLevel || 10}
-                    onChange={(e) => setLessonForm({ ...lessonForm, classLevel: Number(e.target.value) })}
-                    style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
-                  >
-                    <option value={10}>Class 10</option>
-                    <option value={12}>Class 12</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '4px' }}>Language</label>
-                  <select
-                    value={lessonForm.language || 'en'}
-                    onChange={(e) => setLessonForm({ ...lessonForm, language: e.target.value })}
-                    style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.85rem' }}
-                  >
-                    <option value="en">English</option>
-                    <option value="hi">Hindi</option>
-                    <option value="mr">Marathi</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Title & Hindi Title */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>
-                    Lesson Title (English) *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={lessonForm.title}
-                    onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
-                    placeholder="e.g. Ohm's Law"
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>
-                    Lesson Title (Hindi)
-                  </label>
-                  <input
-                    type="text"
-                    value={lessonForm.titleHindi}
-                    onChange={(e) => setLessonForm({ ...lessonForm, titleHindi: e.target.value })}
-                    placeholder="e.g. ओम का नियम"
-                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
-                  />
-                </div>
-              </div>
-
-              {/* Lesson Number */}
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>
-                  Lesson Number *
-                </label>
-                <input
-                  type="number"
-                  required
-                  min="1"
-                  value={lessonForm.lessonNumber}
-                  onChange={(e) => setLessonForm({ ...lessonForm, lessonNumber: parseInt(e.target.value, 10) || 1 })}
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
-                />
-              </div>
-
-              {/* Text Block Content */}
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>
-                  Text Block Content
-                </label>
-                <textarea
-                  rows="3"
-                  value={lessonForm.textBlock}
-                  onChange={(e) => setLessonForm({ ...lessonForm, textBlock: e.target.value })}
-                  placeholder="Core theoretical explanation for this lesson..."
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
-                />
-              </div>
-
-              {/* Formula Block Content */}
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '4px' }}>
-                  Formula Block Content (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={lessonForm.formulaBlock}
-                  onChange={(e) => setLessonForm({ ...lessonForm, formulaBlock: e.target.value })}
-                  placeholder="e.g. V = I * R"
-                  style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1' }}
-                />
-              </div>
-
-              {/* Submit Buttons */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowLessonModal(false)}
-                  className="btn btn-secondary"
-                  style={{ padding: '8px 14px' }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  style={{ padding: '8px 16px' }}
-                >
-                  Save Lesson
-                </button>
-              </div>
-            </form>
+      <Modal
+        open={showLessonModal}
+        onClose={() => setShowLessonModal(false)}
+        title={editingLessonId ? 'Edit Lesson' : 'Add New Lesson'}
+        tapeTone="yellow"
+        maxWidth="540px"
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--sp-2)' }}>
+            <Button type="button" variant="secondary" size="sm" onClick={() => setShowLessonModal(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" form="admin-lesson-form" variant="primary" size="sm">
+              Save Lesson
+            </Button>
           </div>
-        </div>
-      )}
+        }
+      >
+        <form id="admin-lesson-form" onSubmit={handleSaveLesson} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
+          <Field
+            as="select"
+            label="Parent Chapter"
+            value={lessonForm.chapterId}
+            onChange={(e) => setLessonForm({ ...lessonForm, chapterId: e.target.value })}
+            required
+          >
+            {chapters.map((chap) => (
+              <option key={chap._id} value={chap._id}>
+                Ch {chap.chapterNumber}: {chap.title}
+              </option>
+            ))}
+          </Field>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 'var(--sp-2)' }}>
+            <Field
+              as="select"
+              label="Board"
+              value={lessonForm.board || 'CBSE'}
+              onChange={(e) => setLessonForm({ ...lessonForm, board: e.target.value })}
+            >
+              <option value="CBSE">CBSE</option>
+              <option value="ICSE">ICSE</option>
+              <option value="State Board">State Board</option>
+            </Field>
+            <Field
+              as="select"
+              label="Class"
+              value={lessonForm.classLevel || 10}
+              onChange={(e) => setLessonForm({ ...lessonForm, classLevel: Number(e.target.value) })}
+            >
+              <option value={10}>Class 10</option>
+              <option value={12}>Class 12</option>
+            </Field>
+            <Field
+              as="select"
+              label="Language"
+              value={lessonForm.language || 'en'}
+              onChange={(e) => setLessonForm({ ...lessonForm, language: e.target.value })}
+            >
+              <option value="en">English</option>
+              <option value="hi">Hindi</option>
+              <option value="mr">Marathi</option>
+            </Field>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--sp-2)' }}>
+            <Field
+              type="text"
+              label="Lesson Title (English) *"
+              required
+              value={lessonForm.title}
+              onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
+              placeholder="e.g. Ohm's Law"
+            />
+            <Field
+              type="text"
+              label="Lesson Title (Hindi)"
+              value={lessonForm.titleHindi}
+              onChange={(e) => setLessonForm({ ...lessonForm, titleHindi: e.target.value })}
+              placeholder="e.g. ओम का नियम"
+            />
+          </div>
+
+          <Field
+            type="number"
+            label="Lesson Number *"
+            required
+            min="1"
+            value={lessonForm.lessonNumber}
+            onChange={(e) => setLessonForm({ ...lessonForm, lessonNumber: parseInt(e.target.value, 10) || 1 })}
+          />
+
+          <Field
+            as="textarea"
+            label="Text Block Content"
+            rows={3}
+            value={lessonForm.textBlock}
+            onChange={(e) => setLessonForm({ ...lessonForm, textBlock: e.target.value })}
+            placeholder="Core theoretical explanation for this lesson..."
+          />
+
+          <Field
+            type="text"
+            label="Formula Block Content (Optional)"
+            value={lessonForm.formulaBlock}
+            onChange={(e) => setLessonForm({ ...lessonForm, formulaBlock: e.target.value })}
+            placeholder="e.g. V = I * R"
+          />
+        </form>
+      </Modal>
 
       {/* ========================================================= */}
       {/* SAFE DELETION CONFIRMATION MODAL (Task 10.3) */}
       {/* ========================================================= */}
-      {deleteConfirmModal && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(3px)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 120,
-            padding: '16px'
-          }}
-        >
-          <div
-            className="card"
-            style={{
-              width: '100%',
-              maxWidth: '440px',
-              padding: '20px',
-              backgroundColor: '#FFFFFF',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-              <div style={{ padding: '8px', borderRadius: '50%', backgroundColor: '#FEE2E2', color: '#DC2626' }}>
-                <AlertTriangle size={24} />
-              </div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: '700', margin: 0, color: '#991B1B' }}>
-                Confirm Safe Deletion
-              </h3>
+      <Modal
+        open={Boolean(deleteConfirmModal)}
+        onClose={() => setDeleteConfirmModal(null)}
+        title="Confirm Safe Deletion"
+        tapeTone="yellow"
+        maxWidth="440px"
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--sp-2)' }}>
+            <Button type="button" variant="secondary" size="sm" onClick={() => setDeleteConfirmModal(null)}>
+              Cancel
+            </Button>
+            <Button type="button" variant="danger" size="sm" onClick={handleConfirmSafeDelete}>
+              Yes, Delete Safely
+            </Button>
+          </div>
+        }
+      >
+        {deleteConfirmModal && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)' }}>
+              <Tag tone="red">
+                <AlertTriangle size={14} /> WARNING
+              </Tag>
             </div>
-
-            <p style={{ fontSize: '0.88rem', color: '#475569', lineHeight: 1.5, margin: '0 0 14px 0' }}>
-              <strong>Item:</strong> "{deleteConfirmModal.title}"
+            <p style={{ fontSize: '0.9rem', color: 'var(--ink)', lineHeight: 1.5, margin: 0 }}>
+              <strong>Item:</strong> &ldquo;{deleteConfirmModal.title}&rdquo;
             </p>
-
-            <div
+            <PaperCard
+              flat
               style={{
-                padding: '10px 14px',
-                backgroundColor: '#FEF2F2',
-                borderRadius: '6px',
-                borderLeft: '4px solid #DC2626',
-                fontSize: '0.82rem',
-                color: '#B91C1C',
-                lineHeight: 1.5,
-                marginBottom: '16px'
+                padding: 'var(--sp-3)',
+                backgroundColor: 'var(--red-soft)',
+                borderColor: 'var(--red-border)',
+                borderLeft: '4px solid var(--red-600)',
+                fontSize: '0.84rem',
+                color: 'var(--red-ink)',
+                lineHeight: 1.5
               }}
             >
               {deleteConfirmModal.warningText}
-            </div>
-
-            <p style={{ fontSize: '0.82rem', color: '#64748B', margin: '0 0 16px 0' }}>
+            </PaperCard>
+            <p style={{ fontSize: '0.82rem', color: 'var(--ink-soft)', margin: 0 }}>
               Deleting will safely update remaining completion percentages and maintain database consistency.
             </p>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-              <button
-                type="button"
-                onClick={() => setDeleteConfirmModal(null)}
-                className="btn btn-secondary"
-                style={{ padding: '8px 14px' }}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmSafeDelete}
-                className="btn btn-primary"
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#DC2626',
-                  borderColor: '#DC2626'
-                }}
-              >
-                Yes, Delete Safely
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+        )}
+      </Modal>
     </div>
   );
 }

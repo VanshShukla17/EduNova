@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, ArrowRight, ShieldAlert, Award, Compass, Zap } from 'lucide-react';
+import { Play, Pause, RotateCcw } from 'lucide-react';
+import { Button, PaperCard, Tag } from '../../components/ui';
+import { resolveCssVar } from '../../components/ui/subjectUtils';
 
 /**
  * Newton's Laws of Motion 2D Numerical Simulation
@@ -89,6 +91,19 @@ export default function NewtonLawsSimulation() {
     let lastTick = performance.now();
     let uiUpdateCounter = 0;
 
+    const cTrack = resolveCssVar('--paper-edge');
+    const cAxis = resolveCssVar('--ink-soft');
+    const cInk = resolveCssVar('--ink');
+    const cPhysics = resolveCssVar('--physics');
+    const cPhysicsInk = resolveCssVar('--physics-ink');
+    const cWhite = resolveCssVar('--white');
+    const cEmerald = resolveCssVar('--emerald-600');
+    const cRed = resolveCssVar('--red-600');
+    const cMaths = resolveCssVar('--maths');
+    const cMathsInk = resolveCssVar('--maths-ink');
+    const cAmber = resolveCssVar('--amber-500');
+    const cMuted = resolveCssVar('--ink-muted');
+
     const render = (now) => {
       const dt = Math.min((now - lastTick) / 1000, 0.1);
       lastTick = now;
@@ -99,10 +114,10 @@ export default function NewtonLawsSimulation() {
 
       // Floor / Track
       const groundY = height - 55;
-      ctx.fillStyle = '#E2E8F0';
+      ctx.fillStyle = cTrack;
       ctx.fillRect(0, groundY, width, 55);
 
-      ctx.strokeStyle = '#94A3B8';
+      ctx.strokeStyle = cAxis;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(0, groundY);
@@ -113,7 +128,7 @@ export default function NewtonLawsSimulation() {
 
       if (activeLaw === 1) {
         // Law 1: Law of Inertia
-        ctx.fillStyle = '#1E293B';
+        ctx.fillStyle = cInk;
         ctx.font = 'bold 12px sans-serif';
         ctx.fillText(
           `Law 1: Law of Inertia (Friction: ${frictionOn ? 'ON (μ = 0.05)' : 'OFF (μ = 0, Ideal Vacuum)'})`,
@@ -125,14 +140,14 @@ export default function NewtonLawsSimulation() {
         const blockH = 40;
 
         // Draw Block
-        ctx.fillStyle = '#3B82F6';
+        ctx.fillStyle = cPhysics;
         ctx.fillRect(p.law1Pos, groundY - blockH, blockW, blockH);
-        ctx.strokeStyle = '#1D4ED8';
+        ctx.strokeStyle = cPhysicsInk;
         ctx.lineWidth = 2;
         ctx.strokeRect(p.law1Pos, groundY - blockH, blockW, blockH);
 
         // Mass label
-        ctx.fillStyle = '#FFFFFF';
+        ctx.fillStyle = cWhite;
         ctx.font = 'bold 11px sans-serif';
         ctx.fillText('m = 5 kg', p.law1Pos + 10, groundY - blockH + 24);
 
@@ -141,14 +156,14 @@ export default function NewtonLawsSimulation() {
           ctx.beginPath();
           ctx.moveTo(p.law1Pos + blockW, groundY - blockH / 2);
           ctx.lineTo(p.law1Pos + blockW + p.law1Vel * 10, groundY - blockH / 2);
-          ctx.strokeStyle = '#10B981';
+          ctx.strokeStyle = cEmerald;
           ctx.lineWidth = 3;
           ctx.stroke();
 
-          ctx.fillStyle = '#10B981';
+          ctx.fillStyle = cEmerald;
           ctx.fillText(`v = ${p.law1Vel.toFixed(1)} m/s`, p.law1Pos + blockW + 12, groundY - blockH / 2 - 8);
         } else {
-          ctx.fillStyle = '#EF4444';
+          ctx.fillStyle = cRed;
           ctx.fillText('At Rest (v = 0)', p.law1Pos, groundY - blockH - 8);
         }
 
@@ -170,7 +185,7 @@ export default function NewtonLawsSimulation() {
         }
       } else if (activeLaw === 2) {
         // Law 2: F = ma
-        ctx.fillStyle = '#1E293B';
+        ctx.fillStyle = cInk;
         ctx.font = 'bold 12px sans-serif';
         ctx.fillText(`Law 2: F = ma → a = F / m = ${force} N / ${mass} kg = ${acceleration} m/s²`, 20, 25);
 
@@ -178,13 +193,13 @@ export default function NewtonLawsSimulation() {
         const blockH = 45;
 
         // Draw Block
-        ctx.fillStyle = '#8B5CF6';
+        ctx.fillStyle = cMaths;
         ctx.fillRect(p.law2Pos, groundY - blockH, blockW, blockH);
-        ctx.strokeStyle = '#6D28D9';
+        ctx.strokeStyle = cMathsInk;
         ctx.lineWidth = 2;
         ctx.strokeRect(p.law2Pos, groundY - blockH, blockW, blockH);
 
-        ctx.fillStyle = '#FFFFFF';
+        ctx.fillStyle = cWhite;
         ctx.font = 'bold 11px sans-serif';
         ctx.fillText(`${mass} kg`, p.law2Pos + blockW / 2 - 14, groundY - blockH / 2 + 5);
 
@@ -192,23 +207,23 @@ export default function NewtonLawsSimulation() {
         ctx.beginPath();
         ctx.moveTo(p.law2Pos + blockW, groundY - blockH / 2);
         ctx.lineTo(p.law2Pos + blockW + force * 2.2, groundY - blockH / 2);
-        ctx.strokeStyle = '#EF4444';
+        ctx.strokeStyle = cRed;
         ctx.lineWidth = 4;
         ctx.stroke();
 
-        ctx.fillStyle = '#EF4444';
+        ctx.fillStyle = cRed;
         ctx.font = 'bold 11px sans-serif';
         ctx.fillText(`F = ${force} N →`, p.law2Pos + blockW + 10, groundY - blockH / 2 - 8);
 
         // Wheels
-        ctx.fillStyle = '#334155';
+        ctx.fillStyle = cMuted;
         ctx.beginPath();
         ctx.arc(p.law2Pos + 12, groundY - 4, 6, 0, Math.PI * 2);
         ctx.arc(p.law2Pos + blockW - 12, groundY - 4, 6, 0, Math.PI * 2);
         ctx.fill();
 
         // Live Velocity Display
-        ctx.fillStyle = '#7C3AED';
+        ctx.fillStyle = cMaths;
         ctx.font = '11px sans-serif';
         ctx.fillText(`Current Velocity: ${p.law2Vel.toFixed(1)} m/s`, 20, 48);
 
@@ -223,30 +238,30 @@ export default function NewtonLawsSimulation() {
         }
       } else if (activeLaw === 3) {
         // Law 3: Action & Reaction
-        ctx.fillStyle = '#1E293B';
+        ctx.fillStyle = cInk;
         ctx.font = 'bold 12px sans-serif';
         ctx.fillText('Law 3: Action and Reaction are Equal and Opposite (F₁₂ = -F₂₁)', 20, 25);
 
         // Cart 1
         const c1W = 60;
         const c1H = 35;
-        ctx.fillStyle = '#10B981';
+        ctx.fillStyle = cEmerald;
         ctx.fillRect(p.cart1Pos, groundY - c1H, c1W, c1H);
-        ctx.fillStyle = '#FFFFFF';
+        ctx.fillStyle = cWhite;
         ctx.font = 'bold 11px sans-serif';
         ctx.fillText(`${cart1Mass} kg`, p.cart1Pos + 16, groundY - c1H / 2 + 4);
 
         // Cart 2
         const c2W = 60;
         const c2H = 35;
-        ctx.fillStyle = '#F59E0B';
+        ctx.fillStyle = cAmber;
         ctx.fillRect(p.cart2Pos, groundY - c2H, c2W, c2H);
-        ctx.fillStyle = '#FFFFFF';
+        ctx.fillStyle = cWhite;
         ctx.fillText(`${cart2Mass} kg`, p.cart2Pos + 16, groundY - c2H / 2 + 4);
 
         // Spring between carts if not exploded
         if (!isExploded) {
-          ctx.strokeStyle = '#64748B';
+          ctx.strokeStyle = cAxis;
           ctx.lineWidth = 3;
           ctx.beginPath();
           const startX = p.cart1Pos + c1W;
@@ -261,7 +276,7 @@ export default function NewtonLawsSimulation() {
         }
 
         // Momentum readout
-        ctx.fillStyle = '#475569';
+        ctx.fillStyle = cMuted;
         ctx.font = '11px sans-serif';
         ctx.fillText(
           `Cart 1: v = ${p.cart1Vel.toFixed(2)} m/s (p = ${(cart1Mass * p.cart1Vel).toFixed(1)} kg·m/s)`,
@@ -276,7 +291,7 @@ export default function NewtonLawsSimulation() {
 
         // Conservation of momentum note
         const totalP = (cart1Mass * p.cart1Vel + cart2Mass * p.cart2Vel).toFixed(2);
-        ctx.fillStyle = '#0F172A';
+        ctx.fillStyle = cInk;
         ctx.font = 'bold 11px sans-serif';
         ctx.fillText(`Total System Momentum: Σp = ${totalP} kg·m/s (Conserved)`, 20, 70);
 
@@ -305,85 +320,56 @@ export default function NewtonLawsSimulation() {
   }, [activeLaw, isRunning, frictionOn, force, mass, acceleration, isExploded, cart1Mass, cart2Mass]);
 
   return (
-    <div
+    <PaperCard
+      flat
       style={{
-        backgroundColor: '#FFFFFF',
-        borderRadius: '14px',
-        border: '1px solid #E2E8F0',
-        padding: '16px',
+        padding: 'var(--sp-4)',
         display: 'flex',
         flexDirection: 'column',
-        gap: '14px'
+        gap: 'var(--sp-3)'
       }}
     >
       {/* Top Law Tabs */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-        <div style={{ display: 'flex', backgroundColor: '#F1F5F9', borderRadius: '8px', padding: '3px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
           {[
             { id: 1, label: 'Law 1: Inertia' },
             { id: 2, label: 'Law 2: F = ma' },
             { id: 3, label: 'Law 3: Action & Reaction' }
           ].map((tab) => (
-            <button
+            <Button
               key={tab.id}
               type="button"
+              size="sm"
+              variant={activeLaw === tab.id ? 'primary' : 'secondary'}
               onClick={() => {
                 setActiveLaw(tab.id);
                 handleReset();
               }}
-              style={{
-                padding: '6px 14px',
-                fontSize: '0.78rem',
-                fontWeight: '700',
-                borderRadius: '6px',
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: activeLaw === tab.id ? '#7C3AED' : 'transparent',
-                color: activeLaw === tab.id ? '#FFFFFF' : '#64748B'
-              }}
             >
               {tab.label}
-            </button>
+            </Button>
           ))}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
+          <Button
             type="button"
+            size="sm"
+            variant="secondary"
             onClick={() => setIsRunning(!isRunning)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '6px 12px',
-              borderRadius: '8px',
-              border: '1px solid #CBD5E1',
-              backgroundColor: '#F8FAFC',
-              fontSize: '0.78rem',
-              fontWeight: '600',
-              cursor: 'pointer'
-            }}
           >
-            {isRunning ? <Pause size={14} /> : <Play size={14} />} {isRunning ? 'Pause' : 'Resume'}
-          </button>
-          <button
+            {isRunning ? <Pause size={14} /> : <Play size={14} />}
+            {isRunning ? 'Pause' : 'Resume'}
+          </Button>
+          <Button
             type="button"
+            size="sm"
+            variant="secondary"
             onClick={handleReset}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '6px 12px',
-              borderRadius: '8px',
-              border: '1px solid #CBD5E1',
-              backgroundColor: '#F8FAFC',
-              fontSize: '0.78rem',
-              fontWeight: '600',
-              cursor: 'pointer'
-            }}
           >
             <RotateCcw size={14} /> Reset
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -392,10 +378,10 @@ export default function NewtonLawsSimulation() {
         style={{
           width: '100%',
           height: '240px',
-          backgroundColor: '#F8FAFC',
-          borderRadius: '10px',
+          backgroundColor: 'var(--paper-warm)',
+          borderRadius: 'var(--r-md)',
           overflow: 'hidden',
-          border: '1px solid #E2E8F0'
+          border: '1px solid var(--paper-edge)'
         }}
       >
         <canvas
@@ -408,62 +394,53 @@ export default function NewtonLawsSimulation() {
 
       {/* Interactive Controls based on Active Law */}
       {activeLaw === 1 && (
-        <div
+        <PaperCard
+          flat
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '12px 16px',
-            backgroundColor: '#EFF6FF',
-            borderRadius: '10px',
-            border: '1px solid #BFDBFE',
+            padding: 'var(--sp-3)',
+            backgroundColor: 'var(--physics-soft)',
+            borderColor: 'var(--physics)',
             flexWrap: 'wrap',
-            gap: '10px'
+            gap: 'var(--sp-2)'
           }}
         >
           <div>
-            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#1E40AF' }}>
-              Galileo's Frictionless Plane Experiment
+            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--physics-ink)' }}>
+              Galileo&apos;s Frictionless Plane Experiment
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#3B82F6' }}>
+            <div style={{ fontSize: '0.78rem', color: 'var(--physics-ink)' }}>
               An object in motion continues in uniform rectilinear motion unless acted upon by an external net unbalanced force.
             </div>
           </div>
-          <button
+          <Button
             type="button"
+            size="sm"
+            variant={frictionOn ? 'danger' : 'primary'}
             onClick={() => setFrictionOn(!frictionOn)}
-            style={{
-              padding: '6px 14px',
-              borderRadius: '8px',
-              border: 'none',
-              backgroundColor: frictionOn ? '#EF4444' : '#10B981',
-              color: '#FFFFFF',
-              fontWeight: '700',
-              fontSize: '0.78rem',
-              cursor: 'pointer'
-            }}
           >
             {frictionOn ? 'Disable Friction (Ideal Space)' : 'Enable Friction (μ = 0.05)'}
-          </button>
-        </div>
+          </Button>
+        </PaperCard>
       )}
 
       {activeLaw === 2 && (
-        <div
+        <PaperCard
+          flat
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '14px',
-            padding: '12px 16px',
-            backgroundColor: '#F8FAFC',
-            borderRadius: '10px',
-            border: '1px solid #E2E8F0'
+            gap: 'var(--sp-3)',
+            padding: 'var(--sp-3)',
+            backgroundColor: 'var(--paper-warm)'
           }}
         >
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: '600', marginBottom: '4px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 700, marginBottom: '4px' }}>
               <span>Applied Force (F):</span>
-              <span style={{ color: '#EF4444', fontWeight: '800' }}>{force} N</span>
+              <Tag tone="red">{force} N</Tag>
             </div>
             <input
               type="range"
@@ -472,14 +449,15 @@ export default function NewtonLawsSimulation() {
               step="5"
               value={force}
               onChange={(e) => setForce(parseInt(e.target.value, 10))}
-              style={{ width: '100%', cursor: 'pointer' }}
+              aria-label="Applied Force F in Newtons"
+              style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--red-600)' }}
             />
           </div>
 
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: '600', marginBottom: '4px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 700, marginBottom: '4px' }}>
               <span>Cart Mass (m):</span>
-              <span style={{ color: '#7C3AED', fontWeight: '800' }}>{mass} kg</span>
+              <Tag tone="maths">{mass} kg</Tag>
             </div>
             <input
               type="range"
@@ -488,72 +466,65 @@ export default function NewtonLawsSimulation() {
               step="1"
               value={mass}
               onChange={(e) => setMass(parseInt(e.target.value, 10))}
-              style={{ width: '100%', cursor: 'pointer' }}
+              aria-label="Cart Mass m in kilograms"
+              style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--maths)' }}
             />
           </div>
 
-          <div
+          <PaperCard
+            flat
             style={{
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
-              padding: '8px 12px',
-              backgroundColor: '#FAF5FF',
-              borderRadius: '8px',
-              border: '1px solid #E9D5FF'
+              padding: 'var(--sp-2) var(--sp-3)',
+              backgroundColor: 'var(--maths-soft)',
+              borderColor: 'var(--maths)'
             }}
           >
-            <span style={{ fontSize: '0.7rem', color: '#7E22CE', fontWeight: '700' }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--maths-ink)', fontWeight: 700 }}>
               Calculated Acceleration (a = F/m):
             </span>
-            <span style={{ fontSize: '1.2rem', fontWeight: '800', color: '#581C87' }}>
+            <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-mono)' }}>
               {acceleration} m/s²
             </span>
-          </div>
-        </div>
+          </PaperCard>
+        </PaperCard>
       )}
 
       {activeLaw === 3 && (
-        <div
+        <PaperCard
+          flat
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: '12px',
-            padding: '12px 16px',
-            backgroundColor: '#F0FDF4',
-            borderRadius: '10px',
-            border: '1px solid #BBF7D0'
+            gap: 'var(--sp-2)',
+            padding: 'var(--sp-3)',
+            backgroundColor: 'var(--emerald-soft)',
+            borderColor: 'var(--emerald-600)'
           }}
         >
           <div>
-            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: '#15803D' }}>
-              Compressed Spring Recoil & Momentum Conservation
+            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--emerald-800)' }}>
+              Compressed Spring Recoil &amp; Momentum Conservation
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#16A34A' }}>
-              Observe conservation of linear momentum: m₁v₁ + m₂v₂ = 0 (Equal & Opposite forces).
+            <div style={{ fontSize: '0.78rem', color: 'var(--emerald-700)' }}>
+              Observe conservation of linear momentum: m₁v₁ + m₂v₂ = 0 (Equal &amp; Opposite forces).
             </div>
           </div>
-          <button
+          <Button
             type="button"
+            size="sm"
+            variant={isExploded ? 'secondary' : 'primary'}
             onClick={handleSpringRelease}
             disabled={isExploded}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '8px',
-              border: 'none',
-              backgroundColor: isExploded ? '#94A3B8' : '#15803D',
-              color: '#FFFFFF',
-              fontWeight: '700',
-              fontSize: '0.8rem',
-              cursor: isExploded ? 'not-allowed' : 'pointer'
-            }}
           >
             {isExploded ? 'Spring Released' : 'Release Compressed Spring'}
-          </button>
-        </div>
+          </Button>
+        </PaperCard>
       )}
-    </div>
+    </PaperCard>
   );
 }

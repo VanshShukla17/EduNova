@@ -1,0 +1,172 @@
+:root {
+  /* Desk */
+  --desk-950: #052620;
+  --desk-900: #04241f;
+  --desk-800: #052e27;   /* base desk green */
+  --desk-700: #073b32;   /* dark green cards */
+  --grid-minor: rgba(255,255,255,.045);
+  --grid-major: rgba(255,255,255,.08);
+  --ruler-ink: rgba(255,255,255,.22);
+  --chalk: rgba(255,255,255,.14);
+
+  /* Paper */
+  --paper: #faf7ed;
+  --paper-warm: #f4efe0;
+  --paper-aged: #f6efe0;
+  --paper-field: #fffdf6;
+  --paper-edge: #e9d9a6;
+  --paper-dots: rgba(90,80,40,.10);
+  --paper-rule: rgba(59,130,246,.14);
+  --paper-margin: rgba(220,80,80,.28);
+
+  /* Ink */
+  --ink: #0f172a;
+  --ink-muted: #475569;
+  --ink-soft: #64748b;
+  --hand-rust: #9a3412;          /* handwritten sub-titles on paper */
+  --on-desk: #ffffff;
+  --on-desk-muted: rgba(255,255,255,.74);
+
+  /* Actions and status */
+  --emerald-700: #047857;        /* primary */
+  --emerald-600: #059669;        /* primary hover */
+  --emerald-800: #065f46;        /* primary pressed / button edge */
+  --emerald-500: #10b981;        /* progress, success, rings */
+  --emerald-300: #34d399;        /* "ready" dots */
+  --amber-400: #fbbf24;          /* XP, active nav, level chips */
+  --amber-300: #fcd34d;
+  --amber-500: #f59e0b;
+  --red-600: #dc2626;
+  --kraft: #d8b98f;
+  --kraft-edge: #b08a57;
+  --kraft-ink: #4a3216;
+
+  /* Notes and tape */
+  --note-yellow: #fef08a;
+  --note-blue: #bae6fd;
+  --note-green: #bbf7d0;
+  --note-pink: #fbcfe8;
+  --tag-yellow: #fce99d;
+  --tag-yellow-edge: #d4b94a;
+  --tape-yellow: rgba(232,222,160,.88);
+  --tape-green: rgba(167,214,170,.88);
+  --tape-kraft: rgba(214,184,140,.88);
+
+  /* Dark panels (code, graphs, locked) */
+  --slate-950: #050b14;
+  --slate-900: #0a1526;
+  --slate-800: #1e293b;
+  --slate-700: #334155;
+  --locked: #0c2029;
+  --locked-ink: #829092;
+  --nav-bg: rgba(75,82,88,.94);
+
+  /* Pins */
+  --pin-red: #dc2626;
+  --pin-amber: #e89713;
+  --pin-green: #10b981;
+  --pin-blue: #3b82f6;
+  --pin-grey: #94a3b8;
+
+  /* Subjects (section 7) */
+  --maths: #8b5cf6;     --maths-soft: #ede9fe;     --maths-ink: #5b21b6;
+  --physics: #3b82f6;   --physics-soft: #dbeafe;   --physics-ink: #1d4ed8;
+  --chemistry: #f97316; --chemistry-soft: #ffedd5; --chemistry-ink: #9a3412;
+  --biology: #22c55e;   --biology-soft: #dcfce7;   --biology-ink: #166534;
+
+  /* Type */
+  --font-display: "Bricolage Grotesque", "Noto Sans Devanagari", "Noto Sans", system-ui, sans-serif;
+  --font-body: "Plus Jakarta Sans", "Noto Sans Devanagari", "Noto Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-hand: "Caveat", "Kalam", "Noto Sans Devanagari", cursive;
+
+  /* Space (4px base) */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px; --sp-5: 24px;
+  --sp-6: 32px; --sp-7: 48px; --sp-8: 64px; --sp-9: 96px;
+  --page-pad: clamp(16px, 4vw, 56px);
+  --page-max: 1360px;
+  --read-max: 72ch;
+
+  /* Radius */
+  --r-sm: 8px; --r-md: 12px; --r-lg: 20px; --r-xl: 28px; --r-pill: 999px;
+
+  /* Elevation */
+  --shadow-paper: 0 1px 0 rgba(255,255,255,.7) inset, 0 10px 24px rgba(0,0,0,.35);
+  --shadow-lift: 0 1px 0 rgba(255,255,255,.7) inset, 0 18px 34px rgba(0,0,0,.4);
+  --shadow-pin: 0 3px 4px rgba(0,0,0,.45);
+  --shadow-note: 2px 6px 10px rgba(0,0,0,.28);
+
+  /* Component & state helpers (derived from sections 2, 5 & 6; no raw hex/rgb outside tokens.css) */
+  --white: #ffffff;
+  --desk-vignette-top: rgba(255,255,255,.035);
+  --desk-vignette-bottom: rgba(0,0,0,.2);
+  --paper-70: rgba(255,255,255,.7);
+  --paper-60: rgba(255,255,255,.6);
+  --paper-border-warm: #e5e0cc;
+  --paper-border-strong: #d9d0b0;
+  --field-border: #cfc7a8;
+  --btn-note-bg: #f1e9bf;
+  --btn-note-edge: #d6c77c;
+  --btn-edge-soft: rgba(0,0,0,.25);
+  --btn-edge-pressed: rgba(0,0,0,.3);
+  --nav-tab-active-bg: #4d4225;
+  --nav-text: rgba(255,255,255,.88);
+  --nav-border: rgba(255,255,255,.14);
+  --note-ink: #3b3a1a;
+  --track: #e2e8f0;
+  --skeleton: #efe8d0;
+  --streak-bg: #fffaec;
+  --avatar-bg: #e6f8e2;
+  --scrim: rgba(2,20,17,.72);
+  --focus-ring: rgba(16,185,129,.35);
+  --stamp-bg-emerald: rgba(16,185,129,.06);
+  --stamp-bg-red: rgba(220,38,38,.05);
+  --emerald-soft: #ecfdf5;
+  --amber-soft: #fef3c7;
+  --amber-ink: #92400e;
+  --red-soft: #fee2e2;
+  --red-ink: #991b1b;
+  --red-border: #fca5a5;
+  --dark-paper-border: rgba(233,217,166,.25);
+  --dark-btn-edge: #0f172a;
+  --danger-edge: #991b1b;
+
+  /* Landing hero exception (section 8.1) */
+  --sky-1: #1c97e8;
+  --sky-2: #26a6f8;
+  --sky-3: #4ab7fa;
+  --sky-4: #5bc7f9;
+  --sky-scrim: rgba(6,38,90,.48);
+  --nav-sky-bg: rgba(8,28,38,.84);
+  --nav-sky-hover: rgba(255,255,255,.14);
+  --nav-sky-active: rgba(251,191,36,.18);
+  --nav-sky-border: rgba(255,255,255,.22);
+  --nav-sky-shadow: 0 10px 28px rgba(3,14,22,.36);
+  --glass-bg: rgba(8,28,38,.62);
+  --glass-hover: rgba(8,28,38,.78);
+  --glass-border: rgba(255,255,255,.34);
+  --cream-cta: #f5f5f2;
+  --cream-cta-edge: #d8d8d0;
+  --hero-card-bg: rgba(10,34,34,.86);
+  --hero-card-border: rgba(255,255,255,.22);
+  --hero-card-muted: rgba(255,255,255,.76);
+  --hero-card-shadow: 0 10px 24px rgba(3,14,16,.36);
+  --hero-dot: #a3e635;
+  --hero-dot-glow: rgba(163,230,53,.35);
+  --hero-copy-scrim-top: rgba(10,54,110,.42);
+  --hero-copy-scrim-mid: rgba(10,50,82,.44);
+  --hero-copy-scrim: rgba(10,48,48,.46);
+  --hero-copy-subtitle: rgba(255,255,255,.94);
+  --hero-text-shadow: 0 1px 2px rgba(4,20,44,.86), 0 3px 14px rgba(4,20,44,.52);
+  --hero-subtitle-shadow: 0 1px 2px rgba(4,20,44,.9), 0 2px 10px rgba(4,20,44,.62);
+
+  /* Tilt (cards max 1.5deg) */
+  --tilt-a: -1.1deg; --tilt-b: .7deg; --tilt-c: -.4deg; --tilt-d: 1deg;
+
+  /* Layers */
+  --z-desk: -1; --z-base: 1; --z-deco: 2; --z-nav: 50; --z-fab: 60; --z-modal: 80; --z-toast: 90;
+
+  /* Motion */
+  --t-fast: 120ms; --t-med: 200ms; --t-slow: 320ms;
+  --ease: cubic-bezier(.2,.8,.2,1);
+}

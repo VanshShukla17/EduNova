@@ -1,66 +1,61 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   PenTool,
   Download,
   FileText,
-  Upload,
   Camera,
-  RotateCcw,
-  Sparkles,
-  CheckCircle,
-  AlertCircle,
   Loader2,
+  Sparkles,
   ChevronLeft,
   ChevronRight,
-  BookOpen
 } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import {
+  PaperCard,
+  Pin,
+  StickyNote,
+  Field,
+  Button,
+  resolveCssVar,
+} from '../../components/ui';
 
 const FONTS = [
-  { id: 'Caveat', name: 'Caveat (Casual Cursive)' },
-  { id: 'Patrick Hand', name: 'Patrick Hand (Neat School Print)' },
-  { id: 'Homemade Apple', name: 'Homemade Apple (Classic Script)' },
-  { id: 'Kalam', name: 'Kalam (Devanagari / Indian Handwriting)' },
-  { id: 'Indie Flower', name: 'Indie Flower (Artistic Handwriting)' }
+  { id: 'Caveat', name: 'Caveat (Notebook Cursive)' },
+  { id: 'Kalam', name: 'Kalam (Devanagari / Indian Print)' },
+  { id: 'Plus Jakarta Sans', name: 'Plus Jakarta (Neat Print)' },
 ];
 
 const PAPER_STYLES = [
   { id: 'ruled', name: 'Ruled Notebook (Blue Lines + Red Margin)' },
-  { id: 'plain', name: 'Plain Clean White' },
+  { id: 'plain', name: 'Plain Cream Paper' },
   { id: 'graph', name: 'Graph / Coordinate Grid Paper' },
-  { id: 'parchment', name: 'Vintage Legal Pad (Yellow)' }
+  { id: 'parchment', name: 'Legal Yellow Pad' },
 ];
 
-const INK_COLORS = [
-  { id: '#1e3a8a', name: 'Classic Blue Gel', preview: '#1e3a8a' },
-  { id: '#0f172a', name: 'Ballpoint Black', preview: '#0f172a' },
-  { id: '#991b1b', name: 'Red Correction Ink', preview: '#991b1b' },
-  { id: '#475569', name: 'Pencil Grey', preview: '#475569' }
+const INK_OPTIONS = [
+  { id: 'blue', token: '--physics-ink', name: 'Classic Blue Ink' },
+  { id: 'black', token: '--ink', name: 'Ballpoint Black Ink' },
+  { id: 'red', token: '--red-600', name: 'Red Correction Ink' },
+  { id: 'emerald', token: '--emerald-800', name: 'Emerald Ink' },
 ];
 
 export default function HandwritingGenerator({ initialText = '', initialTitle = '', onSaveNote }) {
-  const { user } = useAuth();
-
   const [text, setText] = useState(
     initialText ||
-      `# Ohm's Law and Resistance Notes\n\nAccording to Ohm's Law, the electric current (I) flowing through a metallic conductor is directly proportional to the potential difference (V) applied across its terminals, provided temperature and other physical conditions remain constant.\n\nMathematical Expression:\nV = I * R\n\nWhere:\n- V = Potential difference (measured in Volts, V)\n- I = Electric current (measured in Amperes, A)\n- R = Resistance of the conductor (measured in Ohms, Ω)\n\nFactors affecting resistance:\n1. Length of the conductor (R ∝ L)\n2. Area of cross-section (R ∝ 1/A)\n3. Nature of the material (Resistivity, ρ)\n4. Temperature (Resistance increases with temperature in metals)`
+      "Ohm's Law:\nAt constant temperature, the current flowing through a conductor is directly proportional to the potential difference across its ends.\n\nV = I × R\n\nWhere:\n• V = Potential Difference (Volts)\n• I = Electric Current (Amperes)\n• R = Resistance (Ohms Ω)"
   );
   const [title, setTitle] = useState(initialTitle || "Ohm's Law Handwritten Notes");
   const [subject, setSubject] = useState('Physics');
 
-  // Controls
   const [font, setFont] = useState('Caveat');
   const [fontSize, setFontSize] = useState(24);
   const [lineSpacing, setLineSpacing] = useState(32);
   const [paperStyle, setPaperStyle] = useState('ruled');
-  const [inkColor, setInkColor] = useState('#1e3a8a');
+  const [inkChoice, setInkChoice] = useState('blue');
   const [humanJitter, setHumanJitter] = useState(true);
 
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // OCR state
   const [ocrLoading, setOcrLoading] = useState(false);
   const [ocrMessage, setOcrMessage] = useState(null);
   const [savingNote, setSavingNote] = useState(false);
@@ -69,28 +64,25 @@ export default function HandwritingGenerator({ initialText = '', initialTitle = 
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Render text to canvas with page breaks
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
 
-    const PAGE_WIDTH = 800;
-    const PAGE_HEIGHT = 1130;
+    const ctx = canvas.getContext('2d');
+    const PAGE_WIDTH = 794;
+    const PAGE_HEIGHT = 1123;
     canvas.width = PAGE_WIDTH;
     canvas.height = PAGE_HEIGHT;
 
-    // Background paper styling
-    if (paperStyle === 'parchment') {
-      ctx.fillStyle = '#FEF9C3';
-    } else {
-      ctx.fillStyle = '#FFFFFF';
-    }
+    const paperFill =
+      paperStyle === 'parchment'
+        ? resolveCssVar('--note-yellow')
+        : resolveCssVar('--paper');
+    ctx.fillStyle = paperFill;
     ctx.fillRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
 
-    // Grid paper pattern
     if (paperStyle === 'graph') {
-      ctx.strokeStyle = '#E2E8F0';
+      ctx.strokeStyle = resolveCssVar('--paper-border-warm');
       ctx.lineWidth = 1;
       const gridSize = 25;
       for (let x = 0; x < PAGE_WIDTH; x += gridSize) {
@@ -107,16 +99,14 @@ export default function HandwritingGenerator({ initialText = '', initialTitle = 
       }
     }
 
-    // Ruled lines pattern
-    const marginLeft = 80;
-    const marginTop = 90;
+    const marginTop = 76;
+    const marginLeft = paperStyle === 'ruled' ? 88 : 56;
+    const marginRight = 48;
     const marginBottom = 60;
-    const marginRight = 50;
 
-    if (paperStyle === 'ruled') {
-      // Horizontal blue notebook lines
-      ctx.strokeStyle = '#BFDBFE';
-      ctx.lineWidth = 1;
+    if (paperStyle === 'ruled' || paperStyle === 'parchment') {
+      ctx.strokeStyle = resolveCssVar('--paper-rule');
+      ctx.lineWidth = 1.2;
       for (let y = marginTop; y < PAGE_HEIGHT - marginBottom; y += lineSpacing) {
         ctx.beginPath();
         ctx.moveTo(0, y);
@@ -124,24 +114,24 @@ export default function HandwritingGenerator({ initialText = '', initialTitle = 
         ctx.stroke();
       }
 
-      // Vertical red margin line
-      ctx.strokeStyle = '#FCA5A5';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(marginLeft - 15, 0);
-      ctx.lineTo(marginLeft - 15, PAGE_HEIGHT);
-      ctx.stroke();
+      if (paperStyle === 'ruled') {
+        ctx.strokeStyle = resolveCssVar('--paper-margin');
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(marginLeft - 16, 0);
+        ctx.lineTo(marginLeft - 16, PAGE_HEIGHT);
+        ctx.stroke();
+      }
     }
 
-    // Text rendering setup
+    const selectedInkObj = INK_OPTIONS.find((item) => item.id === inkChoice) || INK_OPTIONS[0];
     ctx.font = `${fontSize}px "${font}", cursive, sans-serif`;
-    ctx.fillStyle = inkColor;
+    ctx.fillStyle = resolveCssVar(selectedInkObj.token);
     ctx.textBaseline = 'alphabetic';
 
     const maxLineWidth = PAGE_WIDTH - marginLeft - marginRight;
     const lines = [];
 
-    // Parse paragraphs and wrap words
     const rawParagraphs = text.split('\n');
     for (const p of rawParagraphs) {
       if (p.trim() === '') {
@@ -153,21 +143,20 @@ export default function HandwritingGenerator({ initialText = '', initialTitle = 
 
       for (const word of words) {
         const testLine = currentLine ? `${currentLine} ${word}` : word;
-        const metrics = ctx.measureText(testLine);
-        if (metrics.width > maxLineWidth) {
+        if (ctx.measureText(testLine).width > maxLineWidth) {
           lines.push(currentLine);
           currentLine = word;
         } else {
           currentLine = testLine;
         }
       }
-      if (currentLine) {
-        lines.push(currentLine);
-      }
+      if (currentLine) lines.push(currentLine);
     }
 
-    // Pagination calculation
-    const linesPerPage = Math.floor((PAGE_HEIGHT - marginTop - marginBottom) / lineSpacing);
+    const linesPerPage = Math.max(
+      1,
+      Math.floor((PAGE_HEIGHT - marginTop - marginBottom) / lineSpacing)
+    );
     const calculatedPages = Math.max(1, Math.ceil(lines.length / linesPerPage));
     setTotalPages(calculatedPages);
 
@@ -175,61 +164,53 @@ export default function HandwritingGenerator({ initialText = '', initialTitle = 
     const startIndex = (safeCurrentPage - 1) * linesPerPage;
     const pageLines = lines.slice(startIndex, startIndex + linesPerPage);
 
-    // Draw lines with natural human jitter
     let y = marginTop;
     pageLines.forEach((line, lineIndex) => {
       if (line) {
-        ctx.save();
-
         let x = marginLeft;
         const words = line.split(' ');
-
         words.forEach((word, wordIndex) => {
-          // Slight micro-jitter in baseline and rotation
-          const baselineOffset = humanJitter ? (Math.sin((lineIndex * 7 + wordIndex) * 1.5) * 1.4) : 0;
-          const rotationAngle = humanJitter ? (Math.cos((lineIndex * 5 + wordIndex) * 2) * 0.008) : 0;
+          const baselineOffset = humanJitter
+            ? Math.sin((lineIndex * 7 + wordIndex) * 1.5) * 1.4
+            : 0;
+          const rotationAngle = humanJitter
+            ? Math.cos((lineIndex * 5 + wordIndex) * 2) * 0.008
+            : 0;
 
           ctx.save();
           ctx.translate(x, y + baselineOffset);
-          if (rotationAngle !== 0) {
-            ctx.rotate(rotationAngle);
-          }
-
+          if (rotationAngle !== 0) ctx.rotate(rotationAngle);
           ctx.fillText(word, 0, 0);
           ctx.restore();
 
-          const wordWidth = ctx.measureText(word + ' ').width;
-          x += wordWidth;
+          x += ctx.measureText(`${word} `).width;
         });
-
-        ctx.restore();
       }
       y += lineSpacing;
     });
 
-    // Page number in header/footer
     ctx.font = `14px "${font}", cursive, sans-serif`;
-    ctx.fillStyle = '#94A3B8';
-    ctx.fillText(`Page ${safeCurrentPage} of ${calculatedPages}`, PAGE_WIDTH - 120, PAGE_HEIGHT - 30);
-  }, [text, font, fontSize, lineSpacing, paperStyle, inkColor, humanJitter, currentPage]);
+    ctx.fillStyle = resolveCssVar('--ink-soft');
+    ctx.fillText(
+      `Page ${safeCurrentPage} of ${calculatedPages}`,
+      PAGE_WIDTH - 120,
+      PAGE_HEIGHT - 30
+    );
+  }, [text, font, fontSize, lineSpacing, paperStyle, inkChoice, humanJitter, currentPage]);
 
-  // Export current page as PNG
   const handleDownloadPNG = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const image = canvas.toDataURL('image/png');
     const a = document.createElement('a');
-    a.href = image;
+    a.href = canvas.toDataURL('image/png');
     a.download = `${title.toLowerCase().replace(/[^a-z0-9]/g, '_')}_page_${currentPage}.png`;
     a.click();
   };
 
-  // Export as printable view / PDF
   const handleDownloadPDF = () => {
     window.print();
   };
 
-  // OCR upload handler
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -240,41 +221,46 @@ export default function HandwritingGenerator({ initialText = '', initialTitle = 
 
       const reader = new FileReader();
       reader.onload = async () => {
-        const base64Data = reader.result;
         try {
           const res = await fetch('/api/notes/ocr', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              ...(localStorage.getItem('token') && { Authorization: `Bearer ${localStorage.getItem('token')}` })
+              ...(localStorage.getItem('token') && {
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+              }),
             },
             body: JSON.stringify({
-              imageBase64: base64Data,
-              mimeType: file.type || 'image/jpeg'
-            })
+              imageBase64: reader.result,
+              mimeType: file.type || 'image/jpeg',
+            }),
           });
 
           const data = await res.json();
           if (data.success && data.text) {
             setText(data.text);
-            setOcrMessage({ type: 'success', text: 'Handwritten notes transcribed accurately! Review and edit below.' });
+            setOcrMessage({
+              type: 'success',
+              text: 'Handwritten notes transcribed! Review and format below.',
+            });
           } else {
-            setOcrMessage({ type: 'error', text: data.message || 'Failed to transcribe image.' });
+            setOcrMessage({
+              type: 'error',
+              text: data.message || 'Failed to transcribe image.',
+            });
           }
-        } catch (netErr) {
+        } catch {
           setOcrMessage({ type: 'error', text: 'Network error performing OCR.' });
         } finally {
           setOcrLoading(false);
         }
       };
       reader.readAsDataURL(file);
-    } catch (err) {
-      console.error('File read error:', err);
+    } catch {
       setOcrLoading(false);
     }
   };
 
-  // Save to student notes & RAG
   const handleSaveToNotes = async () => {
     try {
       setSavingNote(true);
@@ -287,25 +273,30 @@ export default function HandwritingGenerator({ initialText = '', initialTitle = 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(localStorage.getItem('token') && { Authorization: `Bearer ${localStorage.getItem('token')}` })
+          ...(localStorage.getItem('token') && {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          }),
         },
         body: JSON.stringify({
           title: title || 'Handwritten Notes',
           content: text,
           subject,
-          handwritingConfig: { font, fontSize, lineSpacing, paperStyle, inkColor },
-          handwritingImageUrl: imageUrl
-        })
+          handwritingConfig: { font, fontSize, lineSpacing, paperStyle, inkColor: inkChoice },
+          handwritingImageUrl: imageUrl,
+        }),
       });
 
       const data = await res.json();
       if (data.success) {
-        setSaveStatus({ type: 'success', text: 'Saved to your personal notes and embedded into Saarthi knowledge base!' });
+        setSaveStatus({
+          type: 'success',
+          text: 'Saved to your personal notes and embedded into Chotu knowledge base!',
+        });
         if (onSaveNote) onSaveNote(data.note);
       } else {
         setSaveStatus({ type: 'error', text: data.message || 'Failed to save note' });
       }
-    } catch (err) {
+    } catch {
       setSaveStatus({ type: 'error', text: 'Error saving note to database' });
     } finally {
       setSavingNote(false);
@@ -313,16 +304,23 @@ export default function HandwritingGenerator({ initialText = '', initialTitle = 
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(340px, 1fr) minmax(360px, 1.2fr)', gap: '20px', alignItems: 'start' }}>
-      {/* Left Column: Editor & Controls */}
-      <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '1.15rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <PenTool size={20} color="var(--color-primary)" />
+    <div
+      className="paper-grid paper-grid--split"
+      style={{
+        gridTemplateColumns: 'minmax(280px, 1fr) minmax(300px, 1.15fr)',
+        alignItems: 'start',
+      }}
+    >
+      {/* Left: Editor & Ink Controls */}
+      <PaperCard flat style={{ padding: 'var(--sp-5)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
+        <Pin color="blue" position="left" />
+
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--sp-2)' }}>
+          <h2 className="type-h3" style={{ color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <PenTool size={18} strokeWidth={2} style={{ color: 'var(--emerald-700)' }} aria-hidden="true" />
             Text-to-Handwriting Studio
           </h2>
 
-          {/* OCR Trigger button (P2-6.6) */}
           <div>
             <input
               type="file"
@@ -331,250 +329,210 @@ export default function HandwritingGenerator({ initialText = '', initialTitle = 
               accept="image/*"
               style={{ display: 'none' }}
             />
-            <button
-              onClick={() => fileInputRef.current?.click()}
+            <Button
+              variant="note"
+              size="sm"
               disabled={ocrLoading}
-              className="btn btn-secondary"
-              style={{
-                width: 'auto',
-                padding: '6px 12px',
-                fontSize: '0.82rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                color: 'var(--color-primary)',
-                border: '1px solid var(--color-primary)'
-              }}
+              onClick={() => fileInputRef.current?.click()}
             >
-              {ocrLoading ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
-              <span>📸 OCR Photo Notes</span>
-            </button>
+              {ocrLoading ? <Loader2 size={14} aria-hidden="true" /> : <Camera size={14} strokeWidth={2} aria-hidden="true" />}
+              OCR Photo Notes
+            </Button>
           </div>
         </div>
 
-        {ocrMessage && (
-          <div className={`alert ${ocrMessage.type === 'success' ? 'alert-success' : 'alert-error'}`} style={{ fontSize: '0.85rem', padding: '8px 12px' }}>
+        {ocrMessage ? (
+          <StickyNote tone={ocrMessage.type === 'success' ? 'green' : 'pink'} body style={{ maxWidth: '100%' }}>
             {ocrMessage.text}
-          </div>
-        )}
+          </StickyNote>
+        ) : null}
 
-        {/* Note Metadata */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '10px' }}>
-          <div>
-            <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--color-muted)' }}>Note Title</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Newton's Second Law Notes"
-              className="input"
-              style={{ padding: '8px 10px', fontSize: '0.9rem' }}
-            />
-          </div>
-          <div>
-            <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--color-muted)' }}>Subject</label>
-            <select
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              className="input"
-              style={{ padding: '8px 10px', fontSize: '0.9rem' }}
-            >
-              <option value="Physics">Physics</option>
-              <option value="Chemistry">Chemistry</option>
-              <option value="Biology">Biology</option>
-              <option value="Mathematics">Mathematics</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Text Input Editor */}
-        <div>
-          <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--color-muted)', display: 'flex', justifyContent: 'space-between' }}>
-            <span>Type or Paste Note Content</span>
-            <span>{text.length} characters</span>
-          </label>
-          <textarea
-            rows={10}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            className="input"
-            style={{
-              fontFamily: 'monospace',
-              fontSize: '0.88rem',
-              lineHeight: '1.4',
-              resize: 'vertical',
-              padding: '10px'
-            }}
-            placeholder="Type your notes here or use OCR to scan handwritten notebooks..."
+        <div className="paper-grid paper-grid--2" style={{ gap: 'var(--sp-3)' }}>
+          <Field
+            label="Note Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g. Newton's Second Law Notes"
           />
+
+          <Field
+            as="select"
+            label="Subject"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+          >
+            <option value="Physics">Physics</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Biology">Biology</option>
+            <option value="Mathematics">Mathematics</option>
+          </Field>
         </div>
 
-        {/* Style Controls (P2-6.3) */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', background: 'var(--color-background)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
-          <div>
-            <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--color-muted)' }}>Handwriting Font</label>
-            <select value={font} onChange={(e) => setFont(e.target.value)} className="input" style={{ padding: '6px 8px', fontSize: '0.85rem' }}>
-              {FONTS.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
-            </select>
-          </div>
+        <Field
+          as="textarea"
+          label={`Note Content (${text.length} chars)`}
+          rows={9}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Type your notes here or use OCR to scan handwritten notebooks..."
+        />
+
+        <div
+          className="paper-grid paper-grid--2"
+          style={{
+            gap: 'var(--sp-3)',
+            padding: 'var(--sp-3)',
+            background: 'var(--paper-warm)',
+            border: '1px solid var(--paper-border-warm)',
+            borderRadius: 'var(--r-md)',
+          }}
+        >
+          <Field as="select" label="Handwriting Font" value={font} onChange={(e) => setFont(e.target.value)}>
+            {FONTS.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.name}
+              </option>
+            ))}
+          </Field>
+
+          <Field as="select" label="Paper Style" value={paperStyle} onChange={(e) => setPaperStyle(e.target.value)}>
+            {PAPER_STYLES.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </Field>
 
           <div>
-            <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--color-muted)' }}>Paper Background</label>
-            <select value={paperStyle} onChange={(e) => setPaperStyle(e.target.value)} className="input" style={{ padding: '6px 8px', fontSize: '0.85rem' }}>
-              {PAPER_STYLES.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-          </div>
-
-          <div>
-            <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--color-muted)' }}>Ink Colour</label>
-            <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
-              {INK_COLORS.map(c => (
+            <span className="field__label" style={{ display: 'block', marginBottom: '6px' }}>
+              Ink Color
+            </span>
+            <div style={{ display: 'flex', gap: 'var(--sp-2)' }}>
+              {INK_OPTIONS.map((c) => (
                 <button
                   key={c.id}
-                  onClick={() => setInkColor(c.id)}
+                  type="button"
+                  onClick={() => setInkChoice(c.id)}
                   title={c.name}
+                  aria-label={c.name}
+                  aria-pressed={inkChoice === c.id ? 'true' : 'false'}
                   style={{
-                    width: '26px',
-                    height: '26px',
+                    width: '32px',
+                    height: '32px',
                     borderRadius: '50%',
-                    backgroundColor: c.preview,
-                    border: inkColor === c.id ? '2px solid var(--color-primary)' : '2px solid transparent',
+                    background: `var(${c.token})`,
+                    border: inkChoice === c.id ? '3px solid var(--amber-400)' : '2px solid var(--paper-edge)',
                     cursor: 'pointer',
-                    boxShadow: inkColor === c.id ? '0 0 0 2px white' : 'none'
                   }}
                 />
               ))}
             </div>
           </div>
 
-          <div>
-            <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--color-muted)' }}>
-              Natural Jitter: {humanJitter ? 'Organic' : 'Uniform'}
-            </label>
-            <button
-              onClick={() => setHumanJitter(!humanJitter)}
-              className="btn btn-secondary"
-              style={{ width: '100%', padding: '6px 10px', fontSize: '0.8rem', marginTop: '4px' }}
+          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+            <Button
+              variant={humanJitter ? 'primary' : 'note'}
+              size="sm"
+              onClick={() => setHumanJitter((v) => !v)}
             >
-              {humanJitter ? '✓ Human Jitter ON' : 'Uniform Slant ON'}
-            </button>
+              {humanJitter ? 'Human Jitter: ON' : 'Uniform Baseline'}
+            </Button>
           </div>
 
-          <div>
-            <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--color-muted)' }}>Font Size ({fontSize}px)</label>
+          <label className="field">
+            <span className="field__label">Font Size ({fontSize}px)</span>
             <input
               type="range"
               min="18"
               max="32"
               value={fontSize}
               onChange={(e) => setFontSize(Number(e.target.value))}
-              style={{ width: '100%' }}
+              style={{ accentColor: 'var(--emerald-700)' }}
             />
-          </div>
+          </label>
 
-          <div>
-            <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--color-muted)' }}>Line Spacing ({lineSpacing}px)</label>
+          <label className="field">
+            <span className="field__label">Line Spacing ({lineSpacing}px)</span>
             <input
               type="range"
               min="26"
               max="44"
               value={lineSpacing}
               onChange={(e) => setLineSpacing(Number(e.target.value))}
-              style={{ width: '100%' }}
+              style={{ accentColor: 'var(--emerald-700)' }}
             />
-          </div>
+          </label>
         </div>
 
-        {/* Actions & Export (P2-6.4) */}
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <button
-            onClick={handleDownloadPNG}
-            className="btn btn-secondary"
-            style={{ flex: 1, padding: '8px 12px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-          >
-            <Download size={15} /> Export PNG
-          </button>
-          <button
-            onClick={handleDownloadPDF}
-            className="btn btn-secondary"
-            style={{ flex: 1, padding: '8px 12px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-          >
-            <FileText size={15} /> Print / PDF
-          </button>
-          <button
-            onClick={handleSaveToNotes}
-            disabled={savingNote}
-            className="btn btn-primary"
-            style={{ flex: 1.5, padding: '8px 14px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-          >
-            {savingNote ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
-            <span>Save to My Notes</span>
-          </button>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
+          <Button variant="note" size="sm" onClick={handleDownloadPNG}>
+            <Download size={15} strokeWidth={2} aria-hidden="true" />
+            Export PNG
+          </Button>
+          <Button variant="note" size="sm" onClick={handleDownloadPDF}>
+            <FileText size={15} strokeWidth={2} aria-hidden="true" />
+            Print / PDF
+          </Button>
+          <Button variant="primary" size="sm" onClick={handleSaveToNotes} disabled={savingNote}>
+            <Sparkles size={15} strokeWidth={2} aria-hidden="true" />
+            {savingNote ? 'Saving...' : 'Save to My Notes'}
+          </Button>
         </div>
 
-        {saveStatus && (
-          <div className={`alert ${saveStatus.type === 'success' ? 'alert-success' : 'alert-error'}`} style={{ fontSize: '0.85rem', padding: '8px 12px' }}>
+        {saveStatus ? (
+          <StickyNote tone={saveStatus.type === 'success' ? 'green' : 'pink'} body style={{ maxWidth: '100%' }}>
             {saveStatus.text}
-          </div>
-        )}
-      </div>
+          </StickyNote>
+        ) : null}
+      </PaperCard>
 
-      {/* Right Column: Live Handwritten Notebook Page Preview */}
-      <div className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <span style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--color-muted)' }}>
-            Handwritten Notebook Preview
+      {/* Right: Live Page Preview */}
+      <PaperCard flat style={{ padding: 'var(--sp-4)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--sp-3)' }}>
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span className="type-label" style={{ color: 'var(--ink-muted)' }}>
+            NOTEBOOK PAGE PREVIEW
           </span>
 
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+          {totalPages > 1 ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)' }}>
+              <Button
+                variant="note"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="btn btn-secondary"
-                style={{ width: '28px', height: '28px', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                aria-label="Previous page"
               >
                 <ChevronLeft size={16} />
-              </button>
-              <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>
+              </Button>
+              <span className="type-label">
                 {currentPage} / {totalPages}
               </span>
-              <button
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              <Button
+                variant="note"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="btn btn-secondary"
-                style={{ width: '28px', height: '28px', padding: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+                aria-label="Next page"
               >
                 <ChevronRight size={16} />
-              </button>
+              </Button>
             </div>
-          )}
+          ) : null}
         </div>
 
-        {/* The HTML5 Canvas Canvas Area */}
         <div
           style={{
             width: '100%',
-            maxWidth: '460px',
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
-            borderRadius: '4px',
+            maxWidth: '480px',
+            border: '1.5px solid var(--paper-edge)',
+            borderRadius: 'var(--r-sm)',
             overflow: 'hidden',
-            border: '1px solid #E2E8F0',
-            backgroundColor: 'white'
+            boxShadow: 'var(--shadow-paper)',
           }}
         >
-          <canvas
-            ref={canvasRef}
-            style={{
-              width: '100%',
-              height: 'auto',
-              display: 'block'
-            }}
-          />
+          <canvas ref={canvasRef} style={{ width: '100%', height: 'auto', display: 'block' }} />
         </div>
-      </div>
+      </PaperCard>
     </div>
   );
 }
-
