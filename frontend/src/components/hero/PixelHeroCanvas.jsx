@@ -56,6 +56,35 @@ const PALETTE_RGB_HEX = [
   0x115da3, // 32: SKY_DEEP left text-contrast sky wash
   0x1772c2, // 33: SKY_MID_DEEP left text-contrast lower wash
   0x9e251b, // 34: RED_DARK backpack shadow
+  // Detailed Pixel Character Shading Ramps (35..62)
+  0xdf9566, // 35: SKIN_HI bright nose/cheek highlight
+  0xc97b4b, // 36: SKIN_LIT sunlit warm brown skin
+  0xa6663e, // 37: SKIN_MID midtone warm brown skin
+  0x784426, // 38: SKIN_SHADE shaded skin / eyelid / finger crease
+  0x4b2612, // 39: SKIN_DEEP deep neck shadow / smile / inner ear
+  0x0d0f17, // 40: HAIR_OUTLINE deepest black outline & crevices
+  0x181c26, // 41: HAIR_DARK main dark charcoal-black hair & headphone shell
+  0x292f3f, // 42: HAIR_MID mid-slate hair volume locks
+  0x6e4429, // 43: HAIR_SUN_1 warm bronze-brown sunlit hair midtone
+  0xa8683e, // 44: HAIR_SUN_2 bright sunlit hair lock highlight
+  0xf3f5f9, // 45: HOODIE_HI sunlit left shoulder/chest & sneaker white
+  0xe1e5ee, // 46: HOODIE_LIGHT main off-white hoodie & sneaker body
+  0xc2c8d6, // 47: HOODIE_MID mid-grey hoodie cloth shading
+  0x939cb0, // 48: HOODIE_SHADE deep hoodie fold shadow
+  0x646d82, // 49: HOODIE_DEEP dark hoodie fold crease line
+  0x124738, // 50: HOOD_TEAL_DARK inner hood lining deep teal-green
+  0x1f7a4c, // 51: HOOD_TEAL_MID drawstrings, chest grad cap logo & cuff trim
+  0x76ff7a, // 52: LED_GREEN headphone LED matrix & bright green accents
+  0x454a61, // 53: PANTS_HI top knee & cargo pocket flap highlight
+  0x2c3040, // 54: PANTS_MID main dark charcoal cargo pants
+  0x1d202b, // 55: PANTS_SHADE inner leg & fold shadow
+  0x11131b, // 56: PANTS_DEEP deepest fold crease & ankle cuff
+  0xb0b7c6, // 57: SHOE_GREY sneaker mid-grey panel & shaded white
+  0x6d7487, // 58: SHOE_DARK sneaker sole tread grooves
+  0x1b2333, // 59: BOOK_NAVY_DARK outer hardcover board dark navy
+  0x323f57, // 60: BOOK_NAVY_MID hardcover board edge & spine highlight
+  0xcfd5e0, // 61: PAGE_SHADE shaded open page interior
+  0x9aa3b5, // 62: PAGE_DARK page edge shadow & text lines
 ];
 
 const C = {
@@ -93,6 +122,34 @@ const C = {
   SKY_DEEP: 32,
   SKY_MID_DEEP: 33,
   RED_DARK: 34,
+  SKIN_HI: 35,
+  SKIN_LIT: 36,
+  SKIN_MID: 37,
+  SKIN_SHADE: 38,
+  SKIN_DEEP: 39,
+  HAIR_OUTLINE: 40,
+  HAIR_DARK: 41,
+  HAIR_MID: 42,
+  HAIR_SUN_1: 43,
+  HAIR_SUN_2: 44,
+  HOODIE_HI: 45,
+  HOODIE_LIGHT: 46,
+  HOODIE_MID: 47,
+  HOODIE_SHADE: 48,
+  HOODIE_DEEP: 49,
+  HOOD_TEAL_DARK: 50,
+  HOOD_TEAL_MID: 51,
+  LED_GREEN: 52,
+  PANTS_HI: 53,
+  PANTS_MID: 54,
+  PANTS_SHADE: 55,
+  PANTS_DEEP: 56,
+  SHOE_GREY: 57,
+  SHOE_DARK: 58,
+  BOOK_NAVY_DARK: 59,
+  BOOK_NAVY_MID: 60,
+  PAGE_SHADE: 61,
+  PAGE_DARK: 62,
 };
 
 // Precompute 32-bit little-endian ABGR values for fast ImageData writes
@@ -158,6 +215,233 @@ const FOLIAGE_RAMP = [
   C.FOLIAGE_2,
   C.FOLIAGE_1,
   C.GRASS_2,
+];
+
+// ============================================================================
+// Detailed 2D Pixel-Art Character Sprite Matrices (Programmatic Grid Maps)
+// ============================================================================
+const CHOTU_CHAR_PAL = {
+  O: C.HAIR_OUTLINE,
+  // Skin ramp
+  I: C.SKIN_HI,
+  k: C.SKIN_LIT,
+  n: C.SKIN_MID,
+  z: C.SKIN_SHADE,
+  D: C.SKIN_DEEP,
+  // Hair ramp
+  K: C.HAIR_DARK,
+  m: C.HAIR_MID,
+  b: C.HAIR_SUN_1,
+  B: C.HAIR_SUN_2,
+  // Hoodie & Sneaker ramp
+  W: C.HOODIE_HI,
+  L: C.HOODIE_LIGHT,
+  M: C.HOODIE_MID,
+  S: C.HOODIE_SHADE,
+  d: C.HOODIE_DEEP,
+  T: C.HOOD_TEAL_DARK,
+  t: C.HOOD_TEAL_MID,
+  E: C.GRASS_2,
+  G: C.GRASS_3,
+  e: C.LED_GREEN,
+  // Cargo pants & sneakers
+  H: C.PANTS_HI,
+  P: C.PANTS_MID,
+  p: C.PANTS_SHADE,
+  q: C.PANTS_DEEP,
+  g: C.SHOE_GREY,
+  r: C.SHOE_DARK,
+  // Book & Smartwatch
+  N: C.BOOK_NAVY_DARK,
+  J: C.BOOK_NAVY_MID,
+  Q: C.PAGE_SHADE,
+  R: C.PAGE_DARK,
+  U: C.SKY_1,
+  u: C.SKY_3,
+  Y: C.SKY_DEEP,
+  C: C.CLOUD_4,
+  c: C.CLOUD_HI,
+  v: C.DESK,
+};
+
+// 55x16 cross-legged baggy cargo pants with thigh pockets & fold creases
+const CHOTU_PANTS_SPRITE = [
+  '......OOOOOHHHHHPPPPPPpppqqqqqppPPPPPPHHHHHOOOOO.......',
+  '....OOOHHHHHHPPPPPPPPPpppqqqqqppPPPPPPPPPHHHHHHOOO.....',
+  '...OOHHHPPPPHHHPPPPPPPPppqqqqqppPPPPPPPPHHHPPPPHHHOO...',
+  '..OOHHPPHHHHHHPPPPPPPPPppqqqqqppPPPPPPPPHHHHHHPPPHHOO..',
+  '.OOHHPOOHHHHPPPPPPPPPPpppqqqqqppPPPPPPPPPPHHHHOOPPHHOO.',
+  '.OHHPOOHPPPPqPPPPPPPPPpppqqqqqppPPPPPPPPPqPPPPHOOPHHO..',
+  '.OHPPOOPPPPPqPPPPPPPPpppqqqqqqqppPPPPPPPPqPPPPPOOPPPHO.',
+  '.OPPPOOPPPPPqPPPPPPPPppqqqqqqqqqppPPPPPPPqPPPPPOOPPPPO.',
+  '.OPppqqPPPPPqPPPPPPPPqqqqqqqqqqqppPPPPPPPqPPPPPqqppPPO.',
+  '.OppppqqPPPPqppppPPPPqqqqqqqqqqqPPPPpppppPPPPqqppppppO.',
+  '..OpppppqqqpppppppPPPPqqqqqqqqqPPPPppppppppqqqppppppO..',
+  '..OOpppppppppppppppPPPPqqqqqqqPPPPppppppppppppppppOO...',
+  '...OOOqqqqqppppppppppqqqqqqqqqqqppppppppppqqqqqqOOO....',
+  '....OOOOqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqOOOO.....',
+  '......OOOOOOqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqOOOOOO......',
+  '..........OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO.........',
+];
+
+// 14x8 left tucked white-and-green sneaker
+const CHOTU_LEFT_SHOE_SPRITE = [
+  '...OOOOOOOO...',
+  '.OOgLLLLLLtO..',
+  'OgLLWWWWWLTtO.',
+  'OgWWWWWWLLLgO.',
+  'OgLLLLLLLLggO.',
+  'OggggLLLLgggO.',
+  'OOWrWWtWWtWOO.',
+  '..OOOOOOOOOO..',
+];
+
+// 22x9 exposed warm-brown ankle + prominent right white-and-green sneaker
+const CHOTU_RIGHT_SHOE_SPRITE = [
+  '......OOOOOOO.........',
+  '.OOOOOOWttttWO........',
+  'OkkkkknWWttWWLLO......',
+  'OnnnnnzWWttWttWWOO....',
+  '.OzzzzzLWWtWWttWWWO...',
+  '..OOOOzgLLLLLLLLWWO...',
+  '.....OOgWWWWWWWWLLO...',
+  '.....OOWrWWrWWrWWrO...',
+  '......OOOOOOOOOOOO....',
+];
+
+// 43x28 white/cream hoodie with bunched hood, cloth folds, drawstrings & grad-cap chest logo
+const CHOTU_HOODIE_SPRITE = [
+  '..............OOOOOOOOOOOOOOO..............',
+  '............OOWWWWWLLLLMMMMLLOO............',
+  '...........OWWWLLTTTTTTTTSSMMMMLO..........',
+  '..........OWWLLTTTTTTTTTTTTSSMMMLO.........',
+  '.........OWWLTTTTTTTGGTTTTTTSMMLMO.........',
+  '........OOWWLTTTTTTGGGGTTTTTSSMMLMO........',
+  '.......OOWWWLLTTTtGGGGGGtTTTSSMMMLLO.......',
+  '......OOWWWWLLMMtLGGGGGGtLMMSSMMMMLLO......',
+  '.....OOWWWWWLLMMtLLLLLLLLtMMSSMMMMMLLO.....',
+  '....OOWWWWWWLLMMtLLLLLLLLtMSSSMMMMMMLLO....',
+  '....OWWWLWWWLLMMtLLLLLLLLtMSSMMtMMMMLLO....',
+  '...OOWWLLWWWLLMMtLLLMLLLLtMSSMtttMMMLLOO...',
+  '...OWWWLLWWWLLMMtLLMMLLLLtMSStttttMMLLMO...',
+  '..OOWWWLLWWWLLMddtMMMLLLLtMSSSMTtTMMLLMO...',
+  '..OWWWWLLWWWLLMddMMMMLLLLLMdMMMSSTMMLLMMO..',
+  '.OOWWWWLLWWWLLMSSMMMMLLLLLMSSMMMMSMMMLMMO..',
+  '.OWWWWWLLWWWLMMSSMMMMLLLLLMSSMMMMMMMMLMMOO.',
+  '.OWWWWLLLWWWMSSddMMMMLLLLLMSSMMMMMMMMMMMSO.',
+  '.OWWWWLLSWWWMdSSSMMMMLLLLLMSSMMMMMMMMMMMSO.',
+  '.OWWWLLSSWWWMSdSSMMMMLLLLLMSSMMMMMMMMMMSSO.',
+  '.OOWWLSSWWWLMSdSSMMMMLLLLLMSSMMMMMMMMMMSSO.',
+  '..OWWLSStWWLLdSSSMMMMLLLLLMSSMMMMMMMMtTSOO.',
+  '..OOWLLTtTWWLddSSMMMMLLLLLMSSMMMMMMMtTSOO..',
+  '...OOWLLTtWWLLdSSMMMMLLLLLMSSMMMMMMtTSOO...',
+  '....OOWLLWWLLLSSSMMMMLLLLLMSSMMMMMdSSOO....',
+  '.....OOOOLLLLLSSSMMMMLLLLLMSSMMMMddSSOO....',
+  '.........OOOOOSSSSSSSSSSSSSSSddddOOO.......',
+  '...........OOOOOOOOOOOOOOOOOOOOOOO.........',
+];
+
+// 19x8 black & neon-green over-ear headphones around collar
+const CHOTU_HEADPHONES_SPRITE = [
+  '.OOOO.........OOOO.',
+  'OmMKOO.......OOKMmO',
+  'OmKtKOO.....OOKtKmO',
+  'OmKEtKO.....OKEeEmO',
+  'OKKEtKO.....OKEeEmO',
+  'OKKtKKO.....OKtEEKO',
+  '.OOKKO.......OKKOO.',
+  '..OOO.........OOO..',
+];
+
+// 22x16 shaded warm-brown face, right ear & neck under chin
+const CHOTU_FACE_SPRITE = [
+  '..kkkkkkkkknnnzzzz....',
+  '.OkkkkkkkkknnnnzzzO...',
+  '.OkkkkkkkknnnnnzzzO...',
+  '.OkkkkkkkknnnnnzzzO...',
+  '.OkkkkkkkknnnnnzzzO...',
+  '.OkkkkkkkknnnnnzzzO...',
+  '.OkkkkkkkkknnnnzzzOOO.',
+  '.OkkkkkIknnnnnnzzznkO.',
+  '..OkkkkznnnnnnnnzznDO.',
+  '..OkkkkkknnnnnnnzzDDO.',
+  '...OkkkkkknnnnnnzzOOO.',
+  '....OkkkknnnnnnnzzO...',
+  '.....OOkkknnnnnzzOO...',
+  '.......OOOOOOOOOOO....',
+  '.......ODDDDDDzzzO....',
+  '........OkkkknnnO.....',
+];
+
+// 28x20 tousled spiky pixel hair with sunlit bronze left highlights & jagged bangs
+const CHOTU_HAIR_SPRITE = [
+  '.......OOO.......OOO........',
+  '......OBbKO....OOBKKO.......',
+  '.....OBbKKKO..OOKKmKKOO.....',
+  '..OO.OBbKKmKOOOOKKmmmKKOO...',
+  '.OBBOOBbKKmmKKKKKKmmmmKKKOO.',
+  '.OBbbBBbKKKmmKKKKKKmmmmKKKOO',
+  '..OBbbKKKmmmKKOKKKKmmmmmKKKO',
+  '..OOBbKKmmmmKKOKKKKmmmmmKKmO',
+  '.OOBbKKKmmKKKKOKKKmmmmmKKmmO',
+  'OBbbKKKmmKKKKKKOKKmmmmKKmmKO',
+  'OBbKKKmmKKOKKKKOKKKKKKKmmKKO',
+  '.OOKKKKKKKOKKKKOKKmmKKKKKKKO',
+  '..OOKbKKKKOKKKKKKKmmKKKKKKOO',
+  '...OBbKKKKOOKKKKKOKKKKKKKmO.',
+  '...OOKbKKKO.OKKKK.OKKKKKmmO.',
+  '....OOKKKO...OKKO..OKKmKKKO.',
+  '.....OOKO.....OO...OKKO.OKKO',
+  '......OO............OO...OO.',
+  '............................',
+  '............................',
+];
+
+// 35x17 open hardcover textbook in 3/4 view with text lines & blue diagrams
+const CHOTU_BOOK_SPRITE = [
+  '..OOOOO.....................OOOOO..',
+  '.OWWWWWOOOO.............OOOOWWWWWO.',
+  '.ONWWWWLLLLOOOO.....OOOOWWWWWWWWWO.',
+  '.ONQWWWWWLLLLLLOO.OOWWWWWLLLLLLLLNO',
+  '.ONQQRRRRRRRLLLLOOOWWWWLYYYYYYYYLNO',
+  '.ONQQQQQQQQQQQLLNJWLLLLLLLLLLLLLLNO',
+  '.ONQQRRRRRRRRLLLNJWLLLUUUUUuLLLLLNO',
+  '.ONQQQQQQQQQQQLLNJWLLLUUUUUuLLLuuNO',
+  '.ONQQRRRRRRRRLLLNJWLLLUUUUUuLLLuuNO',
+  '.ONQQQQQQQQQQQLLNJWLLLYYYYYYLLLYYNO',
+  '.ONQQRRRRRRRRLLLNJWLLLLLLLLLLLLLLNO',
+  '..ONQQQQQQQQQQLLNJWLLLLLLLLLLLLLNO.',
+  '..OONNQQQQQQQQNNNJNLLLLLLLLNNNOO...',
+  '....OONNNQQQQQQNNJNNLLLLLLNNNOO....',
+  '......OOONNNNNNNJJJNNNNNNNNOOO.....',
+  '.........OOOOOOONJNOOOOOOOO........',
+  '................OOO................',
+];
+
+// 7x9 left hand with 4 distinct fingers wrapping left book cover
+const CHOTU_LEFT_HAND_SPRITE = [
+  '..OOOO.',
+  '.OkkkkO',
+  'OkknzzO',
+  'OkkkkkO',
+  'OknzznO',
+  'OknnnnO',
+  'OknzznO',
+  '.OzzzzO',
+  '..OOOO.',
+];
+
+// 10x9 right hand with 4 fingers + cyan-bezel pixel smartwatch
+const CHOTU_RIGHT_HAND_SPRITE = [
+  '..OOOO....',
+  '.OkkkkO...',
+  'OzznkkO...',
+  'OkkkkkOOO.',
+  'OnzznkOCcO',
+  'OnnnnkOCvO',
+  'OnzznkOCCO',
+  '.OzzzzOOO.',
+  '..OOOO....',
 ];
 
 /**
@@ -530,6 +814,22 @@ export default function PixelHeroCanvas({ reducedMotion = false, onChotuAnchor }
           setPx(px, py, c);
         } else {
           fillRect(px - (thickness >> 1), py - (thickness >> 1), thickness, thickness, c);
+        }
+      }
+    };
+
+    const drawCharSprite = (ox, oy, rows, palMap = CHOTU_CHAR_PAL, rowXShiftFn = null) => {
+      for (let ry = 0; ry < rows.length; ry++) {
+        const row = rows[ry];
+        const rxShift = rowXShiftFn ? rowXShiftFn(ry) : 0;
+        const py = oy + ry;
+        for (let rx = 0; rx < row.length; rx++) {
+          const ch = row[rx];
+          if (ch === '.') continue;
+          const col = palMap[ch];
+          if (col !== undefined) {
+            setPx(ox + rx + rxShift, py, col);
+          }
         }
       }
     };
@@ -1062,7 +1362,7 @@ export default function PixelHeroCanvas({ reducedMotion = false, onChotuAnchor }
       }
 
       // ======================================================================
-      // 6. CHOTU — MULTI-STATE ARTICULATED PIXEL CHARACTER READING A BOOK
+      // 6. CHOTU — DETAILED 2D PIXEL-ART CHARACTER READING A BOOK
       // ======================================================================
       {
         const cx = model.chotuX;
@@ -1071,8 +1371,8 @@ export default function PixelHeroCanvas({ reducedMotion = false, onChotuAnchor }
         // 12-second natural idle & reading state cycle:
         // [0.0..5.2): READING (eyes scan left & right across book pages, gentle head nod)
         // [5.2..6.4): PAGE_TURN (right hand lifts, 6-frame page arc flips right->left, sparkles burst)
-        // [6.4..9.2): THINKING (head lifts 1px, gaze shifts up, hand near chin, thought sparkle)
-        // [9.2..12.0): LOOKING_AROUND (head turns slightly, friendly double-blink, sneaker tap, back to reading)
+        // [6.4..9.2): THINKING (head lifts 1px, gaze shifts up, hand lifts thoughtfully, idea bulb)
+        // [9.2..12.0): LOOKING_AROUND (head turns slightly, double-blink, sneaker tap, back to reading)
         const cycleT = t % 12.0;
         const isReading = cycleT < 5.2;
         const isTurningPage = cycleT >= 5.2 && cycleT < 6.4;
@@ -1082,6 +1382,7 @@ export default function PixelHeroCanvas({ reducedMotion = false, onChotuAnchor }
         // Smooth breathing offset (3.6s period -> 0 or -1px chest/shoulder rise)
         const breathWave = Math.sin((t * Math.PI * 2) / 3.6);
         const breathY = breathWave > 0.35 ? -1 : 0;
+        const breathExpand = breathWave > 0.65;
 
         // Posture / head offsets per state
         let headDX = 0;
@@ -1096,7 +1397,8 @@ export default function PixelHeroCanvas({ reducedMotion = false, onChotuAnchor }
           const lineScan = (readProgress % 1) * 2 - 1; // -1..+1
           gazeX = lineScan > 0.25 ? 1 : lineScan < -0.25 ? -1 : 0;
           gazeY = 1;
-          headDY = breathY + (Math.sin(cycleT * 2.4) > 0.5 ? 1 : 0);
+          headDX = lineScan < -0.58 ? -1 : 0;
+          headDY = breathY + (Math.sin(cycleT * 2.4) > 0.55 ? 1 : 0);
         } else if (isTurningPage) {
           gazeX = 0;
           gazeY = 1;
@@ -1112,22 +1414,30 @@ export default function PixelHeroCanvas({ reducedMotion = false, onChotuAnchor }
           gazeY = 0;
         }
 
-        // Natural blinking schedule (150ms blink every ~3.2s + double blink during look-around)
+        // Natural 3-stage blinking schedule (open -> half -> closed -> half -> open)
         const blinkMod = t % 3.2;
-        const isBlinking =
-          (blinkMod > 2.95 && blinkMod < 3.12) ||
+        const lookDoubleBlink =
           (isLookingAround && cycleT > 9.8 && cycleT < 9.95) ||
           (isLookingAround && cycleT > 10.1 && cycleT < 10.25);
+        let blinkState = 'open';
+        if (lookDoubleBlink || (blinkMod > 2.96 && blinkMod <= 3.08)) {
+          blinkState = 'closed';
+        } else if (
+          (blinkMod > 2.92 && blinkMod <= 2.96) ||
+          (blinkMod > 3.08 && blinkMod <= 3.12)
+        ) {
+          blinkState = 'half';
+        }
 
         // 6A. Ground shadow under Chotu, backpack, and stacked books
-        fillEllipse(cx + 4, by + 2, 48, 9, (px, py, nx, ny) => {
+        fillEllipse(cx + 2, by + 3, 52, 9, (px, py, nx, ny) => {
           const r = Math.sqrt(nx * nx + ny * ny);
           if (r < 0.58) return C.FOLIAGE_5;
           return dither2(px, py, C.FOLIAGE_5, C.FOLIAGE_4, (r - 0.58) * 2.1);
         });
 
         // 6B. Red School Backpack leaning on the grass to Chotu's left
-        const bpx = cx - 35;
+        const bpx = cx - 42;
         const bpy = by - 22;
         for (let py = bpy; py < bpy + 19; py++) {
           for (let px = bpx + 2; px < bpx + 15; px++) {
@@ -1144,149 +1454,107 @@ export default function PixelHeroCanvas({ reducedMotion = false, onChotuAnchor }
         fillRect(bpx + 7, bpy + 8, 2, 3, C.BOOK_GOLD);
         drawLine(bpx + 14, bpy + 3, bpx + 18, bpy + 15, C.TRUNK_2, 2);
 
-        // 6C. Cross-legged navy bottoms & sneakers (with subtle toe-tap animation)
+        // 6C. Cross-legged dark charcoal cargo pants, exposed ankle & white/green sneakers
         const leftShoeTap = isLookingAround && Math.sin(t * 7.5) > 0.55 ? -1 : 0;
-        fillEllipse(cx - 12, by - 6, 15, 6, (px, py, nx, ny) =>
-          ny < -0.2 ? C.NAVY : dither2(px, py, C.NAVY, C.HAIR, 0.5)
-        );
-        fillEllipse(cx + 12, by - 5, 15, 6, (px, py, nx, ny) =>
-          ny < -0.2 ? C.NAVY : dither2(px, py, C.NAVY, C.HAIR, 0.5)
-        );
-        // Left sneaker
-        fillRect(cx - 22, by - 3 + leftShoeTap, 8, 4, C.HAIR);
-        fillRect(cx - 22, by + leftShoeTap, 8, 1, C.CLOUD_HI);
-        // Right sneaker
-        fillRect(cx + 14, by - 2, 8, 4, C.HAIR);
-        fillRect(cx + 14, by + 1, 8, 1, C.CLOUD_HI);
+        drawCharSprite(cx - 27, by - 16, CHOTU_PANTS_SPRITE);
+        drawCharSprite(cx - 19, by - 5 + leftShoeTap, CHOTU_LEFT_SHOE_SPRITE);
+        drawCharSprite(cx - 4, by - 6, CHOTU_RIGHT_SHOE_SPRITE);
 
-        // 6D. Torso in white shirt (rises and settles with breathing)
-        const torsoTopY = by - 38 + breathY;
-        const torsoBotY = by - 12;
-        for (let py = torsoTopY; py <= torsoBotY; py++) {
-          const tr = (py - torsoTopY) / Math.max(1, torsoBotY - torsoTopY);
-          const halfW = Math.round(9 + tr * 5);
-          const rowCx = cx + Math.round((1 - tr) * 1);
-          for (let px = rowCx - halfW; px <= rowCx + halfW; px++) {
-            const relX = (px - (rowCx - halfW)) / (2 * halfW);
-            let c = C.CLOUD_HI;
-            if (relX > 0.68) c = C.CLOUD_2;
-            else if (relX > 0.48) c = dither2(px, py, C.CLOUD_HI, C.CLOUD_1, 0.6);
-            setPx(px, py, c);
-          }
+        // 6D. White/cream hoodie torso, bunched hood, cloth folds, logo, drawstrings & headphones
+        const torsoTopY = by - 40 + breathY;
+        drawCharSprite(cx - 21, torsoTopY, CHOTU_HOODIE_SPRITE);
+        if (breathExpand) {
+          // Subtle inhale highlight across sunlit chest fold
+          fillRect(cx - 12, torsoTopY + 11, 3, 1, C.HOODIE_HI);
         }
-        // Shirt collar & neck
-        fillRect(cx - 3, torsoTopY - 2, 6, 4, C.SKIN_2);
-        fillRect(cx - 2, torsoTopY - 2, 4, 3, C.SKIN_1);
+        drawCharSprite(cx - 9, by - 38 + breathY, CHOTU_HEADPHONES_SPRITE);
+        // Subtle animated LED equalizer bars on right headphone earcup
+        if (Math.sin(t * 4.5) > 0.2) {
+          setPx(cx + 6, by - 36 + breathY, C.LED_GREEN);
+          setPx(cx + 5, by - 35 + breathY, C.GRASS_2);
+        }
 
-        // 6E. Head, Face, Animated Eyes/Blinks, and Wind-Swaying Hair Fringe
-        const headCx = cx - 1 + headDX;
-        const headCy = by - 48 + headDY;
-
-        // Back hair crown
-        fillEllipse(headCx + 1, headCy - 2, 10, 10, C.HAIR);
-        // Warm brown face
-        fillEllipse(headCx - 1, headCy + 1, 8, 8, (px, py, nx, ny) =>
-          nx < 0.35 && ny < 0.45 ? C.SKIN_1 : C.SKIN_2
-        );
-        // Right ear
-        fillRect(headCx + 6, headCy, 2, 4, C.SKIN_1);
-        // Top hair cap + wind-animated front fringe tufts
+        // 6E. Head, Expressive Facial Features, Detailed Eyes & Textured Spiky Hair
+        const headCx = cx + headDX;
+        const headCy = by - 45 + headDY;
         const hairSway = Math.sin(t * 2.5) > 0.35 ? 1 : 0;
-        fillEllipse(headCx, headCy - 5, 9, 5, (px, py, nx, ny) =>
-          nx < -0.2 && ny < 0 ? dither2(px, py, C.HAIR, C.NAVY, 0.5) : C.HAIR
-        );
-        fillRect(headCx + 4, headCy - 4, 4, 5, C.HAIR);
-        fillRect(headCx - 8 + hairSway, headCy - 5, 4, 3, C.HAIR);
-        setPx(headCx - 9 + hairSway, headCy - 4, C.HAIR);
 
-        // Eyes & Blinking
-        if (isBlinking) {
-          // Closed eyelids
-          fillRect(headCx - 6, headCy + 2, 3, 1, C.SKIN_2);
-          fillRect(headCx - 1, headCy + 2, 3, 1, C.SKIN_2);
-        } else {
-          // Eye whites + moving dark pupils
-          fillRect(headCx - 6, headCy + 1 + Math.max(0, gazeY), 3, 2, C.CLOUD_HI);
-          fillRect(headCx - 1, headCy + 1 + Math.max(0, gazeY), 3, 2, C.CLOUD_HI);
-          setPx(headCx - 5 + gazeX, headCy + 2 + gazeY, C.HAIR);
-          setPx(headCx - 5 + gazeX, headCy + 1 + gazeY, C.HAIR);
-          setPx(headCx + gazeX, headCy + 2 + gazeY, C.HAIR);
-          setPx(headCx + gazeX, headCy + 1 + gazeY, C.HAIR);
+        drawCharSprite(headCx - 10, headCy - 6, CHOTU_FACE_SPRITE);
+        drawCharSprite(
+          headCx - 14,
+          headCy - 19,
+          CHOTU_HAIR_SPRITE,
+          CHOTU_CHAR_PAL,
+          (ry) => (ry < 5 ? hairSway : 0)
+        );
+        // Loose left cheek lock tip gently swaying in the breeze
+        setPx(headCx - 14 + hairSway, headCy - 10, C.HAIR_OUTLINE);
+
+        // Expressive Eyebrows (lift 1px when thinking)
+        const browY = headCy - 2 + (isThinking ? -1 : 0);
+        fillRect(headCx - 7, browY, 3, 1, C.HAIR_OUTLINE);
+        fillRect(headCx - 1, browY, 4, 1, C.HAIR_OUTLINE);
+        if (!isThinking) {
+          setPx(headCx + 3, browY + 1, C.HAIR_OUTLINE);
         }
 
-        // Gentle smile (or curious 'o' mouth when thinking)
+        // Detailed Eyes with sclera, shifting 2x2 pupils, catchlights & 3-stage blink
+        if (blinkState === 'closed') {
+          fillRect(headCx - 7, headCy + 1, 3, 1, C.SKIN_SHADE);
+          fillRect(headCx - 7, headCy + 2, 3, 1, C.HAIR_OUTLINE);
+          fillRect(headCx - 1, headCy + 1, 4, 1, C.SKIN_SHADE);
+          fillRect(headCx - 1, headCy + 2, 4, 1, C.HAIR_OUTLINE);
+        } else if (blinkState === 'half') {
+          fillRect(headCx - 7, headCy, 3, 1, C.SKIN_SHADE);
+          fillRect(headCx - 7, headCy + 1, 3, 1, C.HAIR_OUTLINE);
+          fillRect(headCx - 7, headCy + 2, 3, 1, C.CLOUD_HI);
+          setPx(headCx - 7 + (gazeX > 0 ? 1 : 0), headCy + 2, C.HAIR_OUTLINE);
+          setPx(headCx - 6 + (gazeX > 0 ? 1 : 0), headCy + 2, C.HAIR_OUTLINE);
+
+          fillRect(headCx - 1, headCy, 4, 1, C.SKIN_SHADE);
+          fillRect(headCx - 1, headCy + 1, 4, 1, C.HAIR_OUTLINE);
+          fillRect(headCx - 1, headCy + 2, 4, 1, C.CLOUD_HI);
+          fillRect(headCx + gazeX, headCy + 2, 2, 1, C.HAIR_OUTLINE);
+        } else {
+          const lx = headCx - 7 + (gazeX > 0 ? 1 : 0);
+          const rx = headCx + gazeX;
+          if (gazeY > 0) {
+            // Focused downward reading gaze with calm upper eyelids
+            fillRect(headCx - 7, headCy, 3, 1, C.SKIN_SHADE);
+            fillRect(headCx - 1, headCy, 4, 1, C.SKIN_SHADE);
+            fillRect(headCx - 7, headCy + 1, 3, 2, C.CLOUD_HI);
+            fillRect(headCx - 1, headCy + 1, 4, 2, C.CLOUD_HI);
+            fillRect(lx, headCy + 1, 2, 2, C.HAIR_OUTLINE);
+            fillRect(rx, headCy + 1, 2, 2, C.HAIR_OUTLINE);
+            setPx(lx + (gazeX > 0 ? 1 : 0), headCy + 1, C.HAIR_MID);
+            setPx(rx + (gazeX < 0 ? 0 : 1), headCy + 1, C.HAIR_MID);
+          } else {
+            // Bright alert open gaze when thinking or looking around
+            fillRect(headCx - 7, headCy, 3, 3, C.CLOUD_HI);
+            fillRect(headCx - 1, headCy, 4, 3, C.CLOUD_HI);
+            fillRect(lx, headCy, 2, 2, C.HAIR_OUTLINE);
+            fillRect(rx, headCy, 2, 2, C.HAIR_OUTLINE);
+            setPx(lx + (gazeX > 0 ? 1 : 0), headCy, C.CLOUD_HI);
+            setPx(rx + (gazeX < 0 ? 0 : 1), headCy, C.CLOUD_HI);
+          }
+        }
+
+        // Expressive calm smile (or small thoughtful mouth when thinking)
         if (isThinking) {
-          fillRect(headCx - 4, headCy + 5, 2, 1, C.SKIN_2);
+          fillRect(headCx - 3, headCy + 5, 2, 1, C.SKIN_DEEP);
         } else {
-          fillRect(headCx - 4, headCy + 5, 3, 1, C.SKIN_2);
-          setPx(headCx - 1, headCy + 4, C.SKIN_2);
+          fillRect(headCx - 4, headCy + 5, 3, 1, C.SKIN_DEEP);
+          setPx(headCx - 1, headCy + 4, C.SKIN_DEEP);
         }
 
-        // 6F. Independently Articulated Arms & Hands
-        const leftHandY = by - 15 + bookTilt;
-        const rightHandLift = isTurningPage
-          ? Math.round(Math.sin(((cycleT - 5.2) / 1.2) * Math.PI) * -4)
-          : isThinking
-          ? -3
-          : 0;
-        const rightHandX = isTurningPage
-          ? cx + 14 - Math.round(Math.sin(((cycleT - 5.2) / 1.2) * Math.PI) * 8)
-          : isThinking
-          ? cx + 9
-          : cx + 15;
+        // 6F. Open Hardcover Book Held in Lap + Animated Page-Turn Flip + 4-Fingered Hands
+        const bookCx = cx;
+        const bookCy = by - 16 + bookTilt;
+        drawCharSprite(bookCx - 17, bookCy - 10, CHOTU_BOOK_SPRITE);
 
-        // Left sleeve & hand holding left edge of book
-        drawLine(cx - 9, torsoTopY + 5, cx - 16, by - 19, C.CLOUD_HI, 4);
-        drawLine(cx - 16, by - 19, cx - 15, leftHandY, C.SKIN_1, 3);
-        // Right sleeve & animated right hand
-        drawLine(cx + 9, torsoTopY + 6, cx + 16, by - 18 + rightHandLift, C.CLOUD_1, 4);
-        drawLine(
-          cx + 16,
-          by - 18 + rightHandLift,
-          rightHandX,
-          by - 15 + rightHandLift,
-          C.SKIN_2,
-          3
-        );
-
-        // 6G. Open Book Held in Lap + 6-Frame Animated Page-Turn Flip
-        const bookCx = cx - 1;
-        const bookCy = by - 15 + bookTilt;
-
-        // Outer hardcover boards (#c0aa6d) & spine
-        fillRect(bookCx - 17, bookCy - 4, 34, 12, C.BOOK_GOLD);
-        fillRect(bookCx - 18, bookCy - 3, 36, 11, C.TRUNK_1);
-
-        // Left cream page
-        for (let py = bookCy - 5; py <= bookCy + 5; py++) {
-          for (let px = bookCx - 16; px <= bookCx - 1; px++) {
-            const pageCurve = px < bookCx - 5 ? -1 : 0;
-            setPx(px, py + pageCurve, C.CLOUD_HI);
-          }
-        }
-        // Right cream page
-        for (let py = bookCy - 5; py <= bookCy + 5; py++) {
-          for (let px = bookCx + 1; px <= bookCx + 16; px++) {
-            const pageCurve = px > bookCx + 5 ? -1 : 0;
-            setPx(px, py + pageCurve, px < bookCx + 14 ? C.CLOUD_1 : C.PATH);
-          }
-        }
-        // Spine crease
-        fillRect(bookCx, bookCy - 4, 1, 10, C.PATH);
-
-        // Tiny pixel text lines on left page
-        for (let row = -3; row <= 3; row += 2) {
-          fillRect(bookCx - 14, bookCy + row, 10, 1, C.HAIR);
-        }
-        // Tiny pixel text lines + physics diagram box on right page
-        fillRect(bookCx + 3, bookCy - 3, 10, 1, C.HAIR);
-        fillRect(bookCx + 3, bookCy - 1, 9, 1, C.HAIR);
-        fillRect(bookCx + 4, bookCy + 1, 6, 3, C.SKY_1);
-
-        // Animated flipping page during PAGE_TURN state!
+        // Animated flipping page during PAGE_TURN state
         if (isTurningPage) {
           const turnProgress = (cycleT - 5.2) / 1.2; // 0.0 -> 1.0
-          // Free edge of the turning page arcs from right (+14) across spine (0) to left (-14)
           const edgeX = Math.round(Math.cos(turnProgress * Math.PI) * 14);
           const archLift = Math.round(Math.sin(turnProgress * Math.PI) * 6);
           const xStart = Math.min(bookCx, bookCx + edgeX);
@@ -1295,30 +1563,72 @@ export default function PixelHeroCanvas({ reducedMotion = false, onChotuAnchor }
           for (let px = xStart; px <= xEnd; px++) {
             const spanT = (px - bookCx) / (edgeX === 0 ? 1 : edgeX);
             const lift = Math.round(Math.sin(spanT * Math.PI * 0.5) * archLift);
-            for (let py = bookCy - 4 - lift; py <= bookCy + 4 - lift; py++) {
-              setPx(px, py, spanT > 0.75 ? C.CLOUD_HI : C.CLOUD_1);
+            for (let py = bookCy - 6 - lift; py <= bookCy + 2 - lift; py++) {
+              setPx(
+                px,
+                py,
+                py === bookCy - 6 - lift
+                  ? C.HAIR_OUTLINE
+                  : spanT > 0.72
+                  ? C.HOODIE_HI
+                  : C.PAGE_SHADE
+              );
             }
           }
         }
 
-        // Warm brown hands gripping left & right outer edges of the book
-        fillRect(bookCx - 18, bookCy - 1, 3, 4, C.SKIN_1);
-        fillRect(rightHandX, bookCy - 1 + rightHandLift, 3, 4, C.SKIN_2);
+        // Subtle right-hand book-tracking & page-turn kinematics
+        const rightHandLift = isTurningPage
+          ? Math.round(Math.sin(((cycleT - 5.2) / 1.2) * Math.PI) * -5)
+          : isThinking
+          ? -5
+          : isReading && Math.sin(cycleT * 3.1) > 0.85
+          ? -1
+          : 0;
+        const rightHandX = isTurningPage
+          ? cx + 15 - Math.round(Math.sin(((cycleT - 5.2) / 1.2) * Math.PI) * 9)
+          : isThinking
+          ? cx + 12
+          : cx + 15;
+
+        // Keep right sleeve forearm smoothly connected when right hand lifts to turn page or think
+        if (rightHandLift < -1 || rightHandX !== cx + 15) {
+          drawLine(
+            cx + 16,
+            by - 19 + breathY,
+            rightHandX + 4,
+            bookCy - 2 + rightHandLift,
+            C.HAIR_OUTLINE,
+            5
+          );
+          drawLine(
+            cx + 16,
+            by - 19 + breathY,
+            rightHandX + 4,
+            bookCy - 2 + rightHandLift,
+            C.HOODIE_LIGHT,
+            3
+          );
+          fillRect(rightHandX + 3, bookCy - 4 + rightHandLift, 2, 3, C.HOOD_TEAL_MID);
+        }
+
+        // Left & right 4-fingered hands + cyan smartwatch gripping the book edges
+        drawCharSprite(bookCx - 19, bookCy - 7, CHOTU_LEFT_HAND_SPRITE);
+        drawCharSprite(rightHandX - 3, bookCy - 7 + rightHandLift, CHOTU_RIGHT_HAND_SPRITE);
 
         // 6H. Thought sparkle / lightbulb icon above Chotu's head during THINKING state
         if (isThinking) {
           const ideaY = headCy - 14 + (Math.sin(t * 6) > 0 ? -1 : 0);
-          const ideaX = headCx - 12;
+          const ideaX = headCx - 14;
           fillRect(ideaX - 1, ideaY - 2, 3, 3, C.YELLOW);
           setPx(ideaX, ideaY + 1, C.CLOUD_HI);
-          // Tiny rays around idea bulb
           setPx(ideaX - 3, ideaY - 1, C.YELLOW);
           setPx(ideaX + 3, ideaY - 1, C.YELLOW);
           setPx(ideaX, ideaY - 4, C.YELLOW);
         }
 
         // 6I. Stack of Two Bound Books + Pencil on the Grass to Chotu's Right
-        const sbx = cx + 22;
+        const sbx = cx + 28;
         const sby = by - 2;
         fillRect(sbx - 2, sby + 8, 30, 3, C.FOLIAGE_5);
         fillRect(sbx, sby + 3, 26, 5, C.FOLIAGE_2);
