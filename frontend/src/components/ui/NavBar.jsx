@@ -35,15 +35,15 @@ export default function NavBar({
     setMobileMenuOpen(false);
   }, [location.pathname, variant]);
 
-  if (variant === 'onSky') {
-    const startHref = isAuthenticated ? '/dashboard' : '/signup';
-    const subjectLinks = [
-      { to: '/learn/mathematics', label: 'Maths' },
-      { to: '/learn/physics', label: 'Physics' },
-      { to: '/learn/chemistry', label: 'Chemistry' },
-      { to: '/learn/biology', label: 'Biology' },
-    ];
+  const startHref = isAuthenticated ? '/dashboard' : '/signup';
+  const subjectLinks = [
+    { to: '/learn/mathematics', label: 'Maths' },
+    { to: '/learn/physics', label: 'Physics' },
+    { to: '/learn/chemistry', label: 'Chemistry' },
+    { to: '/learn/biology', label: 'Biology' },
+  ];
 
+  if (variant === 'onSky') {
     return (
       <header className="nav-sky" aria-label="Primary navigation">
         <div className="nav-sky__inner">
@@ -153,113 +153,194 @@ export default function NavBar({
   ];
 
   return (
-    <header className="nav-pill" aria-label="Primary navigation">
-      <Link to={isAuthenticated ? '/dashboard' : '/'} className="nav-brand">
-        <span className="nav-brand__tile">
-          <GraduationCap size={17} strokeWidth={2.2} aria-hidden="true" />
-        </span>
-        <span>EduNova</span>
-      </Link>
+    <header className="nav-sky" aria-label="Primary navigation">
+      <div className="nav-sky__inner">
+        <Link to={isAuthenticated ? '/dashboard' : '/'} className="nav-sky__logo">
+          <span className="nav-sky__logo-badge" aria-hidden="true">
+            <GraduationCap size={18} strokeWidth={2.3} />
+          </span>
+          <span>EduNova</span>
+        </Link>
 
-      {isAuthenticated ? (
-        <nav className="nav-tabs" aria-label="Main sections">
-          {studentTabs.map((tab) => {
-            const Icon = tab.icon;
-            return (
+        <div className="nav-sky__right">
+          {isAuthenticated ? (
+            <nav className="nav-sky__desktop" aria-label="Main sections">
+              <div className="nav-sky__pill-group" role="group" aria-label="Main navigation">
+                {studentTabs.map((tab) => {
+                  const Icon = tab.icon;
+                  return (
+                    <NavLink
+                      key={tab.to}
+                      to={tab.to}
+                      className={({ isActive }) =>
+                        `nav-sky__pill-item${isActive ? ' is-active' : ''}`
+                      }
+                    >
+                      <Icon size={14} strokeWidth={2} aria-hidden="true" style={{ marginRight: 6 }} />
+                      <span>{tab.label}</span>
+                    </NavLink>
+                  );
+                })}
+                {isAdmin ? (
+                  <NavLink
+                    to="/admin"
+                    className={({ isActive }) =>
+                      `nav-sky__pill-item${isActive ? ' is-active' : ''}`
+                    }
+                  >
+                    <Shield size={14} strokeWidth={2} aria-hidden="true" style={{ marginRight: 6 }} />
+                    <span>Admin</span>
+                  </NavLink>
+                ) : null}
+              </div>
+            </nav>
+          ) : (
+            <nav className="nav-sky__desktop" aria-label="Explore sections">
+              <div className="nav-sky__pill-group" role="group" aria-label="Subjects">
+                {subjectLinks.map((item) => (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    className={({ isActive }) =>
+                      `nav-sky__pill-item${isActive ? ' is-active' : ''}`
+                    }
+                  >
+                    {item.label}
+                  </NavLink>
+                ))}
+              </div>
+
               <NavLink
-                key={tab.to}
-                to={tab.to}
-                className={({ isActive }) => `nav-tab-link${isActive ? ' is-active' : ''}`}
+                to="/mentor"
+                className={({ isActive }) => `nav-sky__pill${isActive ? ' is-active' : ''}`}
               >
-                <Icon size={15} strokeWidth={2} aria-hidden="true" />
-                <span>{tab.label}</span>
+                Chotu
               </NavLink>
-            );
-          })}
-          {isAdmin ? (
-            <NavLink
-              to="/admin"
-              className={({ isActive }) => `nav-tab-link${isActive ? ' is-active' : ''}`}
-            >
-              <Shield size={15} strokeWidth={2} aria-hidden="true" />
-              <span>Admin</span>
-            </NavLink>
+
+              <NavLink
+                to="/login"
+                className={({ isActive }) => `nav-sky__pill${isActive ? ' is-active' : ''}`}
+              >
+                Log in
+              </NavLink>
+            </nav>
+          )}
+
+          {!isOnline ? (
+            <span className="nav-offline" role="status">
+              <WifiOff size={14} strokeWidth={2} aria-hidden="true" />
+              <span>Offline</span>
+            </span>
           ) : null}
-        </nav>
-      ) : (
-        <nav className="nav-tabs" aria-label="Explore sections">
+
+          {isAuthenticated ? (
+            <>
+              <span className="nav-sky__pill nav-sky__pill--xp" title="Notebook XP">
+                <Award size={14} strokeWidth={2.2} aria-hidden="true" />
+                <span>{xpPoints ?? 0} XP</span>
+              </span>
+
+              {onLanguageChange ? (
+                <label className="nav-sky__pill nav-sky__pill--lang" aria-label="Select language">
+                  <Globe size={14} strokeWidth={2} aria-hidden="true" />
+                  <select
+                    value={(language || 'en').split('-')[0]}
+                    onChange={(e) => onLanguageChange(e.target.value)}
+                    aria-label="Language"
+                  >
+                    <option value="en">EN</option>
+                    <option value="hi">HI</option>
+                    <option value="mr">MR</option>
+                  </select>
+                </label>
+              ) : null}
+
+              <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                  `nav-sky__pill nav-sky__pill--user${isActive ? ' is-active' : ''}`
+                }
+                aria-label="My notebook profile"
+              >
+                <User size={15} strokeWidth={2} aria-hidden="true" />
+                <span className="nav-user__name">{user?.name || 'Student'}</span>
+              </NavLink>
+            </>
+          ) : (
+            <>
+              {onLanguageChange ? (
+                <label className="nav-sky__pill nav-sky__pill--lang" aria-label="Select language">
+                  <Globe size={14} strokeWidth={2} aria-hidden="true" />
+                  <select
+                    value={(language || 'en').split('-')[0]}
+                    onChange={(e) => onLanguageChange(e.target.value)}
+                    aria-label="Language"
+                  >
+                    <option value="en">EN</option>
+                    <option value="hi">HI</option>
+                    <option value="mr">MR</option>
+                  </select>
+                </label>
+              ) : null}
+
+              <button
+                type="button"
+                className="nav-sky__hamburger"
+                aria-expanded={mobileMenuOpen}
+                aria-controls="nav-default-mobile-drawer"
+                aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                onClick={() => setMobileMenuOpen((prev) => !prev)}
+              >
+                {mobileMenuOpen ? (
+                  <X size={20} strokeWidth={2.2} aria-hidden="true" />
+                ) : (
+                  <Menu size={20} strokeWidth={2.2} aria-hidden="true" />
+                )}
+              </button>
+
+              <Button variant="cream" to="/signup" className="nav-sky__cta">
+                Start learning
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {!isAuthenticated && mobileMenuOpen ? (
+        <nav
+          id="nav-default-mobile-drawer"
+          className="nav-sky__mobile-menu"
+          aria-label="Mobile navigation"
+        >
+          {subjectLinks.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `nav-sky__mobile-link${isActive ? ' is-active' : ''}`
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
+          <NavLink
+            to="/mentor"
+            className={({ isActive }) =>
+              `nav-sky__mobile-link${isActive ? ' is-active' : ''}`
+            }
+          >
+            Chotu
+          </NavLink>
           <NavLink
             to="/login"
-            className={({ isActive }) => `nav-tab-link${isActive ? ' is-active' : ''}`}
+            className={({ isActive }) =>
+              `nav-sky__mobile-link${isActive ? ' is-active' : ''}`
+            }
           >
             Log in
           </NavLink>
-          <NavLink
-            to="/signup"
-            className={({ isActive }) => `nav-tab-link${isActive ? ' is-active' : ''}`}
-          >
-            Sign up
-          </NavLink>
         </nav>
-      )}
-
-      <div className="nav-right">
-        {!isOnline ? (
-          <span className="nav-offline" role="status">
-            <WifiOff size={14} strokeWidth={2} aria-hidden="true" />
-            <span>Offline</span>
-          </span>
-        ) : null}
-
-        {isAuthenticated ? (
-          <>
-            <span className="nav-xp" title="Notebook XP">
-              <Award size={14} strokeWidth={2.2} aria-hidden="true" />
-              <span>{xpPoints ?? 0} XP</span>
-            </span>
-
-            {onLanguageChange ? (
-              <label className="nav-lang" aria-label="Select language">
-                <Globe size={14} strokeWidth={2} aria-hidden="true" />
-                <select
-                  value={(language || 'en').split('-')[0]}
-                  onChange={(e) => onLanguageChange(e.target.value)}
-                  aria-label="Language"
-                >
-                  <option value="en">EN</option>
-                  <option value="hi">HI</option>
-                  <option value="mr">MR</option>
-                </select>
-              </label>
-            ) : null}
-
-            <Link to="/profile" className="nav-user" aria-label="My notebook profile">
-              <User size={15} strokeWidth={2} aria-hidden="true" />
-              <span className="nav-user__name">{user?.name || 'Student'}</span>
-            </Link>
-          </>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-2)' }}>
-            {onLanguageChange ? (
-              <label className="nav-lang" aria-label="Select language">
-                <Globe size={14} strokeWidth={2} aria-hidden="true" />
-                <select
-                  value={(language || 'en').split('-')[0]}
-                  onChange={(e) => onLanguageChange(e.target.value)}
-                  aria-label="Language"
-                >
-                  <option value="en">EN</option>
-                  <option value="hi">HI</option>
-                  <option value="mr">MR</option>
-                </select>
-              </label>
-            ) : null}
-            <Button variant="primary" size="sm" to="/signup">
-              Start Learning
-            </Button>
-          </div>
-        )}
-      </div>
+      ) : null}
     </header>
   );
 }

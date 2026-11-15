@@ -3,6 +3,7 @@
 /* 5.1 Paper Card */
 .paper {
   position: relative;
+  padding: clamp(18px, 2.8vw, 26px);
   background-color: var(--paper);
   color: var(--ink);
   border: 1.5px solid var(--paper-edge);
@@ -1231,6 +1232,41 @@ textarea.field__control {
   background: var(--nav-sky-active);
   color: var(--amber-300);
   border-color: var(--amber-400);
+}
+
+.nav-sky__pill--xp {
+  gap: 6px;
+  padding: 7px 12px;
+  color: var(--amber-300);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.nav-sky__pill--lang {
+  gap: 6px;
+  padding: 7px 11px;
+  cursor: pointer;
+}
+
+.nav-sky__pill--lang select {
+  background: transparent;
+  border: 0;
+  color: var(--white);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.nav-sky__pill--lang option {
+  background: var(--slate-900);
+  color: var(--white);
+}
+
+.nav-sky__pill--user {
+  gap: 6px;
+  padding: 7px 13px;
 }
 
 .nav-sky__cta {
