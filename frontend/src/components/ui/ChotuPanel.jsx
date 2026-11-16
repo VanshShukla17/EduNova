@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { createPixelBuffer, clamp } from '../notebooks/pixelEngine';
+import { useSpeechToText } from '../../hooks/useSpeechToText';
+import { useTextToSpeech, detectLanguage } from '../../hooks/useTextToSpeech';
 import Paperclip from './Paperclip';
 import StickyNote from './StickyNote';
 
@@ -201,6 +203,70 @@ const PIXEL_ICON_GRIDS = {
     '.....W.WWW....',
     '.....WW.W.....',
     '.....W........',
+    '..............',
+    '..............',
+    '..............',
+  ],
+  mic: [
+    '..............',
+    '.....MMMM.....',
+    '....MMMMMM....',
+    '....MM..MM....',
+    '....MM..MM....',
+    '....MMMMMM....',
+    '....MMMMMM....',
+    '..MM.MMMM.MM..',
+    '..MM......MM..',
+    '...MM....MM...',
+    '....MMMMMM....',
+    '......MM......',
+    '.....MMMM.....',
+    '..............',
+  ],
+  micRecording: [
+    '..............',
+    '.....MMMM.....',
+    '..M.MMMMMM.M..',
+    '..M.MM..MM.M..',
+    '.M..MM..MM..M.',
+    '.M..MMMMMM..M.',
+    '....MMMMMM....',
+    '..MM.MMMM.MM..',
+    '..MM......MM..',
+    '...MM....MM...',
+    '....MMMMMM....',
+    '......MM......',
+    '.....MMMM.....',
+    '..............',
+  ],
+  speaker: [
+    '..............',
+    '..............',
+    '.....MM.......',
+    '....MMMM......',
+    '..MMMMMM......',
+    '..MMMMMM......',
+    '..MMMMMM......',
+    '..MMMMMM......',
+    '....MMMM......',
+    '.....MM.......',
+    '..............',
+    '..............',
+    '..............',
+    '..............',
+  ],
+  speakerWaves: [
+    '..............',
+    '...........M..',
+    '.....MM...M.M.',
+    '....MMMM.M..M.',
+    '..MMMMMM.M..M.',
+    '..MMMMMM..M.M.',
+    '..MMMMMM..M.M.',
+    '..MMMMMM.M..M.',
+    '....MMMM.M..M.',
+    '.....MM...M.M.',
+    '...........M..',
     '..............',
     '..............',
     '..............',
@@ -1021,10 +1087,26 @@ function buildSpeechSnippet(content) {
 export default function ChotuPanel({ open, onClose }) {
   const { token, user } = useAuth();
   const displayName = user?.name?.trim() || 'there';
+
+  // Read language preference from localStorage ('saarthi_language') or default to 'en'
+  const [panelLanguage, setPanelLanguage] = useState(() => {
+    return localStorage.getItem('saarthi_language') || 'en';
+  });
+
+  const getGreeting = (lang) => {
+    if (lang === 'hi') {
+      return `नमस्ते ${displayName}! मैं हूँ छोटू, आपका STEM नोटबुक साथी। कोई भी त्वरित सवाल पूछें या पूरी वर्कस्पेस खोलें।`;
+    }
+    if (lang === 'kn') {
+      return `ನಮಸ್ಕಾರ ${displayName}! ನಾನು ನಿಮ್ಮ STEM ನೋಟ್‌ಬುಕ್ ಸಹಾಯಕ ಚೋಟು. ಯಾವುದೇ ತ್ವರಿತ ಪ್ರಶ್ನೆ ಕೇಳಿ ಅಥವಾ ಪೂರ್ಣ ವರ್ಕ್‌ಸ್ಪೇಸ್ ತೆರೆಯಿರಿ.`;
+    }
+    return `Hi ${displayName}! I am Chotu, your STEM notebook buddy. Ask any quick concept question or open the full workspace.`;
+  };
+
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: `Hi ${displayName}! I am Chotu, your STEM notebook buddy. Ask any quick concept question or open the full workspace.`,
+      content: getGreeting(localStorage.getItem('saarthi_language') || 'en'),
     },
   ]);
   const [input, setInput] = useState('');
@@ -1034,10 +1116,70 @@ export default function ChotuPanel({ open, onClose }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isWaving, setIsWaving] = useState(true);
   const [interactiveBubbleId, setInteractiveBubbleId] = useState(null);
+  const [autoVoice, setAutoVoice] = useState(false);
   const endRef = useRef(null);
   const speakTimerRef = useRef(null);
   const waveTimerRef = useRef(null);
   const interactTimerRef = useRef(null);
+
+  const {
+    isSpeaking: isTTSActive,
+    currentSpeakingId,
+    selectedLanguage,
+    setSelectedLanguage,
+    activeSpeakingLang,
+    isSupported: ttsSupported,
+    toggle: toggleTTS,
+    stop: stopTTS,
+    speak: speakTTS,
+  } = useTextToSpeech(panelLanguage === 'hi' ? 'hi-IN' : panelLanguage === 'kn' ? 'kn-IN' : 'en-IN');
+
+  const handleLanguageSelect = (langCode) => {
+    setPanelLanguage(langCode);
+    localStorage.setItem('saarthi_language', langCode);
+    setSelectedLanguage(langCode === 'hi' ? 'hi-IN' : langCode === 'kn' ? 'kn-IN' : 'en-IN');
+  };
+
+  const cycleLanguage = () => {
+    const order = ['en', 'hi', 'kn'];
+    const nextIdx = (order.indexOf(panelLanguage) + 1) % order.length;
+    handleLanguageSelect(order[nextIdx]);
+  };
+
+  const getLangBadge = () => {
+    switch (panelLanguage) {
+      case 'hi':
+        return 'HI';
+      case 'kn':
+        return 'KN';
+      default:
+        return 'EN';
+    }
+  };
+
+  const getLangTitle = () => {
+    switch (panelLanguage) {
+      case 'hi':
+        return 'Language: Hindi (हिंदी) · Click to switch';
+      case 'kn':
+        return 'Language: Kannada (ಕನ್ನಡ) · Click to switch';
+      default:
+        return 'Language: English · Click to switch';
+    }
+  };
+
+  const avatarSpeaking = isSpeaking || isTTSActive;
+
+  const {
+    isListening,
+    error: speechError,
+    isSupported: speechSupported,
+    toggleListening,
+    stopListening,
+    setError: setSpeechError,
+  } = useSpeechToText({
+    onTextChange: (text) => setInput(text),
+  });
 
   const triggerSpeakBurst = useCallback((durationMs = 4200, withWave = true) => {
     if (speakTimerRef.current) clearTimeout(speakTimerRef.current);
@@ -1088,6 +1230,26 @@ export default function ChotuPanel({ open, onClose }) {
     []
   );
 
+  useEffect(() => {
+    if (isListening) {
+      triggerSpeakBurst(7000, true);
+    }
+  }, [isListening, triggerSpeakBurst]);
+
+  useEffect(() => {
+    if (speechError) {
+      const t = setTimeout(() => setSpeechError(null), 5500);
+      return () => clearTimeout(t);
+    }
+  }, [speechError, setSpeechError]);
+
+  useEffect(() => {
+    if (!open) {
+      stopListening();
+      stopTTS();
+    }
+  }, [open, stopListening, stopTTS]);
+
   const handleSceneObjectInteract = useCallback(
     (objectId) => {
       setInteractiveBubbleId(objectId);
@@ -1101,18 +1263,56 @@ export default function ChotuPanel({ open, onClose }) {
   );
 
   const speechContent = useMemo(() => {
+    if (speechError) {
+      return {
+        text: speechError,
+        hasWorkspaceLink: false,
+      };
+    }
+    if (isListening) {
+      return {
+        text:
+          panelLanguage === 'hi'
+            ? 'ध्यान से सुन रहा हूँ... माइक में अपना STEM प्रश्न बोलें! 🎙️'
+            : panelLanguage === 'kn'
+            ? 'ಗಮನವಿಟ್ಟು ಕೇಳುತ್ತಿದ್ದೇನೆ... ಮೈಕ್‌ನಲ್ಲಿ STEM ಪ್ರಶ್ನೆ ಮಾತನಾಡಿ! 🎙️'
+            : 'Listening carefully... Speak your STEM question into the mic! 🎙️',
+        hasWorkspaceLink: false,
+      };
+    }
+    if (isTTSActive) {
+      const langLabel = activeSpeakingLang.startsWith('kn')
+        ? 'ಕನ್ನಡದಲ್ಲಿ'
+        : activeSpeakingLang.startsWith('hi')
+        ? 'हिंदी में'
+        : 'in English';
+      return {
+        text: `Reading explanation aloud ${langLabel}! 🔊`,
+        hasWorkspaceLink: false,
+      };
+    }
     if (interactiveBubbleId && INTERACTIVE_BUBBLES[interactiveBubbleId]) {
       return INTERACTIVE_BUBBLES[interactiveBubbleId];
     }
     if (sending) {
       return {
-        text: 'Flipping through my STEM notebooks... give me just a second!',
+        text:
+          panelLanguage === 'hi'
+            ? 'STEM नोटबुक देख रहा हूँ... बस एक सेकंड रुकिए!'
+            : panelLanguage === 'kn'
+            ? 'ನೋಟ್‌ಬುಕ್ ಪರಿಶೀಲಿಸುತ್ತಿದ್ದೇನೆ... ಒಂದು ಕ್ಷಣ ಕಾಯಿರಿ!'
+            : 'Flipping through my STEM notebooks... give me just a second!',
         hasWorkspaceLink: false,
       };
     }
     if (input.trim().length > 0) {
       return {
-        text: "Great question! Press send and let's break it down step by step.",
+        text:
+          panelLanguage === 'hi'
+            ? 'बढ़िया सवाल! भेजें बटन दबाएं और मिलकर हल करते हैं।'
+            : panelLanguage === 'kn'
+            ? 'ಉತ್ತಮ ಪ್ರಶ್ನೆ! ಕಳುಹಿಸಿ ಬಟನ್ ಒತ್ತಿ, ಹಂತ-ಹಂತವಾಗಿ ಕಲಿಯೋಣ.'
+            : "Great question! Press send and let's break it down step by step.",
         hasWorkspaceLink: false,
       };
     }
@@ -1131,17 +1331,35 @@ export default function ChotuPanel({ open, onClose }) {
         };
       }
     }
+    if (panelLanguage === 'hi') {
+      return {
+        text: `नमस्ते ${displayName}! कोई भी सवाल पूछें या `,
+        hasWorkspaceLink: true,
+        linkLabel: 'वर्कस्पेस खोलें।',
+      };
+    }
+    if (panelLanguage === 'kn') {
+      return {
+        text: `ನಮಸ್ಕಾರ ${displayName}! ಯಾವುದೇ ಪ್ರಶ್ನೆ ಕೇಳಿ ಅಥವಾ `,
+        hasWorkspaceLink: true,
+        linkLabel: 'ವರ್ಕ್‌ಸ್ಪೇಸ್ ತೆರೆಯಿರಿ.',
+      };
+    }
     return {
       text: `Hi ${displayName}! Ask me any quick concept question or `,
       hasWorkspaceLink: true,
       linkLabel: 'open the workspace.',
     };
-  }, [interactiveBubbleId, sending, input, messages, displayName]);
+  }, [interactiveBubbleId, sending, input, messages, displayName, isListening, speechError, isTTSActive, activeSpeakingLang, panelLanguage]);
 
   if (!open) return null;
 
   const handleSend = async (e) => {
     e.preventDefault();
+    if (isListening) {
+      stopListening();
+    }
+    stopTTS();
     const trimmed = input.trim();
     if (!trimmed || sending) return;
 
@@ -1163,6 +1381,7 @@ export default function ChotuPanel({ open, onClose }) {
           message: trimmed,
           sessionId,
           mode: 'doubt',
+          language: panelLanguage,
         }),
       });
 
@@ -1171,21 +1390,36 @@ export default function ChotuPanel({ open, onClose }) {
         setSessionId(data.sessionId);
       }
 
+      const replyContent = data.reply || data.error || 'Could not reach Chotu right now. Please try again.';
+      const incomingIdx = messages.length + 1;
+
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: data.reply || data.error || 'Could not reach Chotu right now. Please try again.',
+          content: replyContent,
           sources: Array.isArray(data.sources) ? data.sources : [],
         },
       ]);
       triggerSpeakBurst(4600, true);
+
+      if (autoVoice && replyContent) {
+        speakTTS(replyContent, {
+          id: incomingIdx,
+          lang: panelLanguage === 'hi' ? 'hi-IN' : panelLanguage === 'kn' ? 'kn-IN' : 'en-IN',
+        });
+      }
     } catch {
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: 'Connection issue while talking to Chotu. You can retry or open the full AI Saarthi workspace.',
+          content:
+            panelLanguage === 'hi'
+              ? 'छोटू से संपर्क करने में समस्या आई। कृपया पुनः प्रयास करें या पूर्ण सारथी वर्कस्पेस खोलें।'
+              : panelLanguage === 'kn'
+              ? 'ಚೋಟು ಸಂಪರ್ಕಿಸುವಲ್ಲಿ ದೋಷ ಕಂಡುಬಂದಿದೆ. ದಯವಿಟ್ಟು ಮರುಪ್ರಯತ್ನಿಸಿ ಅಥವಾ ಪೂರ್ಣ ಸಾರಥಿ ವರ್ಕ್‌ಸ್ಪೇಸ್ ತೆರೆಯಿರಿ.'
+              : 'Connection issue while talking to Chotu. You can retry or open the full AI Saarthi workspace.',
         },
       ]);
       triggerSpeakBurst(3600, false);
@@ -1220,7 +1454,7 @@ export default function ChotuPanel({ open, onClose }) {
             {/* Header Bar */}
             <div className="chotu-screen__header">
               <div className="chotu-screen__identity">
-                <ChotuMiniAvatarCanvas isSpeaking={isSpeaking} isThinking={sending} />
+                <ChotuMiniAvatarCanvas isSpeaking={avatarSpeaking} isThinking={sending} />
                 <div className="chotu-screen__titles">
                   <div className="chotu-screen__name">Chotu Mentor</div>
                   <div className="chotu-screen__subtitle">STEM NOTEBOOK HELPER</div>
@@ -1228,6 +1462,28 @@ export default function ChotuPanel({ open, onClose }) {
               </div>
 
               <div className="chotu-screen__controls">
+                <button
+                  type="button"
+                  className="chotu-ctrl-btn chotu-ctrl-btn--lang"
+                  onClick={cycleLanguage}
+                  aria-label={getLangTitle()}
+                  title={getLangTitle()}
+                >
+                  <span className="chotu-lang-badge">{getLangBadge()}</span>
+                </button>
+                <button
+                  type="button"
+                  className={`chotu-ctrl-btn ${autoVoice ? 'is-active' : ''}`}
+                  onClick={() => {
+                    if (autoVoice && isTTSActive) stopTTS();
+                    setAutoVoice((prev) => !prev);
+                  }}
+                  aria-label={autoVoice ? 'Auto-voice is ON. Click to mute' : 'Auto-voice is OFF. Click to enable'}
+                  title={autoVoice ? 'Auto read responses: ON' : 'Auto read responses: OFF'}
+                  style={autoVoice ? { borderColor: '#10b981', color: '#10b981', background: 'rgba(16, 185, 129, 0.2)' } : undefined}
+                >
+                  <PixelIcon name={autoVoice ? 'speakerWaves' : 'speaker'} size={14} color={autoVoice ? 0x34d399 : 0xecfdf5} />
+                </button>
                 <button
                   type="button"
                   className="chotu-ctrl-btn"
@@ -1254,7 +1510,7 @@ export default function ChotuPanel({ open, onClose }) {
             {isScreenExpanded ? (
               <div className="chotu-screen__stage">
                 <ChotuStudySceneCanvas
-                  isSpeaking={isSpeaking}
+                  isSpeaking={avatarSpeaking}
                   isWaving={isWaving}
                   isThinking={sending}
                   isTyping={input.trim().length > 0}
@@ -1262,7 +1518,7 @@ export default function ChotuPanel({ open, onClose }) {
                 />
 
                 <div
-                  className={`chotu-bubble${isSpeaking ? ' is-speaking' : ''}`}
+                  className={`chotu-bubble${avatarSpeaking ? ' is-speaking' : ''}`}
                   role="status"
                   aria-live="polite"
                 >
@@ -1333,7 +1589,48 @@ export default function ChotuPanel({ open, onClose }) {
                   padding: '10px 12px',
                 }}
               >
-                {idx === 0 && msg.role === 'assistant' ? <Paperclip /> : null}
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: msg.role === 'assistant' ? '6px' : 0,
+                  }}
+                >
+                  {idx === 0 && msg.role === 'assistant' ? <Paperclip /> : <span />}
+                  {msg.role === 'assistant' ? (
+                    <button
+                      type="button"
+                      className={`chotu-note-tts-btn ${currentSpeakingId === idx ? 'is-speaking' : ''}`}
+                      onClick={() =>
+                        toggleTTS(idx, msg.content, {
+                          lang: panelLanguage === 'hi' ? 'hi-IN' : panelLanguage === 'kn' ? 'kn-IN' : 'en-IN',
+                        })
+                      }
+                      title={
+                        currentSpeakingId === idx
+                          ? 'Stop speaking'
+                          : `Read answer aloud (${panelLanguage === 'hi' ? 'Hindi' : panelLanguage === 'kn' ? 'Kannada' : 'English'})`
+                      }
+                      aria-label={currentSpeakingId === idx ? 'Stop speaking' : 'Read answer aloud'}
+                    >
+                      <PixelIcon
+                        name={currentSpeakingId === idx ? 'speakerWaves' : 'speaker'}
+                        size={12}
+                        color={currentSpeakingId === idx ? 0x059669 : 0x64748b}
+                      />
+                      <span>
+                        {currentSpeakingId === idx
+                          ? 'Stop'
+                          : detectLanguage(msg.content) === 'kn-IN'
+                          ? 'Listen (ಕನ್ನಡ)'
+                          : detectLanguage(msg.content) === 'hi-IN'
+                          ? 'Listen (हिंदी)'
+                          : 'Listen'}
+                      </span>
+                    </button>
+                  ) : null}
+                </div>
                 <p className="type-small" style={{ whiteSpace: 'pre-wrap' }}>
                   {msg.content}
                 </p>
@@ -1378,17 +1675,99 @@ export default function ChotuPanel({ open, onClose }) {
         <div ref={endRef} />
       </div>
 
-      {/* Bottom Input Field + Stepped Pixel Send Button */}
+      {/* Language Selector Strip (English / हिंदी / ಕನ್ನಡ) */}
+      <div className="chotu-lang-strip" role="group" aria-label="Select AI language">
+        <span className="chotu-lang-strip__label">
+          <span>🌐</span> Language:
+        </span>
+        <div className="chotu-lang-strip__pills">
+          <button
+            type="button"
+            className={`chotu-lang-pill ${panelLanguage === 'en' ? 'is-active' : ''}`}
+            onClick={() => handleLanguageSelect('en')}
+            aria-pressed={panelLanguage === 'en'}
+            title="English responses & speech"
+          >
+            EN
+          </button>
+          <button
+            type="button"
+            className={`chotu-lang-pill ${panelLanguage === 'hi' ? 'is-active' : ''}`}
+            onClick={() => handleLanguageSelect('hi')}
+            aria-pressed={panelLanguage === 'hi'}
+            title="Hindi (हिंदी) responses & speech"
+          >
+            हिंदी
+          </button>
+          <button
+            type="button"
+            className={`chotu-lang-pill ${panelLanguage === 'kn' ? 'is-active' : ''}`}
+            onClick={() => handleLanguageSelect('kn')}
+            aria-pressed={panelLanguage === 'kn'}
+            title="Kannada (ಕನ್ನಡ) responses & speech"
+          >
+            ಕನ್ನಡ
+          </button>
+        </div>
+      </div>
+
+      {/* Bottom Input Field + Pixel Mic Button + Stepped Pixel Send Button */}
       <form onSubmit={handleSend} className="chotu-composer">
         <input
           type="text"
-          className="chotu-composer__input"
+          className={`chotu-composer__input ${isListening ? 'is-listening' : ''}`}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask a quick STEM question..."
-          aria-label="Ask a quick STEM question"
+          placeholder={
+            isListening
+              ? panelLanguage === 'hi'
+                ? 'सुन रहा हूँ... अब बोलें 🎙️'
+                : panelLanguage === 'kn'
+                ? 'ಕೇಳುತ್ತಿದ್ದೇನೆ... ಈಗ ಮಾತನಾಡಿ 🎙️'
+                : 'Listening... Speak now 🎙️'
+              : panelLanguage === 'hi'
+              ? 'हिंदी में STEM प्रश्न पूछें...'
+              : panelLanguage === 'kn'
+              ? 'ಕನ್ನಡದಲ್ಲಿ STEM ಪ್ರಶ್ನೆ ಕೇಳಿ...'
+              : 'Ask a quick STEM question...'
+          }
+          aria-label={
+            panelLanguage === 'hi'
+              ? 'हिंदी में प्रश्न पूछें'
+              : panelLanguage === 'kn'
+              ? 'ಕನ್ನಡದಲ್ಲಿ ಪ್ರಶ್ನೆ ಕೇಳಿ'
+              : 'Ask a quick STEM question'
+          }
           disabled={sending}
         />
+        <button
+          type="button"
+          className={`chotu-mic-btn ${isListening ? 'is-listening' : ''}`}
+          onClick={() =>
+            toggleListening(input, {
+              lang: panelLanguage === 'hi' ? 'hi-IN' : panelLanguage === 'kn' ? 'kn-IN' : 'en-IN',
+            })
+          }
+          disabled={sending}
+          title={
+            !speechSupported
+              ? 'Voice-to-text requires Chrome, Edge, or Safari'
+              : isListening
+              ? 'Listening... Click to stop recording'
+              : `Voice to text (${panelLanguage === 'hi' ? 'Hindi' : panelLanguage === 'kn' ? 'Kannada' : 'English'}): Click to speak`
+          }
+          aria-label={isListening ? 'Stop listening' : 'Voice to text: Click to speak'}
+        >
+          <span className="chotu-mic-btn__extrude" aria-hidden="true" />
+          <span className="chotu-mic-btn__surface">
+            <span className="chotu-mic-btn__highlight" aria-hidden="true" />
+            <PixelIcon
+              name={isListening ? 'micRecording' : 'mic'}
+              size={18}
+              color={isListening ? 0xffffff : 0x064e3b}
+            />
+          </span>
+        </button>
         <button
           type="submit"
           className="chotu-send-btn"

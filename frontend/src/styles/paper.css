@@ -1709,6 +1709,21 @@ textarea.field__control {
   translate: 0 1px;
 }
 
+.chotu-ctrl-btn--lang {
+  width: auto;
+  min-width: 34px;
+  padding: 0 6px;
+}
+
+.chotu-lang-badge {
+  font-family: var(--font-pixel, monospace);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #ecfdf5;
+  user-select: none;
+}
+
 .chotu-pixel-icon {
   display: block;
   image-rendering: pixelated;
@@ -1922,21 +1937,127 @@ textarea.field__control {
   animation-delay: 0.32s;
 }
 
-/* Bottom Input Field + Stepped 16-Bit Pixel Send Button */
+/* Note Text-to-Speech (TTS) Speaker Button */
+.chotu-note-tts-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--paper-border-strong);
+  border-radius: 6px;
+  font-family: var(--font-pixel, monospace);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all var(--t-fast) ease;
+  line-height: 1;
+  user-select: none;
+}
+
+.chotu-note-tts-btn:hover {
+  background: var(--white);
+  color: var(--ink);
+  border-color: var(--emerald-700);
+}
+
+.chotu-note-tts-btn.is-speaking {
+  background: #ecfdf5;
+  border-color: #059669;
+  color: #065f46;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.45);
+  animation: chotu-tts-pulse 1.4s infinite ease-in-out;
+}
+
+@keyframes chotu-tts-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Chotu Language Selection Strip (EN / हिंदी / ಕನ್ನಡ) */
+.chotu-lang-strip {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  background: var(--paper-warm);
+  border: 1px dashed var(--paper-border-strong);
+  border-radius: 8px;
+  font-family: var(--font-body);
+}
+
+.chotu-lang-strip__label {
+  font-size: 0.71875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  user-select: none;
+}
+
+.chotu-lang-strip__pills {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.chotu-lang-pill {
+  padding: 2px 9px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid var(--paper-border-strong);
+  background: var(--white);
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: all var(--t-fast) ease;
+  line-height: 1.35;
+  user-select: none;
+}
+
+.chotu-lang-pill:hover {
+  background: #f0fdf4;
+  border-color: var(--emerald-500);
+  color: var(--emerald-900);
+}
+
+.chotu-lang-pill.is-active {
+  background: var(--emerald-700);
+  border-color: var(--emerald-800);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 1px 4px rgba(5, 150, 105, 0.35);
+}
+
+/* Bottom Input Field + Stepped 16-Bit Pixel Mic & Send Buttons */
 .chotu-composer {
   position: relative;
   z-index: 2;
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .chotu-composer__input {
   flex: 1;
   min-width: 0;
   min-height: 46px;
-  padding: 10px 14px;
+  padding: 10px 13px;
   background: var(--chotu-input-bg);
   border: 1.5px solid var(--chotu-input-border);
   border-radius: 12px;
@@ -1957,10 +2078,139 @@ textarea.field__control {
   box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
+.chotu-composer__input.is-listening {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25), inset 0 2px 3px var(--paper-dots);
+  animation: chotu-listening-glow 1.5s infinite alternate;
+}
+
+@keyframes chotu-listening-glow {
+  0% {
+    border-color: #f87171;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+  }
+  100% {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.35);
+  }
+}
+
+/* 16-Bit Stepped Pixel Mic Button */
+.chotu-mic-btn {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 46px;
+  padding: 0 0 5px 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: stretch;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chotu-mic-btn__extrude,
+.chotu-mic-btn__surface {
+  clip-path: polygon(
+    6px 0, calc(100% - 6px) 0,
+    calc(100% - 6px) 3px, calc(100% - 3px) 3px, calc(100% - 3px) 6px, 100% 6px,
+    100% calc(100% - 6px), calc(100% - 3px) calc(100% - 6px), calc(100% - 3px) calc(100% - 3px), calc(100% - 6px) calc(100% - 3px), calc(100% - 6px) 100%,
+    6px 100%, 6px calc(100% - 3px), 3px calc(100% - 3px), 3px calc(100% - 6px), 0 calc(100% - 6px),
+    0 6px, 3px 6px, 3px 3px, 6px 3px
+  );
+}
+
+.chotu-mic-btn__extrude {
+  position: absolute;
+  top: 5px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--chotu-send-extrude);
+  border: 2px solid var(--chotu-send-border);
+  z-index: 1;
+  transition: transform 90ms steps(2, end);
+}
+
+.chotu-mic-btn__surface {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    180deg,
+    #f0fdf4 0%,
+    #dcfce7 56%,
+    #bbf7d0 100%
+  );
+  border: 2px solid var(--chotu-send-border);
+  box-shadow: inset 0 -3px 0 #86efac;
+  transition: transform 90ms steps(2, end), filter 120ms ease, background 150ms ease;
+}
+
+.chotu-mic-btn__highlight {
+  position: absolute;
+  top: 3px;
+  left: 6px;
+  right: 6px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.75);
+  pointer-events: none;
+}
+
+.chotu-mic-btn:hover:not(:disabled) .chotu-mic-btn__surface {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.chotu-mic-btn:active:not(:disabled) .chotu-mic-btn__surface {
+  transform: translateY(3px);
+}
+
+.chotu-mic-btn:active:not(:disabled) .chotu-mic-btn__extrude {
+  transform: translateY(1px);
+}
+
+.chotu-mic-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Active Voice Recording State */
+.chotu-mic-btn.is-listening .chotu-mic-btn__extrude {
+  background: #7f1d1d;
+  border-color: #450a0a;
+}
+
+.chotu-mic-btn.is-listening .chotu-mic-btn__surface {
+  background: linear-gradient(
+    180deg,
+    #f87171 0%,
+    #ef4444 56%,
+    #dc2626 100%
+  );
+  border-color: #991b1b;
+  box-shadow: inset 0 -3px 0 #b91c1c;
+  animation: chotu-mic-pulse 1.2s infinite ease-in-out;
+}
+
+@keyframes chotu-mic-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.65)) brightness(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.95)) brightness(1.15);
+  }
+}
+
 .chotu-send-btn {
   position: relative;
   flex-shrink: 0;
-  width: 54px;
+  width: 48px;
   height: 46px;
   padding: 0 0 5px 0;
   border: 0;
@@ -2112,6 +2362,8 @@ textarea.field__control {
 
   .chotu-ctrl-btn,
   .chotu-screen__tab,
+  .chotu-mic-btn__surface,
+  .chotu-mic-btn__extrude,
   .chotu-send-btn__surface,
   .chotu-send-btn__extrude,
   .chotu-bubble {

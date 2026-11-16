@@ -16,8 +16,14 @@ import {
   MessageSquare,
   HelpCircle,
   GraduationCap,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import FormattedMessage from '../../components/FormattedMessage';
+import { useSpeechToText } from '../../hooks/useSpeechToText';
+import { useTextToSpeech, detectLanguage } from '../../hooks/useTextToSpeech';
 import {
   PaperCard,
   StickyNote,
@@ -71,12 +77,33 @@ export default function SaarthiPageView({
   handleDeleteSession,
   handleSaveRenameSession,
   deleteMemory,
+  selectedLanguage: controlledLang = 'en',
+  setSelectedLanguage: onLanguageChange,
 }) {
+  const currentLang = controlledLang || 'en';
+
+  const {
+    isListening,
+    error: speechError,
+    isSupported: speechSupported,
+    toggleListening,
+    stopListening,
+  } = useSpeechToText({
+    onTextChange: (text) => setInputText(text),
+  });
+
+  const {
+    isSpeaking: isTTSActive,
+    currentSpeakingId,
+    toggle: toggleTTS,
+    stop: stopTTS,
+  } = useTextToSpeech(currentLang);
+
   return (
     <div style={{ maxWidth: '920px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
       {/* Top Mode & Session Bar */}
       <PaperCard flat style={{ padding: 'var(--sp-4)' }}>
-        <div className="paper-grid paper-grid--2" style={{ gap: 'var(--sp-3)', marginBottom: 'var(--sp-4)' }}>
+        <div className="paper-grid paper-grid--2" style={{ gap: 'var(--sp-3)', marginBottom: 'var(--sp-3)' }}>
           <Button
             variant={mode === 'doubt' ? 'primary' : 'note'}
             onClick={() => handleSwitchMode('doubt')}
@@ -100,6 +127,56 @@ export default function SaarthiPageView({
               <div style={{ fontSize: '0.75rem', opacity: 0.85 }}>Guided revision & study coaching</div>
             </div>
           </Button>
+        </div>
+
+        {/* Language Selection: English / हिंदी / ಕನ್ನಡ */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 'var(--sp-2)',
+            padding: '8px 12px',
+            background: 'var(--paper-dots)',
+            borderRadius: 'var(--r-md)',
+            border: '1.5px solid var(--paper-border-strong)',
+            marginBottom: 'var(--sp-3)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8125rem', fontWeight: 700, color: 'var(--ink)' }}>
+            <span>🌐</span>
+            <span>Response & Voice Language:</span>
+          </div>
+
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            {[
+              { code: 'en', label: 'English', sub: 'English' },
+              { code: 'hi', label: 'हिंदी (Hindi)', sub: 'Hindi' },
+              { code: 'kn', label: 'ಕನ್ನಡ (Kannada)', sub: 'Kannada' },
+            ].map((l) => {
+              const active = currentLang.startsWith(l.code);
+              return (
+                <Button
+                  key={l.code}
+                  variant={active ? 'primary' : 'note'}
+                  size="sm"
+                  onClick={() => onLanguageChange?.(l.code)}
+                  title={`Generate AI answers and voice audio in ${l.sub}`}
+                  aria-label={`Select ${l.label} language`}
+                  style={{
+                    padding: '3px 10px',
+                    fontSize: '0.8125rem',
+                    fontWeight: active ? 700 : 500,
+                    height: '28px',
+                    boxShadow: active ? '0 0 6px rgba(5, 150, 105, 0.35)' : undefined,
+                  }}
+                >
+                  {l.label}
+                </Button>
+              );
+            })}
+          </div>
         </div>
 
         <div
@@ -230,7 +307,69 @@ export default function SaarthiPageView({
                 rotation={isUser ? '0.4deg' : '-0.3deg'}
                 style={{ maxWidth: '88%', padding: '12px 16px' }}
               >
-                {!isUser && msgIdx === 0 ? <NotePaperclip /> : null}
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: !isUser ? 'var(--sp-2)' : 0,
+                  }}
+                >
+                  {!isUser && msgIdx === 0 ? <NotePaperclip /> : <span />}
+                  {!isUser ? (
+                    <Button
+                      type="button"
+                      variant={currentSpeakingId === (m.id || msgIdx) ? 'primary' : 'note'}
+                      size="sm"
+                      onClick={() => toggleTTS(m.id || msgIdx, m.content, { lang: currentLang })}
+                      title={
+                        currentSpeakingId === (m.id || msgIdx)
+                          ? 'Stop reading'
+                          : `Read response aloud in ${currentLang === 'hi' ? 'Hindi' : currentLang === 'kn' ? 'Kannada' : 'English'}`
+                      }
+                      aria-label={
+                        currentSpeakingId === (m.id || msgIdx)
+                          ? 'Stop reading'
+                          : 'Read response aloud'
+                      }
+                      style={
+                        currentSpeakingId === (m.id || msgIdx)
+                          ? {
+                              padding: '2px 8px',
+                              fontSize: '0.75rem',
+                              height: '24px',
+                              background: '#059669',
+                              borderColor: '#047857',
+                              color: '#ffffff',
+                              boxShadow: '0 0 8px rgba(5, 150, 105, 0.45)',
+                            }
+                          : {
+                              padding: '2px 8px',
+                              fontSize: '0.75rem',
+                              height: '24px',
+                            }
+                      }
+                    >
+                      {currentSpeakingId === (m.id || msgIdx) ? (
+                        <>
+                          <VolumeX size={13} strokeWidth={2} aria-hidden="true" />
+                          <span>Stop</span>
+                        </>
+                      ) : (
+                        <>
+                          <Volume2 size={13} strokeWidth={2} aria-hidden="true" />
+                          <span>
+                            {detectLanguage(m.content) === 'kn-IN'
+                              ? 'Listen (ಕನ್ನಡ)'
+                              : detectLanguage(m.content) === 'hi-IN'
+                              ? 'Listen (हिंदी)'
+                              : 'Listen'}
+                          </span>
+                        </>
+                      )}
+                    </Button>
+                  ) : null}
+                </div>
                 {imageAttachment?.dataUrl ? (
                   <div style={{ marginBottom: 'var(--sp-2)' }}>
                     <img
@@ -336,6 +475,8 @@ export default function SaarthiPageView({
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            if (isListening) stopListening();
+            stopTTS();
             handleSend();
           }}
           style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-2)', alignItems: 'center' }}
@@ -376,13 +517,75 @@ export default function SaarthiPageView({
             <Camera size={16} strokeWidth={2} aria-hidden="true" />
           </Button>
 
+          <Button
+            type="button"
+            variant="note"
+            size="sm"
+            onClick={() => {
+              const order = ['en', 'hi', 'kn'];
+              const nextIdx = (order.indexOf(currentLang) + 1) % order.length;
+              onLanguageChange?.(order[nextIdx]);
+            }}
+            title={`Current Language: ${currentLang === 'hi' ? 'Hindi (हिंदी)' : currentLang === 'kn' ? 'Kannada (ಕನ್ನಡ)' : 'English'} · Click to switch`}
+            aria-label={`Language: ${currentLang}`}
+            style={{ fontWeight: 700, fontSize: '0.75rem', minWidth: '48px' }}
+          >
+            {currentLang === 'hi' ? 'हिंदी' : currentLang === 'kn' ? 'ಕನ್ನಡ' : 'EN'}
+          </Button>
+
+          <Button
+            type="button"
+            variant={isListening ? "primary" : "note"}
+            size="sm"
+            onClick={() =>
+              toggleListening(inputText, {
+                lang: currentLang === 'hi' ? 'hi-IN' : currentLang === 'kn' ? 'kn-IN' : 'en-IN',
+              })
+            }
+            title={
+              !speechSupported
+                ? 'Voice input not supported in this browser'
+                : isListening
+                ? 'Listening... Click to stop recording'
+                : `Voice to text (${currentLang === 'hi' ? 'Hindi' : currentLang === 'kn' ? 'Kannada' : 'English'}): Click to speak`
+            }
+            aria-label={isListening ? 'Stop listening' : 'Start voice to text'}
+            style={
+              isListening
+                ? {
+                    background: '#ef4444',
+                    borderColor: '#dc2626',
+                    color: '#ffffff',
+                    boxShadow: '0 0 10px rgba(239, 68, 68, 0.65)',
+                    animation: 'chotu-mic-pulse 1.2s infinite ease-in-out',
+                  }
+                : undefined
+            }
+          >
+            {isListening ? (
+              <MicOff size={16} strokeWidth={2} aria-hidden="true" />
+            ) : (
+              <Mic size={16} strokeWidth={2} aria-hidden="true" />
+            )}
+          </Button>
+
           <div style={{ flex: '1 1 220px' }}>
             <Field
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder={
-                selectedImage
+                isListening
+                  ? currentLang === 'hi'
+                    ? 'सुन रहा हूँ... अब अपना प्रश्न बोलें 🎙️'
+                    : currentLang === 'kn'
+                    ? 'ಕೇಳುತ್ತಿದ್ದೇನೆ... ನಿಮ್ಮ ಪ್ರಶ್ನೆ ಮಾತನಾಡಿ 🎙️'
+                    : 'Listening... speak your question now 🎙️'
+                  : selectedImage
                   ? 'Add optional notes or tap Send...'
+                  : currentLang === 'hi'
+                  ? 'कोई भी विज्ञान या गणित का प्रश्न पूछें... (उदा: न्यूटन का तीसरा नियम)'
+                  : currentLang === 'kn'
+                  ? 'ವಿಜ್ಞಾನ ಅಥವಾ ಗಣಿತದ ಪ್ರಶ್ನೆ ಕೇಳಿ... (ಉದಾ: ನ್ಯೂಟನ್ ನಿಯಮ)'
                   : mode === 'doubt'
                   ? 'Ask any STEM doubt or problem...'
                   : 'Ask for guided revision or study plans...'
@@ -400,6 +603,21 @@ export default function SaarthiPageView({
             Send
           </Button>
         </form>
+        {speechError ? (
+          <div
+            style={{
+              marginTop: 'var(--sp-2)',
+              fontSize: '0.8125rem',
+              color: '#b91c1c',
+              background: '#fef2f2',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              border: '1px solid #fecaca',
+            }}
+          >
+            {speechError}
+          </div>
+        ) : null}
       </PaperCard>
 
       {/* Session History Modal */}

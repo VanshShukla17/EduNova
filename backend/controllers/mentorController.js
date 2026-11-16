@@ -300,13 +300,14 @@ async function processChatTurn({
   // 5. Retrieve relevant CBSE textbook excerpts via RAG
   let retrievedChunks = [];
   try {
+    const ragLang = (language && language !== 'hi' && language !== 'kn') ? language : 'en';
     retrievedChunks = await retrieve(
       effectiveContent,
       {
         board: 'CBSE',
         classLevel: Number(classLevel),
         subject: activeSubject,
-        language,
+        language: ragLang,
         userId,
         minSimilarity: 0.15
       },

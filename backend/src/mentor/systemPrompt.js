@@ -13,11 +13,37 @@ function getSaarthiSystemPrompt(options = {}) {
   const moduleTitle = options.moduleTitle || '';
   const currentTopic = options.currentTopic || '';
 
-  const langDirective = language === 'hi'
-    ? 'भाषा निर्देश: आप छात्र को सरल, स्पष्ट और सम्मानजनक हिंदी (Devanagari script) में संबोधित करेंगे। वैज्ञानिक और गणितीय पारिभाषिक शब्दों को स्पष्ट समझ के लिए कोष्ठक (brackets) में अंग्रेजी में भी लिखें।'
-    : language === 'mr'
-    ? 'भाषा निर्देश: तुम्ही विद्यार्थ्याशी सोप्या, स्पष्ट आणि आदरपूर्वक मराठीत (Devanagari script) संवाद साधावा. वैज्ञानिक संज्ञा कंसात इंग्रजीतही लिहाव्यात.'
-    : 'Language Directive: Respond in simple, student-friendly, and engaging English. Use LaTeX math notation ($...$ for inline, $$...$$ for standalone formulas) for mathematical and physical equations.';
+  const rawLang = String(options.language || 'en').toLowerCase().trim();
+  const normLang = rawLang.startsWith('hi')
+    ? 'hi'
+    : rawLang.startsWith('kn')
+    ? 'kn'
+    : rawLang.startsWith('mr')
+    ? 'mr'
+    : 'en';
+
+  let langDirective = '';
+  if (normLang === 'hi') {
+    langDirective = `### STRICT LANGUAGE MANDATE: HINDI (हिंदी)
+- You MUST generate your ENTIRE explanation in natural, student-friendly HINDI (हिंदी) using standard Devanagari script.
+- All headings, explanations, bullet points, definitions, and step-by-step solutions must be in Hindi.
+- Keep technical scientific terms in brackets with English for CBSE clarity where helpful (e.g. गुरुत्वाकर्षण बल (Gravitational Force), प्रकाश संश्लेषण (Photosynthesis), वेग (Velocity), त्वरण (Acceleration)).
+- Format mathematical equations, physical formulas, and chemical equations in standard LaTeX notation ($...$ for inline, $$...$$ for display formulas, e.g. $F = ma$, $\\text{H}_2\\text{O}$, $\\sin^2\\theta + \\cos^2\\theta = 1$).`;
+  } else if (normLang === 'kn') {
+    langDirective = `### STRICT LANGUAGE MANDATE: KANNADA (ಕನ್ನಡ)
+- You MUST generate your ENTIRE explanation in natural, student-friendly KANNADA (ಕನ್ನಡ) using standard Kannada script.
+- All headings, explanations, bullet points, definitions, and step-by-step solutions must be in Kannada.
+- Keep technical scientific terms in brackets with English for CBSE/State Board clarity where helpful (e.g. ಗುರುತ್ವಾಕರ್ಷಣ ಬಲ (Gravitational Force), ದ್ಯುತಿಸಂಶ್ಲೇಷಣೆ (Photosynthesis), ವೇಗ (Velocity), ವೇಗೋತ್ಕರ್ಷ (Acceleration)).
+- Format mathematical equations, physical formulas, and chemical equations in standard LaTeX notation ($...$ for inline, $$...$$ for display formulas, e.g. $F = ma$, $\\text{H}_2\\text{O}$, $\\sin^2\\theta + \\cos^2\\theta = 1$).`;
+  } else if (normLang === 'mr') {
+    langDirective = `### STRICT LANGUAGE MANDATE: MARATHI (मराठी)
+- You MUST generate your entire explanation in natural MARATHI (मराठी) using Devanagari script.
+- Technical scientific terms may include English in brackets for clarity.`;
+  } else {
+    langDirective = `### LANGUAGE DIRECTIVE: ENGLISH
+- Respond in simple, student-friendly, and engaging English.
+- Use LaTeX math notation ($...$ for inline, $$...$$ for standalone formulas) for mathematical and physical equations.`;
+  }
 
   const contextDirective = (moduleTitle || currentTopic)
     ? `CURRENT LEARNING CONTEXT:

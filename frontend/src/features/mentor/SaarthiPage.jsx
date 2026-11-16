@@ -50,6 +50,15 @@ export default function SaarthiPage() {
   const [mentorInputText, setMentorInputText] = useState('');
   const [mentorSelectedImage, setMentorSelectedImage] = useState(null);
 
+  const [selectedLanguage, setSelectedLanguage] = useState(() => {
+    return localStorage.getItem('saarthi_language') || 'en';
+  });
+
+  const handleLanguageChange = (lang) => {
+    setSelectedLanguage(lang);
+    localStorage.setItem('saarthi_language', lang);
+  };
+
   // Active Mode State Getters
   const currentSessionId = mode === 'doubt' ? doubtSessionId : mentorSessionId;
   const currentSessionTitle = mode === 'doubt' ? doubtSessionTitle : mentorSessionTitle;
@@ -422,7 +431,7 @@ export default function SaarthiPage() {
           moduleTitle: activeModuleContext || null,
           board: user?.board || 'CBSE',
           classLevel: user?.classLevel || 10,
-          language: user?.preferredLanguage || user?.language || 'en'
+          language: selectedLanguage,
         })
       });
 
@@ -569,6 +578,8 @@ export default function SaarthiPage() {
       handleDeleteSession={handleDeleteSession}
       handleSaveRenameSession={handleSaveRenameSession}
       deleteMemory={deleteMemory}
+      selectedLanguage={selectedLanguage}
+      setSelectedLanguage={handleLanguageChange}
     />
   );
 }
