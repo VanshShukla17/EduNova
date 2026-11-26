@@ -1,6 +1,7 @@
-# 🧪 STEM Edu — CBSE Class 10 & 12 Interactive Learning Platform (Phase 2)
+#  STEM Edu — CBSE Class 10 & 12 Interactive Learning Platform (Phase 2)
 
 > A production-grade, bilingual (English & Hindi) STEM education platform for CBSE Class 10 and Class 12 students across Mathematics, Physics, Chemistry, and Biology. Built on **Supabase** (Postgres + pgvector + Auth) and **Google Gemini 1.5 Flash**, featuring the **Saarthi AI Mentor & 24/7 Doubt Solver**, 9 Virtual Learning 3D simulations, 3D virtual experiments, a Text-to-Handwriting canvas studio with OCR, chapter video lectures, a Discord-style Community Hub, and offline PWA readiness.
+> **Subjects:** Mathematics · Physics · Chemistry · Biology
 
 [![Release](https://img.shields.io/badge/Release-v2.0--phase2-success?style=flat-square)](./Task2.md)
 [![Database](https://img.shields.io/badge/Database-Supabase%20Postgres%20%7C%20pgvector-3ECF8E?style=flat-square)](https://supabase.com)
